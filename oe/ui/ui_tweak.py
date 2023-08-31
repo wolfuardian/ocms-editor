@@ -1,7 +1,7 @@
-from oe.utils import qt
 
-from oe.ui import ui_setup
 from oe import gui
+from oe.utils import qt
+from oe.ui import ui_setup
 
 
 class Tweak(ui_setup.Setup):

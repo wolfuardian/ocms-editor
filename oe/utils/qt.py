@@ -1,4 +1,8 @@
 from PySide2 import QtWidgets, QtCore, QtGui
+
+from refer import Qt as qt_
+from refer import Registry as reg_
+
 from oe.tools.registry import Registry
 
 
@@ -155,14 +159,14 @@ class QtButtonCSWidget(QtWidgets.QPushButton):
     ):
         super().__init__(parent)
 
-        font = QtGui.QFont(QtFonts.MingLiU, 8, QtGui.QFont.Normal)
+        font = QtGui.QFont(QtFonts.SegoeUI, 8, QtGui.QFont.Normal)
         self.setFont(font)
 
         if icon:
             project_dir = Registry.get_value(
-                "Software", "MayaBIM", "Pref_ModuleProjectDirectory", ""
+                reg_.REG_KEY, reg_.REG_SUB, "Pref_ModuleProjectDirectory", ""
             )
-            icon_filepath = project_dir + "/mayabim/utils/resources/" + icon
+            icon_filepath = project_dir + qt_.RES_DIR + icon
             try:
                 self.setIcon(QtGui.QIcon(icon_filepath))
             except Exception as e:
@@ -256,7 +260,8 @@ class QtScrollareaCSWidget(QtWidgets.QScrollArea):
         layout.setContentsMargins(*margin)
         layout.setSpacing(spacing)
         self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        self.setStyleSheet(f"""
+        self.setStyleSheet(
+            f"""
             QScrollArea {{
                 border: None;
             }}
@@ -292,13 +297,11 @@ class QtFrameLayoutCSWidget(QtDefaultCSWidget):
 
         self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
-
         layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         layout.setAlignment(QtCore.Qt.AlignTop)
         self.setLayout(layout)
-
 
         self.__frame_btn = QtFrameButtonCSWidget("Frame Button")
         self.__frame_btn.setText(text)
@@ -312,7 +315,8 @@ class QtFrameLayoutCSWidget(QtDefaultCSWidget):
         self.__frame = QtWidgets.QWidget(self)
         self.__frame.setObjectName("frame_widget")
         self.__frame.setContentsMargins(3, 3, 3, 3)
-        self.__frame.setStyleSheet(f"""
+        self.__frame.setStyleSheet(
+            f"""
             QWidget {{
                 border: 1px solid {_hex("272727")};
                 border-bottom-right-radius: 12px;
@@ -325,7 +329,6 @@ class QtFrameLayoutCSWidget(QtDefaultCSWidget):
         self.__frame_layout.setObjectName("frame_layout")
         self.__frame_layout.setContentsMargins(0, 0, 0, 0)
         self.__frame_layout.setSpacing(0)
-
 
         self.layout().addWidget(self.__frame_btn)
         self.layout().addWidget(self.__frame)
@@ -688,7 +691,7 @@ class QtTextLineCSWidget(QtDefaultCSWidget):
         super().__init__(parent)
         lineedit = QtLineEditCSWidget()
         lineedit.setReadOnly(readonly)
-        lineedit.setPlaceholderText(">")
+        # lineedit.setPlaceholderText(">")
         lineedit_font = QtGui.QFont(QtFonts.MicrosoftJhengHei, 8, QtGui.QFont.Bold)
         lineedit_font.setLetterSpacing(QtGui.QFont.PercentageSpacing, 100)
         lineedit.setFont(QtGui.QFont(lineedit_font))
@@ -706,8 +709,9 @@ class QtTextLineCSWidget(QtDefaultCSWidget):
         self.layout = layout
         # --------------------------------------------
 
-        if use_label and text!="":
+        if use_label and text != "":
             self.label = QtLabelCSWidget()
+            self.label.setFixedWidth(80)
             if text:
                 self.label.setText(text)
             font = QtGui.QFont(QtFonts.MicrosoftJhengHei, 8, QtGui.QFont.Bold)
@@ -799,6 +803,23 @@ class QtSpacerCSWidget(QtWidgets.QSpacerItem):
         super().__init__(size_h, size_v, policy_h, policy_v, *args, **kwargs)
 
 
+class QtLineCSWidget(QtWidgets.QFrame):
+    """Custom QFrame subclass, for decorative lines"""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFrameShape(QtWidgets.QFrame().HLine)
+        self.setFrameShadow(QtWidgets.QFrame().Raised)
+
+    def add_to(self, parent):
+        parent.addWidget(self)
+        return self
+
+    def remove_from(self, parent):
+        self.setParent(None)
+        parent.removeWidget(self)
+
+
 # Widget Status
 
 
@@ -821,6 +842,8 @@ class QtLabelStatus:
     Default = f"""
         QLabel {{
             color: {_hex("B0B0B0")};
+            border: None;
+            background-color: None;
         }}
     """
     Info = f"""
@@ -925,9 +948,9 @@ class QtLineEditStatus:
 
 class QtCheckBoxStatus:
     project_dir = Registry.get_value(
-        "Software", "MayaBIM", "Pref_ModuleProjectDirectory", ""
+        reg_.REG_KEY, reg_.REG_SUB, "Pref_ModuleProjectDirectory", ""
     )
-    icon_filepath = project_dir + "/mayabim/utils/resources/" + "so-checkmark.svg"
+    icon_filepath = project_dir + qt_.RES_DIR + "so-checkmark.svg"
 
     Default = f"""
         QCheckBox {{
@@ -965,7 +988,7 @@ class QtButtonStatus:
     Default = f"""
             QPushButton {{
                 color: {_hex("bdbdbd")};
-                border: 2px solid {_hex("444444")};
+                border: 1px solid {_hex("606060")};
                 background-color: {_hex("525252")};
                 padding-left: 6px;
                 padding-right: 6px;
@@ -976,7 +999,7 @@ class QtButtonStatus:
             }}
 
             QPushButton:hover {{
-                border: 2px solid {_hex("B0B0B0")};
+                border: 1px solid {_hex("B0B0B0")};
             }}
             QPushButton:pressed {{
                 background-color: {_hex("707070")};
@@ -1017,7 +1040,7 @@ class QtGroupBoxStatus:
 
             QGroupBox::title {{
                 color: {_hex("bdbdbd")};
-                background-color: {_hex("525252")};
+                background-color: {_hex("2b2b2b")};
                 border-bottom-right-radius: 6px;
             }}
         """

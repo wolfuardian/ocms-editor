@@ -1,16 +1,18 @@
 from maya import cmds
-from oe.ui import ui_tweak
 
 import oe.tools as tools
-from version import version as ver
+
+from oe.ui import ui_tweak
+
+from refer import Product as prod_
+
 
 global instance
 
-mod = ver.split("-")[0] + "-" + ver.split("-")[1]
 
 def show():
     global instance
-    tools.Logging.gui_logger().info(f"Reloading {mod} packages")
+    tools.Logging.gui_logger().info(f"Reloading {prod_.ID} packages")
     tools.Packages.reload(packages=["oe"])
 
     try:
@@ -21,7 +23,7 @@ def show():
             instance = ui_tweak.Tweak()
             instance.update()
             tools.Logging.gui_logger().info("Showing GUI")
-            instance.show(dockable=True, area='left')
+            instance.show(dockable=True, area="left")
 
     except NameError:
         instance = ui_tweak.Tweak()
