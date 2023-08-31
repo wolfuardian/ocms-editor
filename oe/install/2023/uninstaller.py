@@ -4,9 +4,8 @@ import getpass
 import maya.mel as mel
 import maya.cmds as cmds
 
+import oe.tools as tools
 from version import version as ver
-from oe.utils.logging import installer_logger, fileio_logger, maya_logger
-from oe.utils.registry import Registry
 
 env_dir = f"C:/Users/{getpass.getuser()}/PycharmProjects"
 
@@ -20,16 +19,16 @@ maya_mod_file = f"{maya_mod_dir}/{mod}.mod"
 
 def uninstall():
     try:
-        fileio_logger.info(f"Removing module file: {maya_mod_file}")
+        tools.Logging.fileio_logger().info(f"Removing module file: {maya_mod_file}")
         os.remove(maya_mod_file)
 
     except WindowsError:
-        fileio_logger.error(f"{mod} module file does not exist.")
+        tools.Logging.fileio_logger().error(f"{mod} module file does not exist.")
 
-    installer_logger.info(f"Removing {mod} preferences")
-    Registry.delete_subkey("Software", mod)
+    tools.Logging.installer_logger().info(f"Removing {mod} preferences")
+    tools.Registry.delete_subkey("Software", mod)
 
-    maya_logger.info(f"Removing {mod} shelf tab and button")
+    tools.Logging.maya_logger().info(f"Removing {mod} shelf tab and button")
     shelf_buttons = cmds.shelfLayout(mod, query=True, childArray=True)
     if shelf_buttons:
         for button in shelf_buttons:

@@ -4,9 +4,8 @@ import getpass
 import maya.mel as mel
 import maya.cmds as cmds
 
+import oe.tools as tools
 from version import version as ver
-from oe.utils.logging import installer_logger, fileio_logger, maya_logger
-from oe.utils.registry import Registry
 
 env_dir = f"C:/Users/{getpass.getuser()}/PycharmProjects"
 
@@ -20,27 +19,27 @@ maya_mod_file = f"{maya_mod_dir}/{mod}.mod"
 
 def install():
     if not os.path.exists(maya_mod_dir):
-        fileio_logger.info(f"Creating module folder: {maya_mod_dir}")
+        tools.Logging.fileio_logger().info(f"Creating module folder: {maya_mod_dir}")
         os.makedirs(maya_mod_dir)
 
     command = f"""+ {mod} {mod_ver} {mod_dir}
 scripts: {mod_dir}"""
 
-    fileio_logger.info(f"Creating module file: {maya_mod_file}")
+    tools.Logging.fileio_logger().info(f"Creating module file: {maya_mod_file}")
     fp = open(maya_mod_file, "w")
     fp.write(command)
     fp.close()
 
-    installer_logger.info(f"Saving {mod} preferences")
-    Registry.set_value("Software", mod, "Pref_ModuleName", mod)
-    Registry.set_value("Software", mod, "Pref_ModuleEnvDirectory", env_dir)
-    Registry.set_value("Software", mod, "Pref_ModuleProjectDirectory", mod_dir)
-    Registry.set_value("Software", mod, "Pref_MayaVersion", maya_ver)
-    Registry.set_value("Software", mod, "Pref_MayaModuleFolder", maya_mod_dir)
-    Registry.set_value("Software", mod, "Pref_MayaModuleFile", maya_mod_file)
+    tools.Logging.installer_logger().info(f"Saving {mod} preferences")
+    tools.Registry.set_value("Software", mod, "Pref_ModuleName", mod)
+    tools.Registry.set_value("Software", mod, "Pref_ModuleEnvDirectory", env_dir)
+    tools.Registry.set_value("Software", mod, "Pref_ModuleProjectDirectory", mod_dir)
+    tools.Registry.set_value("Software", mod, "Pref_MayaVersion", maya_ver)
+    tools.Registry.set_value("Software", mod, "Pref_MayaModuleFolder", maya_mod_dir)
+    tools.Registry.set_value("Software", mod, "Pref_MayaModuleFile", maya_mod_file)
 
     if not cmds.layout(mod, exists=True):
-        maya_logger.info(f"Creating {mod} shelf tab")
+        tools.Logging.maya_logger().info(f"Creating {mod} shelf tab")
         c = 'addNewShelfTab("' + mod + '");'
         mel.eval(c)
 
@@ -51,11 +50,11 @@ gui.show()"""
 
     shelf_mbim = cmds.shelfLayout(mod, query=True, childArray=True)
     if shelf_mbim:
-        maya_logger.info(f"Clearing {mod} shelf buttons")
+        tools.Logging.maya_logger().info(f"Clearing {mod} shelf buttons")
         for button in shelf_mbim:
             cmds.deleteUI(button, control=True)
 
-    maya_logger.info(f"Creating {mod} shelf button")
+    tools.Logging.maya_logger().info(f"Creating {mod} shelf button")
     cmds.shelfButton(
         annotation="Run",
         image1=icon_path,

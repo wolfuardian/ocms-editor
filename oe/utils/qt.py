@@ -1,6 +1,5 @@
 from PySide2 import QtWidgets, QtCore, QtGui
-from oe.utils.registry import Registry
-
+from oe.tools.registry import Registry
 
 class QtFonts:
     Fixedsys = "Fixedsys"
