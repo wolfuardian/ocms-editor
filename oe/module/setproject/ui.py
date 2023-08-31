@@ -1,4 +1,5 @@
 from PySide2 import QtWidgets
+
 from oe.utils import qt
 
 # from . import operator, prop, store
@@ -7,7 +8,7 @@ def _hex(h):
     return "#" + h
 
 class SetProjectDirectoryCSWidget(qt.QtFrameLayoutCSWidget):
-    def __init__(self, parent=None, text="專案目錄"):
+    def __init__(self, parent=None, text="設定專案目錄"):
         super().__init__(parent, text)
 
         # <editor-fold desc="CODE_BLOCK: Initialize">
@@ -23,12 +24,12 @@ class SetProjectDirectoryCSWidget(qt.QtFrameLayoutCSWidget):
         gbox_p_dir = qt.QtGroupHBoxCSWidget(text="專案目錄")
         tl_p_dir = qt.QtTextLineCSWidget(text="", placeholder="> 專案目錄路徑")
         tl_p_dir.lineedit.setReadOnly(True)
-        btn_p_dir = qt.QtButtonCSWidget(text="< 開啟")
+        btn_p_dir = qt.QtButtonCSWidget(icon="open_folder.png", text="  開啟專案目錄", height=32)
 
         gbox_m_dir = qt.QtGroupHBoxCSWidget(text="模型檔目錄")
         tl_m_dir = qt.QtTextLineCSWidget(text="", placeholder="> 模型檔目錄路徑")
         tl_m_dir.lineedit.setReadOnly(True)
-        btn_m_dir = qt.QtButtonCSWidget(text="< 開啟")
+        btn_m_dir = qt.QtButtonCSWidget(icon="open_folder.png", text="  開啟模型檔目錄", height=32)
         # </editor-fold>
 
         # <editor-fold desc="CODE_BLOCK: Set Status">
@@ -43,9 +44,9 @@ class SetProjectDirectoryCSWidget(qt.QtFrameLayoutCSWidget):
         # </editor-fold>
 
         # <editor-fold desc="CODE_BLOCK: Assembly Widget">
-        gbox_p_dir.layout.addWidget(tl_p_dir)
+        # gbox_p_dir.layout.addWidget(tl_p_dir)
         gbox_p_dir.layout.addWidget(btn_p_dir)
-        gbox_m_dir.layout.addWidget(tl_m_dir)
+        # gbox_m_dir.layout.addWidget(tl_m_dir)
         gbox_m_dir.layout.addWidget(btn_m_dir)
         scrollarea.layout.addWidget(gbox_p_dir)
         scrollarea.layout.addWidget(gbox_m_dir)
