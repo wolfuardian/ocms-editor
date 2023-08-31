@@ -29,3 +29,7 @@ registry_logger.setLevel(logging.INFO)
 fileio_logger = logging.getLogger("FileIO")
 fileio_logger.addHandler(handler)
 fileio_logger.setLevel(logging.INFO)
+
+maya_logger = logging.getLogger("Maya")
+maya_logger.addHandler(handler)
+maya_logger.setLevel(logging.INFO)
