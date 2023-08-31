@@ -1,0 +1,1 @@
+from oe.module.setproject.ui import SetProjectDirectoryCSWidget
