@@ -1,1 +1,1 @@
-version = "ocms-editor-2308-0007"
+version = "ocms-editor-2308-0008"
