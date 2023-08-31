@@ -20,31 +20,46 @@ class Setup(
         # <editor-fold desc="CODE_BLOCK: Initialize">
         layout = qt.QtWidgets.QVBoxLayout()
         layout.setAlignment(qt.QtCore.Qt.AlignTop)
-        layout.setContentsMargins(3, 3, 3, 3)
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         # </editor-fold>
 
         # <editor-fold desc="CODE_BLOCK: Create Widget">
-        bar = qt.QtWidgets.QMenuBar()
-        action_reset = qt.QtWidgets.QAction("重新載入")
+        menubar = qt.QtWidgets.QMenuBar()
+        menubar.setToolTip("💡 此功能列僅供開發者使用")
+        act_reset = qt.QtWidgets.QAction("R")
+        act_expand_all = qt.QtWidgets.QAction("😎")
+
         tab = qt.QtTabCSWidget()
-        tab_opt = qt.QtTabItemCSWidget()
-        ui_set_pdir = module.SetProjectDirectoryCSWidget()
+        tab_load = qt.QtTabItemCSWidget()
+        tab_edit = qt.QtTabItemCSWidget()
+        tab_save = qt.QtTabItemCSWidget()
+
+        frame_set_project_directory_widget = module.SetProjectDirectoryCSWidget()
+
+        tab_load.layout.addWidget(frame_set_project_directory_widget)
         # </editor-fold>
 
         # <editor-fold desc="CODE_BLOCK: Assembly Widget">
-        tab_opt.layout.addWidget(ui_set_pdir)
-        tab.addTab(tab_opt, "讀取")
+        tab.addTab(tab_load, "讀取")
+        tab.addTab(tab_edit, "編輯")
+        tab.addTab(tab_save, "儲存")
         layout.addWidget(tab)
-        bar.addAction(action_reset)
+        menubar.addAction(act_reset)
+        menubar.addAction(act_expand_all)
         self.setLayout(layout)
-        self.layout().setMenuBar(bar)
+        self.layout().setMenuBar(menubar)
         # </editor-fold>
 
         # <editor-fold desc="CODE_BLOCK: Expose Variable">
         self.layout = layout
-        self.bar = bar
+        self.bar = menubar
         self.tab = tab
-        self.tab_tool = tab_opt
-        self.action_reset = action_reset
+        self.tab_tool = tab_load
+        self.act_reset = act_reset
+        self.act_expand_all = act_expand_all
+
+        self.frame_widgets = [
+            frame_set_project_directory_widget,
+        ]
         # </editor-fold>

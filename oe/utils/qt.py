@@ -155,7 +155,7 @@ class QtButtonCSWidget(QtWidgets.QPushButton):
     ):
         super().__init__(parent)
 
-        font = QtGui.QFont(QtFonts.MingLiU, 8, QtGui.QFont.Bold)
+        font = QtGui.QFont(QtFonts.MingLiU, 8, QtGui.QFont.Normal)
         self.setFont(font)
 
         if icon:
@@ -223,7 +223,7 @@ class QtTabItemCSWidget(QtDefaultCSWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(6)
 
-        scrollarea = QtScrollareaCSWidget()
+        scrollarea = QtScrollareaCSWidget(margin=(3, 3, 3, 3))
         scrollarea.layout.setSpacing(3)
 
         layout.addWidget(scrollarea)
@@ -246,10 +246,8 @@ class QtTabItemCSWidget(QtDefaultCSWidget):
 class QtScrollareaCSWidget(QtWidgets.QScrollArea):
     """Custom QScrollArea subclass"""
 
-    def __init__(self, parent=None, margin=(12, 12, 12, 12), spacing=6):
+    def __init__(self, parent=None, margin=(0, 0, 0, 0), spacing=6):
         super().__init__(parent)
-        self.force_visible = True
-
         self.setWidgetResizable(True)
 
         widget = QtDefaultCSWidget()
@@ -257,7 +255,13 @@ class QtScrollareaCSWidget(QtWidgets.QScrollArea):
         layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(*margin)
         layout.setSpacing(spacing)
-
+        self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self.setStyleSheet(f"""
+            QScrollArea {{
+                border: None;
+            }}
+            """
+        )
         content_layout = QtWidgets.QVBoxLayout()
         content_layout.setAlignment(QtCore.Qt.AlignTop)
 
@@ -270,10 +274,6 @@ class QtScrollareaCSWidget(QtWidgets.QScrollArea):
         # --------------------------------------------
         self.layout = content_layout
         # --------------------------------------------
-
-    def set_force_visible(self, visible):
-        self.force_visible = visible
-        self.setVisible(visible)
 
     def add_to(self, parent):
         parent.addWidget(self)
@@ -291,13 +291,14 @@ class QtFrameLayoutCSWidget(QtDefaultCSWidget):
         super().__init__(parent)
 
         self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        # self.setMinimumSize(width, height)
+
 
         layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         layout.setAlignment(QtCore.Qt.AlignTop)
         self.setLayout(layout)
+
 
         self.__frame_btn = QtFrameButtonCSWidget("Frame Button")
         self.__frame_btn.setText(text)
@@ -310,16 +311,26 @@ class QtFrameLayoutCSWidget(QtDefaultCSWidget):
 
         self.__frame = QtWidgets.QWidget(self)
         self.__frame.setObjectName("frame_widget")
+        self.__frame.setContentsMargins(3, 3, 3, 3)
+        self.__frame.setStyleSheet(f"""
+            QWidget {{
+                border: 1px solid {_hex("272727")};
+                border-bottom-right-radius: 12px;
+                background-color: {_hex("363636")};
+            }}
+            """
+        )
 
         self.__frame_layout = QtWidgets.QVBoxLayout(self.__frame)
         self.__frame_layout.setObjectName("frame_layout")
         self.__frame_layout.setContentsMargins(0, 0, 0, 0)
         self.__frame_layout.setSpacing(0)
 
+
         self.layout().addWidget(self.__frame_btn)
         self.layout().addWidget(self.__frame)
 
-        self.frame_btn.toggle = True
+        # self.frame_btn.toggle = True
 
     def add_to(self, parent):
         parent.addWidget(self)
@@ -356,6 +367,10 @@ class QtFrameLayoutCSWidget(QtDefaultCSWidget):
         """Set the text of _FrameButton"""
         self.__frame_btn.setText(text)
 
+    def set_toggle(self, toggle):
+        """Set the toggle of _FrameButton"""
+        self.__frame_btn.toggle = toggle
+
 
 class QtFrameButtonCSWidget(QtDefaultCSWidget):
     """
@@ -373,15 +388,15 @@ class QtFrameButtonCSWidget(QtDefaultCSWidget):
         self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
         self.setAutoFillBackground(True)
 
-        # self.setBackgroundColor((93, 93, 93))  # Light
-        self.setBackgroundColor((60, 60, 60))  # Dark
-        # self.setBackgroundColor((47, 79, 79))  # Dark
+        self.color_default = (39, 39, 39)
+        self.color_hover = (46, 46, 46)
+
+        self.setBackgroundColor(self.color_default)  # Dark
 
         layout = QtWidgets.QHBoxLayout()
         layout.setContentsMargins(5, 0, 5, 0)
         layout.setSpacing(12)
         layout.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        self.setLayout(layout)
 
         self.__icon = QtWidgets.QLabel()
         self.__icon.setPixmap(self.__close_pix)
@@ -390,6 +405,7 @@ class QtFrameButtonCSWidget(QtDefaultCSWidget):
             self.__label = QtWidgets.QLabel(" " + label)
 
         layout.addWidget(self.__label)
+        self.setLayout(layout)
 
         class _Listener(object):
             """Process registration class"""
@@ -479,6 +495,33 @@ class QtFrameButtonCSWidget(QtDefaultCSWidget):
         self.__toggle = not self.__toggle
         self.__expanded.emit() if self.__toggle else self.__collapsed.emit()
 
+    def enterEvent(self, *args, **kwargs):
+        """
+        Mouse enter event
+        """
+        self.setBackgroundColor(self.color_hover)
+
+    def leaveEvent(self, *args, **kwargs):
+        """
+        Mouse leave event
+        """
+        self.setBackgroundColor(self.color_default)
+
+
+class QtBoxLayoutCSWidget(QtWidgets.QBoxLayout):
+    """Custom QBoxLayout subclass"""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    def add_to(self, parent):
+        parent.addWidget(self)
+        return self
+
+    def remove_from(self, parent):
+        self.setParent(None)
+        parent.removeWidget(self)
+
 
 class QtGroupBoxCSWidget(QtWidgets.QGroupBox):
     """Custom QGroupBox subclass"""
@@ -514,7 +557,7 @@ class QtGroupHBoxCSWidget(QtGroupBoxCSWidget):
         parent=None,
         flat=True,
         text=None,
-        margin=(12, 12, 12, 12),
+        margin=(6, 24, 6, 6),
         spacing=6,
         status=None,
     ):
@@ -557,7 +600,7 @@ class QtGroupVBoxCSWidget(QtGroupBoxCSWidget):
         parent=None,
         flat=True,
         text=None,
-        margin=(12, 12, 12, 12),
+        margin=(6, 24, 6, 6),
         spacing=6,
         status=None,
     ):
@@ -647,7 +690,7 @@ class QtTextLineCSWidget(QtDefaultCSWidget):
         lineedit.setReadOnly(readonly)
         lineedit.setPlaceholderText(">")
         lineedit_font = QtGui.QFont(QtFonts.MicrosoftJhengHei, 8, QtGui.QFont.Bold)
-        lineedit_font.setLetterSpacing(QtGui.QFont.PercentageSpacing, 95)
+        lineedit_font.setLetterSpacing(QtGui.QFont.PercentageSpacing, 100)
         lineedit.setFont(QtGui.QFont(lineedit_font))
         lineedit.setCursorPosition(0)
 
@@ -663,7 +706,7 @@ class QtTextLineCSWidget(QtDefaultCSWidget):
         self.layout = layout
         # --------------------------------------------
 
-        if use_label:
+        if use_label and text!="":
             self.label = QtLabelCSWidget()
             if text:
                 self.label.setText(text)
@@ -769,7 +812,6 @@ class QtStylesheet:
             background-color: {_hex("282828")};
             color: {_hex("ADD8E6")};
             border: 1px solid {_hex("1E90FF")};
-            border-radius: 4px;
             padding: 2px;
         }}
     """
@@ -815,71 +857,68 @@ class QtLineEditStatus:
     Default = f"""
         QLineEdit {{
             background-color: {_hex("1d1d1d")};
-            border: 2px solid {_hex("636363")};
-            border-radius: 4px;
+            border: 2px solid {_hex("444444")};
             color: {_hex("B0B0B0")};
         }}
         QLineEdit:focus {{
-            border: 2px solid {_hex("B0B0B0")};
+            border: 2px solid {_hex("606060")};
+        }}
+        QLineEdit:hover {{
+            border: 2px solid {_hex("606060")};
         }}
     """
 
     Info = f"""
         QLineEdit {{
             background-color: {_hex("1d1d1d")};
-            border: 2px solid {_hex("1E90FF")};
-            border-radius: 4px;
+            border: 1px solid {_hex("1E90FF")};
             color: {_hex("A6D8FF")};
         }}
         QLineEdit:focus {{
-            border: 2px solid {_hex("A6D8FF")};
+            border: 1px solid {_hex("A6D8FF")};
         }}
     """
     Warning = f"""
         QLineEdit {{
             background-color: {_hex("1d1d1d")};
-            border: 2px solid {_hex("8E6D37")};
-            border-radius: 4px;
+            border: 1px solid {_hex("8E6D37")};
             color: {_hex("FFEB8A")};
         }}
         QLineEdit:focus {{
-            border: 2px solid {_hex("FFEB8A")};
+            border: 1px solid {_hex("FFEB8A")};
         }}
     """
 
     Error = f"""
         QLineEdit {{
             background-color: {_hex("1d1d1d")};
-            border: 2px solid {_hex("8E3B2E")};
-            border-radius: 4px;
+            border: 1px solid {_hex("8E3B2E")};
             color: {_hex("FF8F76")};
         }}
         QLineEdit:focus {{
-            border: 2px solid {_hex("FF8F76")};
+            border: 1px solid {_hex("FF8F76")};
         }}
     """
 
     Verified = f"""
         QLineEdit {{
             background-color: {_hex("1d1d1d")};
-            border: 2px solid {_hex("348E34")};
-            border-radius: 4px;
+            border: 1px solid {_hex("348E34")};
             color: {_hex("C5F2C5")};
         }}
         QLineEdit:focus {{
-            border: 2px solid {_hex("C5F2C5")};
+            border: 1px solid {_hex("C5F2C5")};
         }}
     """
 
     Disabled = f"""
         QLineEdit {{
             background-color: {_hex("1d1d1d")};
-            border: 2px solid {_hex("3c3c3c")};
-            border-radius: 4px;
+            border: 1px solid {_hex("3c3c3c")};
             color: {_hex("636363")};
         }}
         QLineEdit:focus {{
-            border: 2px solid {_hex("636363")};
+            border: 1px solid {_hex("636363")};
         }}
     """
 
@@ -904,13 +943,11 @@ class QtCheckBoxStatus:
         QCheckBox::indicator:unchecked {{
             background-color: {_hex("444444")};
             border: 2px solid {_hex("1E90FF")};
-            border-radius: 4px;
         }}
 
         QCheckBox::indicator:checked {{
             background-color: {_hex("1E90FF")};
             border: 2px solid {_hex("1E90FF")};
-            border-radius: 4px;
             image: url({icon_filepath});
         }}
 
@@ -927,10 +964,9 @@ class QtCheckBoxStatus:
 class QtButtonStatus:
     Default = f"""
             QPushButton {{
+                color: {_hex("bdbdbd")};
                 border: 2px solid {_hex("444444")};
-                border-radius: 4px;
-                background-color: {_hex("1E90FF")};
-                color: {_hex("333333")};
+                background-color: {_hex("525252")};
                 padding-left: 6px;
                 padding-right: 6px;
                 padding-top: 3px;
@@ -940,20 +976,16 @@ class QtButtonStatus:
             }}
 
             QPushButton:hover {{
-                background-color: {_hex("63b2ff")};
-                color: {_hex("333333")};
+                border: 2px solid {_hex("B0B0B0")};
             }}
-
             QPushButton:pressed {{
-                background-color: {_hex("333333")};
-                color: {_hex("1E90FF")};
+                background-color: {_hex("707070")};
             }}
         """
 
     Invert = f"""
             QPushButton {{
                 border: 2px solid {_hex("1E90FF")};
-                border-radius: 4px;
                 background-color: {_hex("333333")};
                 color: {_hex("1E90FF")};
                 padding-left: 6px;
@@ -979,21 +1011,20 @@ class QtButtonStatus:
 class QtGroupBoxStatus:
     Default = f"""
             QGroupBox {{
-                background-color: {_hex("404040")};
-                border: 1px solid {_hex("3c3c3c")};
-                border-radius: 4px;
+                background-color: {_hex("3c3c3c")};
+                border: 1px solid {_hex("444444")};
             }}
 
             QGroupBox::title {{
-                color: {_hex("282828")};
-                background-color: {_hex("1e90ff")};
+                color: {_hex("bdbdbd")};
+                background-color: {_hex("525252")};
+                border-bottom-right-radius: 6px;
             }}
         """
     Invert = f"""
             QGroupBox {{
                 background-color: {_hex("333333")};
                 border: 1px solid {_hex("1460aa")};
-                border-radius: 4px;
             }}
 
             QGroupBox::title {{
@@ -1005,7 +1036,6 @@ class QtGroupBoxStatus:
             QGroupBox {{
                 background-color: {_hex("444444")};
                 border: 0px;
-                border-radius: 4px;
             }}
 
             QGroupBox::title {{
@@ -1017,7 +1047,6 @@ class QtGroupBoxStatus:
             QGroupBox {{
                 background-color: {_hex("3c3c3c")};
                 border: 0px;
-                border-radius: 4px;
             }}
 
             QGroupBox::title {{
@@ -1029,7 +1058,6 @@ class QtGroupBoxStatus:
             QGroupBox {{
                 background-color: {_hex("3c3c3c")};
                 border: 1px solid {_hex("282828")};
-                border-radius: 4px;
             }}
 
             QGroupBox::title {{
@@ -1041,7 +1069,6 @@ class QtGroupBoxStatus:
             QGroupBox {{
                 background-color: {_hex("3c3c3c")};
                 border: 1px solid {_hex("282828")};
-                border-radius: 4px;
             }}
 
             QGroupBox::title {{
