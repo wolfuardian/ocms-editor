@@ -15,7 +15,7 @@ def show():
 
     try:
         if instance:
-            tools.Logging.gui_logger().info("Closing GUI")
+            tools.Logging.gui_logger().info("Cleaning existing GUI")
             instance.close()
             instance.deleteLater()
             instance = ui_tweak.Tweak()
