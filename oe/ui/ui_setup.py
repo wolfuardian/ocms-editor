@@ -1,10 +1,12 @@
 from maya.app.general import mayaMixin
-from oe.utils import qt
 
 import oe.tools as tools
 import oe.module as module
-from version import version as ver
 
+from oe.utils import qt
+
+from refer import Product as prod_
+from version import version as ver
 
 class Setup(
     mayaMixin.MayaQWidgetDockableMixin,
@@ -13,6 +15,7 @@ class Setup(
 ):
     def __init__(self, parent=tools.Maya.get_main_window()):
         super(Setup, self).__init__(parent)
+
 
         self.setWindowTitle(ver)
         self.setMinimumWidth(360)
@@ -36,8 +39,12 @@ class Setup(
         tab_save = qt.QtTabItemCSWidget()
 
         frame_set_project_directory_widget = module.SetProjectDirectoryCSWidget()
+        frame_verify_xml = module.VerifyXMLCSWidget()
+        frame_verify_model = module.VerifyModelCSWidget()
 
         tab_load.layout.addWidget(frame_set_project_directory_widget)
+        tab_load.layout.addWidget(frame_verify_xml)
+        tab_load.layout.addWidget(frame_verify_model)
         # </editor-fold>
 
         # <editor-fold desc="CODE_BLOCK: Assembly Widget">
@@ -61,5 +68,7 @@ class Setup(
 
         self.frame_widgets = [
             frame_set_project_directory_widget,
+            frame_verify_xml,
+            frame_verify_model,
         ]
         # </editor-fold>
