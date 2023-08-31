@@ -1,7 +1,7 @@
 import logging
 
-import oe.core.tools as core
 import oe.tools as tools
+import oe.core.tools as core
 
 class Logging(core.Logging):
     @classmethod
@@ -28,3 +28,6 @@ class Logging(core.Logging):
     def packages_logger(cls):
         return logging.getLogger("Packages")
 
+    @classmethod
+    def operator_logger(cls):
+        return logging.getLogger("Operator")

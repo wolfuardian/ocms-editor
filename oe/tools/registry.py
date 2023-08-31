@@ -1,12 +1,15 @@
 import winreg
 
-import oe.core.tools as core
 import oe.tools as tools
+import oe.core.tools as core
+
 
 class Registry(core.Registry):
     @classmethod
     def create_key(cls, key_name, subkey_name):
-        tools.Logging.registry_logger().info(f"Creating subkey '{subkey_name}' in key '{key_name}'")
+        tools.Logging.registry_logger().info(
+            f"Creating subkey '{subkey_name}' in key '{key_name}'"
+        )
         pass
 
     @classmethod
@@ -38,15 +41,35 @@ class Registry(core.Registry):
                 with winreg.OpenKey(key, subkey_name, 0, winreg.KEY_READ) as subkey:
                     value = winreg.QueryValueEx(subkey, value_name)[0]
                     return value
+            except PermissionError:
+                tools.Logging.operator_logger().error(
+                    "Permission denied: Unable to access the registry."
+                )
+                return default
             except WindowsError:
                 tools.Logging.registry_logger().warning(
                     f"Subkey '{subkey_name}' does not exist in key '{key_name}'."
                 )
                 return default
+            except (AttributeError, NameError):
+                tools.Logging.registry_logger().error("Function or module not found.")
+                return default
+
+            except (TypeError, ValueError):
+                tools.Logging.registry_logger().error("Invalid argument provided.")
+                return default
+
+            except Exception as e:
+                tools.Logging.registry_logger().error(
+                    f"An unexpected error occurred: {e}"
+                )
+                return default
 
     @classmethod
     def create_subkey(cls, key_name, subkey_name):
-        tools.Logging.registry_logger().info(f"Creating subkey '{subkey_name}' in key '{key_name}'")
+        tools.Logging.registry_logger().info(
+            f"Creating subkey '{subkey_name}' in key '{key_name}'"
+        )
         key = winreg.OpenKey(
             winreg.HKEY_CURRENT_USER, key_name, 0, winreg.KEY_ALL_ACCESS
         )

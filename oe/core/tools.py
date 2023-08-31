@@ -6,7 +6,7 @@ import inspect
 # certain technical challenges inherent in the problem that are adeptly addressed by the BlenderBIM's solution.
 # The use of this code segment is not intended as a claim of originality, but rather as a testament to
 # the efficacy of the adopted approach.
-
+# fmt: off
 class Interface(abc.ABC): pass
 
 
@@ -17,9 +17,11 @@ def interface(cls):
 
 @interface
 class Maya:
+    def browser(cls, file_mode, default_dir, file_filter): pass
     def get_main_window(cls): pass
     def decode_utf8_string(cls, byte_string): pass
     def decode_fbxasc_string(cls, fbxasc_string): pass
+    def uuid(cls, node: str) -> str: pass
 
 @interface
 class Registry:
@@ -37,8 +39,10 @@ class Logging:
     def maya_logger(cls): pass
     def gui_logger(cls): pass
     def packages_logger(cls): pass
+    def operator_logger(cls): pass
 
 @interface
 class Packages:
     def reload(cls, packages): pass
     def upload(cls, packages): pass
+    # fmt: on

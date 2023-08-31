@@ -1,8 +1,8 @@
-import importlib
 import sys
+import importlib
 
-import oe.core.tools as core
 import oe.tools as tools
+import oe.core.tools as core
 
 DEFAULT_RELOAD_PACKAGES = []
 

@@ -1,14 +1,29 @@
+import os
 import re
 import sys
+import pymel.core as pm
+import maya.cmds as cmds
 import maya.OpenMayaUI as omui
+
 from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
 
-import oe.core.tools as core
 import oe.tools as tools
+import oe.core.tools as core
 
 
 class Maya(core.Maya):
+    @classmethod
+    def browser(
+        cls,
+        file_mode,
+        default_dir=os.path.expanduser("~"),
+        file_filter="All Files (*.*)",
+    ):
+        return pm.fileDialog2(
+            fileMode=file_mode, dir=default_dir, fileFilter=file_filter
+        )[0]
+
     @classmethod
     def get_main_window(cls):
         maya_main_ptr = omui.MQtUtil.mainWindow()
@@ -33,11 +48,15 @@ class Maya(core.Maya):
             return fbxasc_string
         prefix = "FBXASC"
         decoded_string = fbxasc_string
-        matches = re.findall(f'{prefix}\d{{3}}', fbxasc_string)
+        matches = re.findall(f"{prefix}\d{{3}}", fbxasc_string)
 
         for match in matches:
-            decoded_char = chr(int(match[len(prefix):]))
+            decoded_char = chr(int(match[len(prefix) :]))
             decoded_string = decoded_string.replace(match, decoded_char)
 
         byte_string = decoded_string.encode("iso-8859-1")
         return cls.decode_utf8_string(byte_string)
+
+    @classmethod
+    def uuid(cls, node: str) -> str:
+        return cmds.ls(node, uuid=True)[0]
