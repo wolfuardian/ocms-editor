@@ -11,7 +11,7 @@ class Tweak(ui_setup.Setup):
         self.frame_widget_toggle = False
 
         self.action_reset.triggered.connect(gui.show)
-        self.action_reset.setShortcut("Alt+`")
+        self.action_reset.setShortcut("Shift+`")
 
         self.action_expand_all.triggered.connect(self.toggle_frame_widgets)
         self.action_expand_all.setShortcut("Shift+1")
