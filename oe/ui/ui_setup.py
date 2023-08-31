@@ -27,8 +27,8 @@ class Setup(
         # <editor-fold desc="CODE_BLOCK: Create Widget">
         menubar = qt.QtWidgets.QMenuBar()
         menubar.setToolTip("💡 此功能列僅供開發者使用")
-        act_reset = qt.QtWidgets.QAction("R")
-        act_expand_all = qt.QtWidgets.QAction("😎")
+        action_reset = qt.QtWidgets.QAction("R")
+        action_expand_all = qt.QtWidgets.QAction("😎")
 
         tab = qt.QtTabCSWidget()
         tab_load = qt.QtTabItemCSWidget()
@@ -45,8 +45,8 @@ class Setup(
         tab.addTab(tab_edit, "編輯")
         tab.addTab(tab_save, "儲存")
         layout.addWidget(tab)
-        menubar.addAction(act_reset)
-        menubar.addAction(act_expand_all)
+        menubar.addAction(action_reset)
+        menubar.addAction(action_expand_all)
         self.setLayout(layout)
         self.layout().setMenuBar(menubar)
         # </editor-fold>
@@ -56,8 +56,8 @@ class Setup(
         self.bar = menubar
         self.tab = tab
         self.tab_tool = tab_load
-        self.act_reset = act_reset
-        self.act_expand_all = act_expand_all
+        self.action_reset = action_reset
+        self.action_expand_all = action_expand_all
 
         self.frame_widgets = [
             frame_set_project_directory_widget,

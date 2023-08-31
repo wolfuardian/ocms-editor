@@ -13,11 +13,11 @@ class Tweak(ui_setup.Setup):
         self.action_reset.triggered.connect(gui.show)
         self.action_reset.setShortcut("Alt+`")
 
-        self.act_expand_all.triggered.connect(self.toggle_frame_widgets)
-        self.act_expand_all.setShortcut("Shift+1")
+        self.action_expand_all.triggered.connect(self.toggle_frame_widgets)
+        self.action_expand_all.setShortcut("Shift+1")
 
     def toggle_frame_widgets(self):
         for frame_btn in self.frame_widgets:
             frame_btn.set_toggle(self.frame_widget_toggle)
         self.frame_widget_toggle = not self.frame_widget_toggle
-        self.act_expand_all.setText("🙂" if self.frame_widget_toggle else "😮")
+        self.action_expand_all.setText("🙂" if self.frame_widget_toggle else "😮")
