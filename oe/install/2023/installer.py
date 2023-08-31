@@ -6,15 +6,15 @@ import logging
 import maya.mel as mel
 import maya.cmds as cmds
 
-# from version import version as ver
+corp = "NADI"
 ver = "ocms-editor-2308-0024"
+
 
 maya_logger = logging.getLogger("Maya")
 fileio_logger = logging.getLogger("FileIO")
 registry_logger = logging.getLogger("Registry")
 packages_logger = logging.getLogger("Packages")
 installer_logger = logging.getLogger("Installer")
-
 
 env_dir = f"C:/Users/{getpass.getuser()}/PycharmProjects"
 
@@ -111,12 +111,15 @@ scripts: {mod_dir}"""
     fp.close()
 
     installer_logger.info(f"Saving {mod} preferences")
-    Registry.set_value("Software", mod, "Pref_ModuleName", mod)
-    Registry.set_value("Software", mod, "Pref_ModuleEnvDirectory", env_dir)
-    Registry.set_value("Software", mod, "Pref_ModuleProjectDirectory", mod_dir)
-    Registry.set_value("Software", mod, "Pref_MayaVersion", maya_ver)
-    Registry.set_value("Software", mod, "Pref_MayaModuleFolder", maya_mod_dir)
-    Registry.set_value("Software", mod, "Pref_MayaModuleFile", maya_mod_file)
+
+    _key = "Software\\NADI"
+    _sub = mod
+    Registry.set_value(_key, _sub, "Pref_ModuleName", mod)
+    Registry.set_value(_key, _sub, "Pref_ModuleEnvDirectory", env_dir)
+    Registry.set_value(_key, _sub, "Pref_ModuleProjectDirectory", mod_dir)
+    Registry.set_value(_key, _sub, "Pref_MayaVersion", maya_ver)
+    Registry.set_value(_key, _sub, "Pref_MayaModuleFolder", maya_mod_dir)
+    Registry.set_value(_key, _sub, "Pref_MayaModuleFile", maya_mod_file)
 
     if not cmds.layout(maya_shelf, exists=True):
         maya_logger.info(f"Creating {maya_shelf} shelf tab")

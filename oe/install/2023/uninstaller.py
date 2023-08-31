@@ -6,8 +6,7 @@ import logging
 import maya.mel as mel
 import maya.cmds as cmds
 
-# import oe.tools as tools
-# from version import version as ver
+corp = "NADI"
 ver = "ocms-editor-2308-0024"
 
 env_dir = f"C:/Users/{getpass.getuser()}/PycharmProjects"
@@ -106,7 +105,9 @@ def uninstall():
         fileio_logger.error(f"{mod} module file does not exist.")
 
     installer_logger.info(f"Removing {mod} preferences")
-    Registry.delete_subkey("Software", mod)
+    _key = "Software\\NADI"
+    _sub = mod
+    Registry.delete_subkey(_key, _sub)
 
     maya_logger.info(f"Removing {maya_shelf} shelf tab and button")
     shelf_buttons = cmds.shelfLayout(maya_shelf, query=True, childArray=True)
