@@ -4,7 +4,7 @@ import oe.tools as tools
 
 from oe.ui import ui_tweak
 
-from refer import Product as prod_
+from oe.refer import Product as prod_
 
 
 global instance

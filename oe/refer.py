@@ -14,4 +14,4 @@ class Registry:
     REG_XML_STRING = "XML_String"
 
 class Qt:
-    RES_DIR = "/oe/utils/resources/"
+    RES_DIR = "utils/resources/"

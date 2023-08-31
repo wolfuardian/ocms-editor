@@ -1,7 +1,7 @@
 from PySide2 import QtWidgets, QtCore, QtGui
 
-from refer import Qt as qt_
-from refer import Registry as reg_
+from oe.refer import Qt as qt_
+from oe.refer import Registry as reg_
 
 from oe.tools.registry import Registry
 

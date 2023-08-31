@@ -5,7 +5,6 @@ import oe.module as module
 
 from oe.utils import qt
 
-from refer import Product as prod_
 from version import version as ver
 
 class Setup(

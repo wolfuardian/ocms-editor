@@ -1,10 +1,6 @@
-import re
-from maya import cmds
-
-from . import store
 import oe.tools as tools
 
-from refer import Registry as reg_
+from oe.refer import Registry as reg_
 
 def op_browser_project_dir():
     tools.Logging.operator_logger().info("Browsing project directory")
