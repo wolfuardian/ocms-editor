@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 import os
 import getpass
+import maya.mel as mel
+import maya.cmds as cmds
+
 from version import version as ver
-from oe.utils.logging import installer_logger, fileio_logger
+from oe.utils.logging import installer_logger, fileio_logger, maya_logger
 from oe.utils.registry import Registry
-
-
 
 env_dir = f"C:/Users/{getpass.getuser()}/PycharmProjects"
 
@@ -16,7 +17,6 @@ mod_dir = f"{env_dir}/{mod}"
 maya_ver = "2023"
 maya_mod_dir = f"C:/Users/{getpass.getuser()}/Documents/maya/{maya_ver}/modules"
 maya_mod_file = f"{maya_mod_dir}/{mod}.mod"
-
 
 def install():
     if not os.path.exists(maya_mod_dir):
@@ -39,17 +39,31 @@ scripts: {mod_dir}"""
     Registry.set_value("Software", mod, "Pref_MayaModuleFolder", maya_mod_dir)
     Registry.set_value("Software", mod, "Pref_MayaModuleFile", maya_mod_file)
 
+    if not cmds.layout(mod, exists=True):
+        maya_logger.info(f"Creating {mod} shelf tab")
+        c = 'addNewShelfTab("' + mod + '");'
+        mel.eval(c)
 
-def uninstall():
-    try:
-        fileio_logger.info(f"Removing module file: {maya_mod_file}")
-        os.remove(maya_mod_file)
+    command = """from oe import gui
+gui.show()"""
 
-    except WindowsError:
-        fileio_logger.error(f"{mod} module file does not exist.")
+    icon_path = "/execute.png"
 
-    installer_logger.info(f"Removing {mod} preferences")
-    Registry.delete_subkey("Software", mod)
+    shelf_mbim = cmds.shelfLayout(mod, query=True, childArray=True)
+    if shelf_mbim:
+        maya_logger.info(f"Clearing {mod} shelf buttons")
+        for button in shelf_mbim:
+            cmds.deleteUI(button, control=True)
+
+    maya_logger.info(f"Creating {mod} shelf button")
+    cmds.shelfButton(
+        annotation="Run",
+        image1=icon_path,
+        command=command,
+        parent=mod,
+        label="run",
+    )
+
 
 
 if __name__ == "__main__":
