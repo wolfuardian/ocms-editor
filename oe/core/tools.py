@@ -40,9 +40,39 @@ class Logging:
     def gui_logger(cls): pass
     def packages_logger(cls): pass
     def operator_logger(cls): pass
+    def widget_logger(cls): pass
+    def parser_xml_logger(cls): pass
 
 @interface
 class Packages:
     def reload(cls, packages): pass
     def upload(cls, packages): pass
-    # fmt: on
+
+@interface
+class IO:
+    def read_utf16(cls, path): pass
+
+@interface
+class XML:
+    def root(cls, xmlstring): pass
+    def iterator(cls, root, tag, attr, kwd): pass
+    def enumerator(cls, elems, attr, mode, out_attr, test_print): pass
+    def extractor(cls, elems, pos_attrs, neg_attrs, pos_op, neg_op): pass
+    def collect_attrs(cls, elems, kwd): pass
+    def collect_unique_attrs(cls, root): pass
+
+
+@interface
+class String:
+    def join_with_commas(cls, lst): pass
+
+
+@interface
+class Widget:
+    def remove_widgets(cls, container): pass
+    def add_widgets(cls, container, dynamic_container): pass
+    def rebuild_widgets(cls, container, dynamic_container): pass
+
+
+
+# fmt: on

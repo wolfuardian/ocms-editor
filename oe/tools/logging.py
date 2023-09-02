@@ -31,3 +31,11 @@ class Logging(core.Logging):
     @classmethod
     def operator_logger(cls):
         return logging.getLogger("Operator")
+
+    @classmethod
+    def widget_logger(cls):
+        return logging.getLogger("Widget")
+
+    @classmethod
+    def parser_xml_logger(cls):
+        return logging.getLogger("ParserXML")

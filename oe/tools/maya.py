@@ -20,9 +20,15 @@ class Maya(core.Maya):
         default_dir=os.path.expanduser("~"),
         file_filter="All Files (*.*)",
     ):
-        return pm.fileDialog2(
-            fileMode=file_mode, dir=default_dir, fileFilter=file_filter
-        )[0]
+        try:
+            return pm.fileDialog2(
+                fileMode=file_mode, dir=default_dir, fileFilter=file_filter
+            )[0]
+        except TypeError:
+            tools.Logging.maya_logger().warning(
+                "Maya browser failed, please check the input parameters."
+            )
+            return ""
 
     @classmethod
     def get_main_window(cls):

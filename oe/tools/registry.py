@@ -25,6 +25,7 @@ class Registry(core.Registry):
             try:
                 with winreg.OpenKey(key, subkey_name, 0, winreg.KEY_WRITE) as subkey:
                     winreg.SetValueEx(subkey, val_name, 0, val_type, val_data)
+                return val_data
             except WindowsError:
                 with winreg.CreateKey(key, subkey_name) as subkey:
                     winreg.SetValueEx(subkey, val_name, 0, val_type, val_data)
