@@ -7,11 +7,13 @@ class Product:
 class Registry:
     REG_KEY = f"Software\\{Corp.NADI}"
     REG_SUB = f"{Product.ID}"
-    REG_PROJECT_DIRECTORY = "Project_Directory"
-    REG_RESOURCES_SOURCE_DIRECTORY = "Resources_Source_Directory"
-    REG_RESOURCES_TARGET_DIRECTORY = "Resources_Target_Directory"
-    REG_XML_DIRECTORY = "XML_Directory"
-    REG_XML_STRING = "XML_String"
+
+    REG_PROJ_DIR = "Pref_ProjectDirectory"
+    REG_RES_SRC_DIR = "Pref_ResourcesSourceDirectory"
+    REG_RES_TAR_DIR = "Pref_ResourcesTargetDirectory"
+    REG_XML_PATH = "Pref_XmlPath"
+
+    REG_XML_DOC = "Pref_XmlDocument"
 
 class Qt:
-    RES_DIR = "utils/resources/"
+    ICON_DIR = "/oe/utils/resources/"
