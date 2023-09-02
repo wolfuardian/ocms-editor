@@ -158,6 +158,7 @@ class QtButtonCSWidget(QtWidgets.QPushButton):
         status=None,
     ):
         super().__init__(parent)
+        self.force_visible = True
 
         font = QtGui.QFont(QtFonts.SegoeUI, 8, QtGui.QFont.Normal)
         self.setFont(font)
@@ -166,7 +167,7 @@ class QtButtonCSWidget(QtWidgets.QPushButton):
             project_dir = Registry.get_value(
                 reg_.REG_KEY, reg_.REG_SUB, "Pref_ModuleProjectDirectory", ""
             )
-            icon_filepath = project_dir + qt_.RES_DIR + icon
+            icon_filepath = project_dir + qt_.ICON_DIR + icon
             try:
                 self.setIcon(QtGui.QIcon(icon_filepath))
             except Exception as e:
@@ -193,6 +194,10 @@ class QtButtonCSWidget(QtWidgets.QPushButton):
     def remove_from(self, parent):
         self.setParent(None)
         parent.removeWidget(self)
+
+    def set_force_visible(self, visible):
+        self.force_visible = visible
+        self.setVisible(visible)
 
     def set_status(self, status):
         self.setStyleSheet(status)
@@ -639,16 +644,130 @@ class QtGroupVBoxCSWidget(QtGroupBoxCSWidget):
         self.setStyleSheet(status)
 
 
+class QtInfoBoxCSWidget(QtGroupBoxCSWidget):
+    """Custom QtInfoBox subclass"""
+
+    class InfoType:
+        Information = ":/info.png"
+        Warning = ":/warningIcon.svg"
+        Error = ":/error.png"
+
+    def __init__(
+        self,
+        parent=None,
+        flat=True,
+        title=None,
+        text=None,
+        icon=None,
+        margin=(0, 0, 0, 0),
+        spacing=3,
+        width=None,
+        height=None,
+        status=None,
+    ):
+        super().__init__(parent, flat)
+
+        self.info_type = self.InfoType()
+
+        layout = QtWidgets.QHBoxLayout()
+        layout.setSpacing(spacing)
+
+        label = QtLabelCSWidget(text)
+        font = QtGui.QFont("Microsoft JhengHei", 8, QtGui.QFont.Bold)
+        font.setLetterSpacing(QtGui.QFont.PercentageSpacing, 100)
+        label.setFont(QtGui.QFont(font))
+        label.setWordWrap(True)
+
+        if title:
+            self.setTitle(title)
+        if text:
+            label.setText(text)
+        if margin:
+            layout.setContentsMargins(*margin)
+        if status:
+            self.set_status(status)
+        else:
+            self.set_status(QtInfoBoxStatus.Default)
+        if icon:
+            project_dir = Registry.get_value(
+                reg_.REG_KEY, reg_.REG_SUB, "Pref_ModuleProjectDirectory", ""
+            )
+            icon_filepath = project_dir + qt_.ICON_DIR + icon
+            try:
+                pixmap = QtLabelCSWidget()
+                pixmap.setPixmap(QtGui.QPixmap(icon_filepath))
+                pixmap.setFixedSize(20, 20)
+                layout.addWidget(pixmap)
+            except Exception as e:
+                print(e)
+        else:
+            project_dir = Registry.get_value(
+                reg_.REG_KEY, reg_.REG_SUB, "Pref_ModuleProjectDirectory", ""
+            )
+            icon_dir = project_dir + qt_.ICON_DIR
+            icon_filepath = ""
+            if status == QtInfoBoxStatus.Info:
+                icon_filepath = ":/info.png"
+            elif status == QtInfoBoxStatus.Help:
+                icon_filepath = ":/help.png"
+            elif status == QtInfoBoxStatus.Warning:
+                icon_filepath = ":/warningIcon.svg"
+            elif status == QtInfoBoxStatus.Error:
+                icon_filepath = ":/error.png"
+            elif status == QtInfoBoxStatus.Success:
+                icon_filepath = icon_dir + "success.png"
+            elif status == QtInfoBoxStatus.Disable:
+                icon_filepath = ":/RS_disable.png"
+            else:
+                icon_filepath = ""
+
+            pixmap = QtLabelCSWidget()
+            pixmap.setPixmap(QtGui.QPixmap(icon_filepath))
+            pixmap.setFixedSize(20, 20)
+            layout.addWidget(pixmap)
+
+        if width:
+            self.setFixedWidth(width)
+        if height:
+            self.setFixedHeight(height)
+
+        self.set_extra_stylesheet()
+
+        layout.addWidget(label)
+
+        # 設置主要布局
+        self.setLayout(layout)
+
+        # 儲存當前的部件
+        self.label = label
+        self.layout = layout
+
+    def add_to(self, parent):
+        parent.addWidget(self)
+        return self
+
+    def remove_from(self, parent):
+        self.setParent(None)
+        parent.removeWidget(self)
+
+    def set_status(self, status):
+        self.setStyleSheet(status)
+
+    def set_extra_stylesheet(self):
+        stylesheet = self.styleSheet() + "\n" + QtStylesheet.Tooltip
+        self.setStyleSheet(stylesheet)
+
+
 # Molecular Widget
 class QtHelperCSWidget(QtLabelCSWidget):
     """Custom QtHelper subclass"""
 
     def __init__(self, parent=None, text=None, status=None):
         super().__init__(parent)
-
+        self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        self.setWordWrap(True)
         if text:
             self.setText(text)
-
         if status:
             self.set_status(status)
         else:
@@ -672,6 +791,43 @@ class QtHelperCSWidget(QtLabelCSWidget):
         self.setStyleSheet(stylesheet)
 
 
+class LineEditProxy:
+    def __init__(self, lineedits):
+        self.lineedits = lineedits
+
+    def setReadOnly(self, state):
+        for le in self.lineedits:
+            le.setReadOnly(state)
+
+    def setText(self, text):
+        for le in self.lineedits:
+            le.setText(text)
+
+    def setAlignment(self, align):
+        for le in self.lineedits:
+            le.setAlignment(align)
+
+    def setCursorPosition(self, position):
+        for le in self.lineedits:
+            le.setCursorPosition(position)
+
+    def setPlaceholderText(self, placeholder):
+        for le in self.lineedits:
+            le.setPlaceholderText(placeholder)
+
+    def setFixedWidth(self, width):
+        for le in self.lineedits:
+            le.setFixedWidth(width)
+
+    def setFixedHeight(self, height):
+        for le in self.lineedits:
+            le.setFixedHeight(height)
+
+    def setStyleSheet(self, stylesheet):
+        for le in self.lineedits:
+            le.setStyleSheet(stylesheet)
+
+
 class QtTextLineCSWidget(QtDefaultCSWidget):
     """Custom QtTextLine subclass, contains a label and a read-only text box arranged in a horizontal layout"""
 
@@ -679,23 +835,19 @@ class QtTextLineCSWidget(QtDefaultCSWidget):
         self,
         parent=None,
         use_label=True,
+        title=None,
         text=None,
-        default=None,
         placeholder=None,
         readonly=False,
         align="left",
         spacing=None,
         width=None,
         height=None,
+        status=None,
+        ratio=0.5,
     ):
         super().__init__(parent)
-        lineedit = QtLineEditCSWidget()
-        lineedit.setReadOnly(readonly)
-        # lineedit.setPlaceholderText(">")
-        lineedit_font = QtGui.QFont(QtFonts.MicrosoftJhengHei, 8, QtGui.QFont.Bold)
-        lineedit_font.setLetterSpacing(QtGui.QFont.PercentageSpacing, 100)
-        lineedit.setFont(QtGui.QFont(lineedit_font))
-        lineedit.setCursorPosition(0)
+        self.force_visible = True
 
         layout = QtWidgets.QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -705,24 +857,84 @@ class QtTextLineCSWidget(QtDefaultCSWidget):
 
         # --------------------------------------------
         self.use_label = use_label
-        self.lineedit = lineedit
+        self.real_lineedits = []  # 存放實際的 QtLineEditCSWidget 實例
+        self.lineedit = None
         self.layout = layout
         # --------------------------------------------
 
-        if use_label and text != "":
+        if title:
             self.label = QtLabelCSWidget()
             self.label.setFixedWidth(80)
-            if text:
-                self.label.setText(text)
+            if title:
+                self.label.setText(title)
             font = QtGui.QFont(QtFonts.MicrosoftJhengHei, 8, QtGui.QFont.Bold)
             font.setLetterSpacing(QtGui.QFont.PercentageSpacing, 100)
             self.label.setFont(QtGui.QFont(font))
             self.layout.addWidget(self.label)
-        self.layout.addWidget(self.lineedit)
         if spacing:
             self.layout.setSpacing(spacing)
-        if default:
-            self.lineedit.setText(default)
+        if text or text == "":
+            self.create_line_edits(
+                text,
+                readonly,
+                align,
+                placeholder,
+                width,
+                height,
+                ratio,
+                status,
+            )
+        if status:
+            self.set_status(status)
+        else:
+            pass
+
+        self.set_extra_stylesheet()
+
+    def create_line_edits(
+        self,
+        texts,
+        readonly=False,
+        align="left",
+        placeholder=None,
+        width=None,
+        height=None,
+        ratio=0.9,
+        status=None,
+    ):
+        self.real_lineedits.clear()
+        if isinstance(texts, str):
+            texts = [texts]
+
+        total_texts = len(texts)
+        if total_texts <= 1:
+            scale_factors = [1] * total_texts  # 避免division by zero
+        else:
+            scale_factors = [
+                (1 - ratio) + (ratio * 2 - 1) * (i / (total_texts - 1))
+                for i in range(total_texts)
+            ]
+
+        for i, text in enumerate(texts):
+            _lineedit = QtLineEditCSWidget()
+            _lineedit.setReadOnly(readonly)
+            _lineedit.setText(text)
+
+            size_policy = QtWidgets.QSizePolicy(
+                QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed
+            )
+
+            scale_factor = 1 - scale_factors[i]
+            if width:
+                _lineedit.setFixedWidth(int(width * scale_factor))
+            else:
+                size_policy.setHorizontalStretch(int(100 * scale_factor))  # 設定水平拉伸因子
+                _lineedit.setSizePolicy(size_policy)
+
+            self.real_lineedits.append(_lineedit)
+            self.layout.addWidget(_lineedit)
+
+        self.lineedit = LineEditProxy(self.real_lineedits)
         if align == "left":
             self.lineedit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         elif align == "center":
@@ -731,10 +943,12 @@ class QtTextLineCSWidget(QtDefaultCSWidget):
             self.lineedit.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         if placeholder:
             self.lineedit.setPlaceholderText(placeholder)
-        if width:
-            self.lineedit.setFixedWidth(width)
         if height:
             self.lineedit.setFixedHeight(height)
+        if status:
+            self.lineedit.setStyleSheet(status)
+
+        self.lineedit.setCursorPosition(0)
 
     def add_to(self, parent):
         parent.addWidget(self)
@@ -743,6 +957,17 @@ class QtTextLineCSWidget(QtDefaultCSWidget):
     def remove_from(self, parent):
         self.setParent(None)
         parent.removeWidget(self)
+
+    def set_force_visible(self, visible):
+        self.force_visible = visible
+        self.setVisible(visible)
+
+    def set_status(self, status):
+        self.lineedit.setStyleSheet(status)
+
+    # def set_extra_stylesheet(self):
+    #     stylesheet = self.styleSheet() + "\n" + QtStylesheet.Tooltip
+    #     self.lineedit.setStyleSheet(stylesheet)
 
 
 class QtCheckBoxLineCSWidget(QtDefaultCSWidget):
@@ -894,54 +1119,69 @@ class QtLineEditStatus:
     Info = f"""
         QLineEdit {{
             background-color: {_hex("1d1d1d")};
-            border: 1px solid {_hex("1E90FF")};
+            border: 2px solid {_hex("1E90FF")};
             color: {_hex("A6D8FF")};
         }}
         QLineEdit:focus {{
-            border: 1px solid {_hex("A6D8FF")};
+            border: 2px solid {_hex("A6D8FF")};
+        }}
+        QLineEdit:hover {{
+            border: 2px solid {_hex("A6D8FF")};
         }}
     """
     Warning = f"""
         QLineEdit {{
             background-color: {_hex("1d1d1d")};
-            border: 1px solid {_hex("8E6D37")};
+            border: 2px solid {_hex("8E6D37")};
             color: {_hex("FFEB8A")};
         }}
         QLineEdit:focus {{
-            border: 1px solid {_hex("FFEB8A")};
+            border: 2px solid {_hex("FFEB8A")};
+        }}
+        QLineEdit:hover {{
+            border: 2px solid {_hex("FFEB8A")};
         }}
     """
 
     Error = f"""
         QLineEdit {{
             background-color: {_hex("1d1d1d")};
-            border: 1px solid {_hex("8E3B2E")};
+            border: 2px solid {_hex("8E3B2E")};
             color: {_hex("FF8F76")};
         }}
         QLineEdit:focus {{
-            border: 1px solid {_hex("FF8F76")};
+            border: 2px solid {_hex("FF8F76")};
+        }}
+        QLineEdit:hover {{
+            border: 2px solid {_hex("FF8F76")};
         }}
     """
 
-    Verified = f"""
+    Success = f"""
         QLineEdit {{
             background-color: {_hex("1d1d1d")};
-            border: 1px solid {_hex("348E34")};
+            border: 2px solid {_hex("348E34")};
             color: {_hex("C5F2C5")};
         }}
         QLineEdit:focus {{
-            border: 1px solid {_hex("C5F2C5")};
+            border: 2px solid {_hex("C5F2C5")};
+        }}
+        QLineEdit:hover {{
+            border: 2px solid {_hex("C5F2C5")};
         }}
     """
 
-    Disabled = f"""
+    Disable = f"""
         QLineEdit {{
             background-color: {_hex("1d1d1d")};
-            border: 1px solid {_hex("3c3c3c")};
+            border: 2px solid {_hex("3c3c3c")};
             color: {_hex("636363")};
         }}
         QLineEdit:focus {{
-            border: 1px solid {_hex("636363")};
+            border: 2px solid {_hex("636363")};
+        }}
+        QLineEdit:hover {{
+            border: 2px solid {_hex("636363")};
         }}
     """
 
@@ -950,7 +1190,7 @@ class QtCheckBoxStatus:
     project_dir = Registry.get_value(
         reg_.REG_KEY, reg_.REG_SUB, "Pref_ModuleProjectDirectory", ""
     )
-    icon_filepath = project_dir + qt_.RES_DIR + "so-checkmark.svg"
+    icon_filepath = project_dir + qt_.ICON_DIR + "so-checkmark.svg"
 
     Default = f"""
         QCheckBox {{
@@ -1077,6 +1317,17 @@ class QtGroupBoxStatus:
                 background-color: {_hex("282828")};
             }}
         """
+    Border = f"""
+                QGroupBox {{
+                background-color: None;
+                border: 0px;
+            }}
+
+            QGroupBox::title {{
+                color: None;
+                background-color: None;
+            }}
+    """
     Disabled = f"""
             QGroupBox {{
                 background-color: {_hex("3c3c3c")};
@@ -1099,6 +1350,69 @@ class QtGroupBoxStatus:
                 background-color: {_hex("282828")};
             }}
         """
+
+
+class QtInfoBoxStatus:
+    Default = f"""
+            QGroupBox {{
+                background-color: {_hex("3c3c3c")};
+                border: 1px solid {_hex("444444")};
+                border-radius: 4px;
+                padding: 3px;
+            }}
+            """
+    Info = f"""
+            QGroupBox {{
+                background-color: {_hex("525252")};
+                border: 1px solid {_hex("B0B0B0")};
+                border-radius: 4px;
+                padding: 3px;
+            }}
+            """
+    Help = f"""
+            QGroupBox {{
+                background-color: {_hex("3c3c3c")};
+                border: 1px solid {_hex("1E90FF")};
+                border-radius: 4px;
+                padding: 3px;
+            }}
+            """
+    Warning = f"""
+            QGroupBox {{
+                background-color: {_hex("3e3527")};
+                border: 1px solid {_hex("fbb549")};
+                border-radius: 4px;
+                padding: 3px;
+                
+            }}
+            """
+
+    Error = f"""
+            QGroupBox {{
+                background-color: {_hex("5d3535")};
+                border: 1px solid {_hex("cf3539")};
+                border-radius: 4px;
+                padding: 3px;
+            }}
+            """
+
+    Success = f"""
+            QGroupBox {{
+                background-color: {_hex("174117")};
+                border: 1px solid {_hex("348E34")};
+                border-radius: 4px;
+                padding: 3px;
+            }}
+            """
+
+    Disable = f"""
+            QGroupBox {{
+                background-color: {_hex("2b2b2b")};
+                border: 1px solid {_hex("000000")};
+                border-radius: 4px;
+                padding: 3px;
+            }}
+            """
 
 
 class QtHelperStatus:
