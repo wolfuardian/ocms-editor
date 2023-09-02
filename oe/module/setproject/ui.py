@@ -2,60 +2,150 @@ from PySide2 import QtWidgets
 
 from oe.utils import qt
 
-# from . import operator, prop, store
+from . import operator
+
 
 def _hex(h):
     return "#" + h
+
 
 class SetProjectDirectoryCSWidget(qt.QtFrameLayoutCSWidget):
     def __init__(self, parent=None, text="設定專案目錄"):
         super().__init__(parent, text)
 
-        # <editor-fold desc="CODE_BLOCK: Initialize">
-        widget = qt.QtDefaultCSWidget()
-        layout = QtWidgets.QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(6)
-        # </editor-fold>
-
         # <editor-fold desc="CODE_BLOCK: Create Widget">
         scrollarea = qt.QtScrollareaCSWidget()
 
-        gbox_p_dir = qt.QtGroupHBoxCSWidget(text="專案目錄")
-        tl_p_dir = qt.QtTextLineCSWidget(text="", placeholder="> 專案目錄路徑")
-        tl_p_dir.lineedit.setReadOnly(True)
-        btn_p_dir = qt.QtButtonCSWidget(icon="open_folder.png", text="  開啟專案目錄", height=32)
+        box_proj_dir = qt.QtGroupHBoxCSWidget(text="專案目錄")
+        txt_proj_dir = qt.QtTextLineCSWidget(text="")
+        txt_proj_dir.lineedit.setReadOnly(True)
+        txt_proj_dir.set_force_visible(False)
+        btn_init_proj_dir = qt.QtButtonCSWidget(
+            icon="open_folder.png",
+            text="  初始化",
+            height=32,
+            status=qt.QtButtonStatus.Invert,
+        )
+        ui_btn_browser_proj_dir = qt.QtButtonCSWidget(
+            icon="open_folder.png", text="", height=32
+        )
+        ui_btn_browser_proj_dir.set_force_visible(False)
 
-        gbox_m_dir = qt.QtGroupHBoxCSWidget(text="模型檔目錄")
-        tl_m_dir = qt.QtTextLineCSWidget(text="", placeholder="> 模型檔目錄路徑")
-        tl_m_dir.lineedit.setReadOnly(True)
-        btn_m_dir = qt.QtButtonCSWidget(icon="open_folder.png", text="  開啟模型檔目錄", height=32)
-        # </editor-fold>
+        box_res_src_dir = qt.QtGroupHBoxCSWidget(text="來源模型檔目錄")
+        txt_res_src_dir = qt.QtTextLineCSWidget(text="")
+        txt_res_src_dir.lineedit.setReadOnly(True)
+        txt_res_src_dir.set_force_visible(False)
+        btn_init_res_src_dir = qt.QtButtonCSWidget(
+            icon="open_folder.png",
+            text="  初始化",
+            height=32,
+            status=qt.QtButtonStatus.Invert,
+        )
+        ui_btn_browser_res_src_dir = qt.QtButtonCSWidget(
+            icon="open_folder.png", text="", height=32
+        )
+        ui_btn_browser_res_src_dir.set_force_visible(False)
 
-        # <editor-fold desc="CODE_BLOCK: Set Status">
+        box_res_tar_dir = qt.QtGroupHBoxCSWidget(text="目標模型檔目錄")
+        txt_res_tar_dir = qt.QtTextLineCSWidget(text="")
+        txt_res_tar_dir.lineedit.setReadOnly(True)
+        txt_res_tar_dir.set_force_visible(False)
+        btn_init_res_tar_dir = qt.QtButtonCSWidget(
+            icon="open_folder.png",
+            text="  初始化",
+            height=32,
+            status=qt.QtButtonStatus.Invert,
+        )
+        ui_btn_browser_res_tar_dir = qt.QtButtonCSWidget(
+            icon="open_folder.png", text="", height=32
+        )
+        ui_btn_browser_res_tar_dir.set_force_visible(False)
         # </editor-fold>
 
         # <editor-fold desc="CODE_BLOCK: Tooltip">
-        gbox_p_dir.setToolTip("💡 選取場景中所有材質球，除了lambert1、standardSurface1、particleCloud1")
+        btn_init_proj_dir.setToolTip("💡 初始化 專案目錄 路徑")
+        ui_btn_browser_proj_dir.setToolTip("💡 瀏覽並選取 專案目錄 路徑")
+        btn_init_res_src_dir.setToolTip("💡 初始化  來源模型檔目錄 路徑")
+        ui_btn_browser_res_src_dir.setToolTip("💡 瀏覽並選取 來源模型檔目錄 路徑")
+        btn_init_res_tar_dir.setToolTip("💡 初始化  目標模型檔目錄 路徑")
+        ui_btn_browser_res_tar_dir.setToolTip("💡 瀏覽並選取 目標模型檔目錄 路徑")
         # </editor-fold>
 
         # <editor-fold desc="CODE_BLOCK: Connect Action">
-        # btn_sel_mats_in_scene.clicked.connect(operator.op_sel_mats)
+        btn_init_proj_dir.clicked.connect(
+            lambda: operator.op_initialize_project_dir(
+                {
+                    "btn_init_proj_dir": btn_init_proj_dir,
+                    "ui_btn_browser_proj_dir": ui_btn_browser_proj_dir,
+                    "txt_proj_dir": txt_proj_dir,
+                }
+            )
+        )
+        ui_btn_browser_proj_dir.clicked.connect(
+            lambda: operator.op_browser_project_dir(
+                {
+                    "ui_btn_browser_proj_dir": ui_btn_browser_proj_dir,
+                    "btn_init_proj_dir": btn_init_proj_dir,
+                    "txt_proj_dir": txt_proj_dir,
+                }
+            )
+        )
+        btn_init_res_src_dir.clicked.connect(
+            lambda: operator.op_initialize_resources_source_dir(
+                {
+                    "btn_init_res_src_dir": btn_init_res_src_dir,
+                    "ui_btn_browser_res_src_dir": ui_btn_browser_res_src_dir,
+                    "txt_res_src_dir": txt_res_src_dir,
+                }
+            )
+        )
+        ui_btn_browser_res_src_dir.clicked.connect(
+            lambda: operator.op_browser_resources_source_dir(
+                {
+                    "ui_btn_browser_res_src_dir": ui_btn_browser_res_src_dir,
+                    "btn_init_res_src_dir": btn_init_res_src_dir,
+                    "txt_res_src_dir": txt_res_src_dir,
+                }
+            )
+        )
+        btn_init_res_tar_dir.clicked.connect(
+            lambda: operator.op_initialize_resources_target_dir(
+                {
+                    "btn_init_res_tar_dir": btn_init_res_tar_dir,
+                    "ui_btn_browser_res_tar_dir": ui_btn_browser_res_tar_dir,
+                    "txt_res_tar_dir": txt_res_tar_dir,
+                }
+            )
+        )
+        ui_btn_browser_res_tar_dir.clicked.connect(
+            lambda: operator.op_browser_resources_target_dir(
+                {
+                    "ui_btn_browser_res_tar_dir": ui_btn_browser_res_tar_dir,
+                    "btn_init_res_tar_dir": btn_init_res_tar_dir,
+                    "txt_res_tar_dir": txt_res_tar_dir,
+                }
+            )
+        )
+
         # </editor-fold>
 
         # <editor-fold desc="CODE_BLOCK: Assembly Widget">
-        # gbox_p_dir.layout.addWidget(tl_p_dir)
-        gbox_p_dir.layout.addWidget(btn_p_dir)
-        # gbox_m_dir.layout.addWidget(tl_m_dir)
-        gbox_m_dir.layout.addWidget(btn_m_dir)
-        scrollarea.layout.addWidget(gbox_p_dir)
-        scrollarea.layout.addWidget(gbox_m_dir)
-        layout.addWidget(scrollarea)
-        widget.setLayout(layout)
-        self.frame_layout.addWidget(widget)
+        box_proj_dir.layout.addWidget(txt_proj_dir)
+        box_proj_dir.layout.addWidget(btn_init_proj_dir)
+        box_proj_dir.layout.addWidget(ui_btn_browser_proj_dir)
+        box_res_src_dir.layout.addWidget(txt_res_src_dir)
+        box_res_src_dir.layout.addWidget(btn_init_res_src_dir)
+        box_res_src_dir.layout.addWidget(ui_btn_browser_res_src_dir)
+        box_res_tar_dir.layout.addWidget(txt_res_tar_dir)
+        box_res_tar_dir.layout.addWidget(btn_init_res_tar_dir)
+        box_res_tar_dir.layout.addWidget(ui_btn_browser_res_tar_dir)
+        scrollarea.layout.addWidget(box_proj_dir)
+        scrollarea.layout.addWidget(box_res_src_dir)
+        scrollarea.layout.addWidget(box_res_tar_dir)
+
+        self.frame_layout.addWidget(scrollarea)
+
         # </editor-fold>
 
         # <editor-fold desc="CODE_BLOCK: Expose Variable">
-        self.layout = layout
-        self.widget = widget
         # </editor-fold>

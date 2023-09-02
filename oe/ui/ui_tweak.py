@@ -1,6 +1,4 @@
-
 from oe import gui
-from oe.utils import qt
 from oe.ui import ui_setup
 
 
