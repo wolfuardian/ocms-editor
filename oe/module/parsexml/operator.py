@@ -15,7 +15,9 @@ def op_initialize_xml_path(self):
     if _default_path == "":
         _browser_path = tools.Maya.browser(1, _default_path)
         if _browser_path == "":
-            tools.Logging.parse_xml_logger().warning("User canceled the browser dialog.")
+            tools.Logging.parse_xml_logger().warning(
+                "User canceled the browser dialog."
+            )
             return
         _target_dir = tools.Registry.set_value(
             reg_.REG_KEY,
@@ -233,16 +235,17 @@ def parse_xml(self):
     prop.set_prop_data_objects_enum_model_by_type(data_objects_enum_model_by_type)
     prop.set_prop_data_objects_enum_bundle_by_type(data_objects_enum_bundle_by_type)
 
-    tools.Logging.parse_xml_logger().info("Updating parse xml data")
-    self.parse.update()
-
     construct_ui(self)
 
 
 def construct_ui(self):
     p = self.parse
-    tools.Logging.parse_xml_logger().info("Notice: Current datasource is " + p.data_datasource)
-    tools.Logging.gui_logger().info("Notice: Some widgets may have some differences due to different datasource")
+    tools.Logging.parse_xml_logger().info(
+        "Notice: Current datasource is " + p.data_datasource
+    )
+    tools.Logging.gui_logger().info(
+        "Notice: Some widgets may have some differences due to different datasource"
+    )
     tools.Logging.gui_logger().info("Constructing dynamic ui group manager")
     self.dynamic_box.add_group(
         id="點位物件統計", widget=qt.QtGroupVBoxCSWidget(text="點位物件統計")
@@ -351,7 +354,9 @@ def construct_ui(self):
                             tools.String.join_with_commas(
                                 p.props["data_objects_enum_model_by_type"][typ]
                             ),
-                            len(p.props["data_objects_enum_model_by_type"][typ]).__str__(),
+                            len(
+                                p.props["data_objects_enum_model_by_type"][typ]
+                            ).__str__(),
                         ],
                         readonly=True,
                         ratio=0.9,
@@ -473,7 +478,9 @@ def construct_ui(self):
                             tools.String.join_with_commas(
                                 p.props["data_objects_enum_model_by_type"][typ]
                             ),
-                            len(p.props["data_objects_enum_model_by_type"][typ]).__str__(),
+                            len(
+                                p.props["data_objects_enum_model_by_type"][typ]
+                            ).__str__(),
                         ],
                         readonly=True,
                         ratio=0.9,

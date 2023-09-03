@@ -5,6 +5,7 @@ from oe.utils import qt
 
 class ParseXMLData:
     props = {}
+
     path = None
     xmlstring = None
     root = None
@@ -20,11 +21,6 @@ class ParseXMLData:
     types = None
 
     non_device_types = None
-
-    nodes = {}
-    data = {}
-    json = {}
-    is_loaded = False
 
     @classmethod
     def purse(cls):
@@ -44,10 +40,6 @@ class ParseXMLData:
 
         cls.non_device_types = None
 
-        cls.nodes = {}
-        cls.data = {}
-        cls.json = {}
-
     @classmethod
     def load(cls, path):
         cls.path = path
@@ -65,29 +57,6 @@ class ParseXMLData:
         cls.types = cls.get_types()
 
         cls.non_device_types = cls.get_non_device_types()
-
-    @classmethod
-    def update(cls):
-        cls.nodes = {
-            "nodes_objects_by_type": cls.get_prop_nodes_objects_by_type(),
-            "nodes_objects_valid_by_type": cls.get_prop_nodes_objects_valid_by_type(),
-            "nodes_objects_invalid_by_type": cls.get_prop_nodes_objects_invalid_by_type(),
-            "nodes_objects_temporary_by_type": cls.get_prop_nodes_objects_temporary_by_type(),
-            "nodes_objects_duplicate_by_type": cls.get_prop_nodes_objects_duplicate_by_type(),
-            "nodes_objects_available_by_type": cls.get_prop_nodes_objects_available_by_type(),
-        }
-        cls.data = {
-            "data_objects_by_type": cls.get_prop_data_objects_by_type(),
-            "data_objects_valid_by_type": cls.get_prop_data_objects_valid_by_type(),
-            "data_objects_invalid_by_type": cls.get_prop_data_objects_invalid_by_type(),
-            "data_objects_temporary_by_type": cls.get_prop_data_objects_temporary_by_type(),
-            "data_objects_duplicate_by_type": cls.get_prop_data_objects_duplicate_by_type(),
-            "data_objects_available_by_type": cls.get_prop_data_objects_available_by_type(),
-            "data_objects_enum_model_by_type": cls.get_prop_data_objects_enum_model_by_type(),
-            "data_objects_enum_bundle_by_type": cls.get_prop_data_objects_enum_bundle_by_type(),
-        }
-        # cls.JSON = cls.get_data_json()
-        cls.is_loaded = True
 
     @classmethod
     def get_xmlstring(cls):
