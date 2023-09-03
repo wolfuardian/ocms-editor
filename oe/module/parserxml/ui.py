@@ -26,7 +26,7 @@ class ParserXMLCSWidget(qt.QtFrameLayoutCSWidget):
         _btn_clean_group = qt.QtButtonCSWidget(text="clean_group")
         _btn_clean_all = qt.QtButtonCSWidget(text="clean_all")
 
-        tools.Logging.widget_logger().setLevel(level=logging.INFO)
+        tools.Logging.gui_logger().setLevel(level=logging.INFO)
 
         dynamic_box = store.DynamicUIGroupManager()
         # dynamic_box.add_group(id="群組_XML路徑", widget=qt.QtGroupHBoxCSWidget(text="XML路徑"))

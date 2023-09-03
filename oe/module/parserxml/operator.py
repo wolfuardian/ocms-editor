@@ -7,7 +7,7 @@ from . import store, prop
 
 
 def op_initialize_xml_path(self):
-    tools.Logging.operator_logger().info("Initializing xml path")
+    tools.Logging.parser_xml_logger().info("Initializing xml path")
 
     _default_path = tools.Registry.get_value(
         reg_.REG_KEY, reg_.REG_SUB, reg_.REG_XML_PATH, ""
@@ -15,7 +15,7 @@ def op_initialize_xml_path(self):
     if _default_path == "":
         _browser_path = tools.Maya.browser(1, _default_path)
         if _browser_path == "":
-            tools.Logging.operator_logger().warning("User canceled the browser dialog.")
+            tools.Logging.parser_xml_logger().warning("User canceled the browser dialog.")
             return
         _target_dir = tools.Registry.set_value(
             reg_.REG_KEY,
@@ -35,14 +35,14 @@ def op_initialize_xml_path(self):
 
 
 def op_browser_xml_path(self):
-    tools.Logging.operator_logger().info("Browsing xml path")
+    tools.Logging.parser_xml_logger().info("Browsing xml path")
 
     _default_path = tools.Registry.get_value(
         reg_.REG_KEY, reg_.REG_SUB, reg_.REG_XML_PATH, ""
     )
     _browser_path = tools.Maya.browser(1, _default_path)
     if _browser_path == "":
-        tools.Logging.operator_logger().warning("User canceled the browser dialog.")
+        tools.Logging.parser_xml_logger().warning("User canceled the browser dialog.")
         return
     _target_dir = tools.Registry.set_value(
         reg_.REG_KEY,
@@ -57,15 +57,18 @@ def op_browser_xml_path(self):
 
 
 def parser_xml(self):
+    tools.Logging.gui_logger().info("Initializing dynamic ui group manager")
     self.dynamic_box.clear_all()
 
-    tools.Logging.operator_logger().info("Parsing xml")
+    tools.Logging.parser_xml_logger().info("Initializing parser xml data")
     self.parser = store.ParserXMLData()
 
     _path = tools.Registry.get_value(reg_.REG_KEY, reg_.REG_SUB, reg_.REG_XML_PATH, "")
 
+    tools.Logging.parser_xml_logger().info("Loading xml data")
     self.parser.load(_path)
 
+    tools.Logging.parser_xml_logger().info("Starting constructing variables")
     nodes_objects = self.parser.nodes_objects
     nodes_datasource = self.parser.nodes_datasource
     nodes_objects_by_type = {}
@@ -91,18 +94,15 @@ def parser_xml(self):
 
     non_device_types = self.parser.non_device_types
 
-    # is_legacy_ocms = True if data_datasource == "OCMS" else False
-
     for typ in data_types:
+        tools.Logging.parser_xml_logger().info("Constructing variables for type: " + typ)
         typ = typ.__str__()
-
         nodes_objects_by_type[typ] = tools.XML.iterator(
             self.parser.root, tag="Object", attr="type", kwd=typ
         )
         data_objects_by_type[typ] = tools.XML.enumerator(
             nodes_objects_by_type[typ], attr="name", mode=1
         )
-
         if typ not in non_device_types:
             if data_datasource == "OCMS":
                 data_objects_enum_bundle_by_type[typ] = tools.XML.enumerator(
@@ -217,6 +217,7 @@ def parser_xml(self):
                     if node.get("name") in data_objects_duplicate_by_type[typ]:
                         nodes_objects_duplicate_by_type[typ].append(node)
 
+    tools.Logging.parser_xml_logger().info("Setting variables")
     prop.set_prop_nodes_objects_by_type(nodes_objects_by_type)
     prop.set_prop_nodes_objects_valid_by_type(nodes_objects_valid_by_type)
     prop.set_prop_nodes_objects_invalid_by_type(nodes_objects_invalid_by_type)
@@ -232,6 +233,7 @@ def parser_xml(self):
     prop.set_prop_data_objects_enum_model_by_type(data_objects_enum_model_by_type)
     prop.set_prop_data_objects_enum_bundle_by_type(data_objects_enum_bundle_by_type)
 
+    tools.Logging.parser_xml_logger().info("Updating parser xml data")
     self.parser.update()
 
     construct_ui(self)
@@ -239,6 +241,9 @@ def parser_xml(self):
 
 def construct_ui(self):
     p = self.parser
+    tools.Logging.parser_xml_logger().info("Notice: Current datasource is " + p.data_datasource)
+    tools.Logging.gui_logger().info("Notice: Some widgets may have some differences due to different datasource")
+    tools.Logging.gui_logger().info("Constructing dynamic ui group manager")
     self.dynamic_box.add_group(
         id="點位物件統計", widget=qt.QtGroupVBoxCSWidget(text="點位物件統計")
     )
@@ -298,12 +303,12 @@ def construct_ui(self):
         id="分隔線3",
         widget=qt.QtLineCSWidget(),
     )
+
     for typ in p.types:
         if typ not in p.non_device_types:
             self.dynamic_box.add_group(
                 id=f"{typ} 物件", widget=qt.QtGroupVBoxCSWidget(text=f"{typ} 物件")
             )
-
             if p.data_datasource == "OCMS":
                 self.dynamic_box.add_widget(
                     parent_id=f"{typ} 物件",
@@ -431,14 +436,7 @@ def construct_ui(self):
                     id=f"{typ} 重複設備",
                     widget=_w,
                 )
-                self.dynamic_box.add_widget(
-                    parent_id=f"{typ} 物件",
-                    id=f"{typ} OCMS提示",
-                    widget=qt.QtInfoBoxCSWidget(
-                        text="自 OCMS2.0 開始，由於部分屬性合併，＂各類 bundle＂、＂暫代設備＂將會被拿掉。",
-                        status=qt.QtInfoBoxStatus.Help,
-                    ),
-                )
+
                 if len(p.props["data_objects_invalid_by_type"][typ]) > 0:
                     self.dynamic_box.add_widget(
                         parent_id=f"{typ} 物件",
@@ -457,7 +455,14 @@ def construct_ui(self):
                             status=qt.QtInfoBoxStatus.Warning,
                         ),
                     )
-
+                self.dynamic_box.add_widget(
+                    parent_id=f"{typ} 物件",
+                    id=f"{typ} OCMS提示",
+                    widget=qt.QtInfoBoxCSWidget(
+                        text="自 OCMS2.0 開始，由於部分屬性合併，＂各類 bundle＂、＂暫代設備＂將會被拿掉。",
+                        status=qt.QtInfoBoxStatus.Help,
+                    ),
+                )
             elif p.data_datasource == "OCMS2_0":
                 self.dynamic_box.add_widget(
                     parent_id=f"點位物件統計",
@@ -568,3 +573,4 @@ def construct_ui(self):
                             status=qt.QtInfoBoxStatus.Warning,
                         ),
                     )
+    tools.Logging.gui_logger().info("Completed constructing dynamic ui group manager")
