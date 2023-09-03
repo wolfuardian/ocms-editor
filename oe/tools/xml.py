@@ -54,7 +54,7 @@ class XML(core.XML):
 
         # When enabled, the log will print more information and the unicode will be converted to str.
         if test_print:
-            return tools.String.join_with_commas(lst)
+            return tools.String.list_to_string(lst)
 
         return lst
 

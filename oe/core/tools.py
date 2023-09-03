@@ -39,9 +39,9 @@ class Logging:
     def maya_logger(cls): pass
     def gui_logger(cls): pass
     def packages_logger(cls): pass
-    def operator_logger(cls): pass
-    def widget_logger(cls): pass
+    def storage_logger(cls): pass
     def parse_xml_logger(cls): pass
+    def parse_resources_logger(cls): pass
 
 @interface
 class Packages:
@@ -49,8 +49,19 @@ class Packages:
     def upload(cls, packages): pass
 
 @interface
+class Dictionary:
+    def create_dict_from_lists(cls, key, val): pass
+
+@interface
 class IO:
     def read_utf16(cls, path): pass
+    def convert_to_unix_path(cls, path): pass
+    def convert_paths_to_unix_style(cls, paths): pass
+    def list_filtered_paths(cls, directory, extension, re_pattern, recursive): pass
+    def sort_files_by_size(cls, paths, is_reverse, is_dict): pass
+    def get_maxsize_file(cls, paths): pass
+    def get_minsize_file(cls, paths): pass
+    def bytes_to_readable_size(cls, paths, is_reverse, is_dict): pass
 
 @interface
 class XML:
@@ -63,5 +74,6 @@ class XML:
 
 @interface
 class String:
-    def join_with_commas(cls, lst): pass
+    def list_to_string(cls, lst): pass
+    def dict_to_string(cls, dictionary): pass
 # fmt: on

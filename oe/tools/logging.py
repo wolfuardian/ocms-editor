@@ -29,5 +29,13 @@ class Logging(core.Logging):
         return logging.getLogger("Packages")
 
     @classmethod
+    def storage_logger(cls):
+        return logging.getLogger("Storage")
+
+    @classmethod
     def parse_xml_logger(cls):
         return logging.getLogger("ParseXML")
+
+    @classmethod
+    def parse_resources_logger(cls):
+        return logging.getLogger("ParseResources")
