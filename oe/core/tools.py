@@ -61,18 +61,7 @@ class XML:
     def collect_attrs(cls, elems, kwd): pass
     def collect_unique_attrs(cls, root): pass
 
-
 @interface
 class String:
     def join_with_commas(cls, lst): pass
-
-
-@interface
-class Widget:
-    def remove_widgets(cls, container): pass
-    def add_widgets(cls, container, dynamic_container): pass
-    def rebuild_widgets(cls, container, dynamic_container): pass
-
-
-
 # fmt: on

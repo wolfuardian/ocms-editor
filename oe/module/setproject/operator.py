@@ -3,7 +3,7 @@ import oe.tools as tools
 from oe.refer import Registry as reg_
 
 
-def op_initialize_project_dir(context):
+def op_initialize_project_dir(self):
     tools.Logging.parse_xml_logger().info("Initializing project directory")
 
     _default_dir = tools.Registry.get_value(
@@ -16,17 +16,17 @@ def op_initialize_project_dir(context):
             reg_.REG_PROJ_DIR,
             tools.Maya.browser(3, _default_dir),
         )
-        context["txt_proj_dir"].lineedit.setText(_target_dir)
+        self.txt_proj_dir.lineedit.setText(_target_dir)
     else:
-        context["txt_proj_dir"].lineedit.setText(_default_dir)
-    context["btn_init_proj_dir"].set_force_visible(False)
-    context["txt_proj_dir"].set_force_visible(True)
-    context["txt_proj_dir"].lineedit.setCursorPosition(0)
-    context["ui_btn_browser_proj_dir"].set_force_visible(True)
+        self.txt_proj_dir.lineedit.setText(_default_dir)
+    self.btn_init_proj_dir.set_force_visible(False)
+    self.txt_proj_dir.set_force_visible(True)
+    self.txt_proj_dir.lineedit.setCursorPosition(0)
+    self.ui_btn_browser_proj_dir.set_force_visible(True)
     tools.Logging.parse_xml_logger().info("Completed initializing project directory")
 
 
-def op_browser_project_dir(context):
+def op_browser_project_dir(self):
     tools.Logging.parse_xml_logger().info("Browsing project directory")
 
     _default_dir = tools.Registry.get_value(
@@ -42,12 +42,12 @@ def op_browser_project_dir(context):
         reg_.REG_PROJ_DIR,
         _browser_dir,
     )
-    context["txt_proj_dir"].lineedit.setText(_target_dir)
-    context["txt_proj_dir"].lineedit.setCursorPosition(0)
+    self.txt_proj_dir.lineedit.setText(_target_dir)
+    self.txt_proj_dir.lineedit.setCursorPosition(0)
     tools.Logging.parse_xml_logger().info("Completed browsing project directory")
 
 
-def op_initialize_resources_source_dir(context):
+def op_initialize_resources_source_dir(self):
     tools.Logging.parse_xml_logger().info("Initializing resources source directory")
 
     _default_dir = tools.Registry.get_value(
@@ -60,16 +60,16 @@ def op_initialize_resources_source_dir(context):
             reg_.REG_RES_SRC_DIR,
             tools.Maya.browser(3, _default_dir),
         )
-        context["txt_res_src_dir"].lineedit.setText(_target_dir)
+        self.txt_res_src_dir.lineedit.setText(_target_dir)
     else:
-        context["txt_res_src_dir"].lineedit.setText(_default_dir)
-    context["btn_init_res_src_dir"].set_force_visible(False)
-    context["txt_res_src_dir"].set_force_visible(True)
-    context["txt_res_src_dir"].lineedit.setCursorPosition(0)
-    context["ui_btn_browser_res_src_dir"].set_force_visible(True)
+        self.txt_res_src_dir.lineedit.setText(_default_dir)
+    self.btn_init_res_src_dir.set_force_visible(False)
+    self.txt_res_src_dir.set_force_visible(True)
+    self.txt_res_src_dir.lineedit.setCursorPosition(0)
+    self.ui_btn_browser_res_src_dir.set_force_visible(True)
     tools.Logging.parse_xml_logger().info("Completed initializing resources source directory")
 
-def op_browser_resources_source_dir(context):
+def op_browser_resources_source_dir(self):
     tools.Logging.parse_xml_logger().info("Browsing resources source directory")
 
     _default_dir = tools.Registry.get_value(
@@ -85,11 +85,11 @@ def op_browser_resources_source_dir(context):
         reg_.REG_RES_SRC_DIR,
         _browser_dir,
     )
-    context["txt_res_src_dir"].lineedit.setText(_target_dir)
-    context["txt_res_src_dir"].lineedit.setCursorPosition(0)
+    self.txt_res_src_dir.lineedit.setText(_target_dir)
+    self.txt_res_src_dir.lineedit.setCursorPosition(0)
     tools.Logging.parse_xml_logger().info("Completed browsing resources source directory")
 
-def op_initialize_resources_target_dir(context):
+def op_initialize_resources_target_dir(self):
     tools.Logging.parse_xml_logger().info("Initializing resources target directory")
 
     _default_dir = tools.Registry.get_value(
@@ -102,16 +102,16 @@ def op_initialize_resources_target_dir(context):
             reg_.REG_RES_TAR_DIR,
             tools.Maya.browser(3, _default_dir),
         )
-        context["txt_res_tar_dir"].lineedit.setText(_target_dir)
+        self.txt_res_tar_dir.lineedit.setText(_target_dir)
     else:
-        context["txt_res_tar_dir"].lineedit.setText(_default_dir)
-    context["btn_init_res_tar_dir"].set_force_visible(False)
-    context["txt_res_tar_dir"].set_force_visible(True)
-    context["txt_res_tar_dir"].lineedit.setCursorPosition(0)
-    context["ui_btn_browser_res_tar_dir"].set_force_visible(True)
+        self.txt_res_tar_dir.lineedit.setText(_default_dir)
+    self.btn_init_res_tar_dir.set_force_visible(False)
+    self.txt_res_tar_dir.set_force_visible(True)
+    self.txt_res_tar_dir.lineedit.setCursorPosition(0)
+    self.ui_btn_browser_res_tar_dir.set_force_visible(True)
     tools.Logging.parse_xml_logger().info("Completed initializing resources target directory")
 
-def op_browser_resources_target_dir(context):
+def op_browser_resources_target_dir(self):
     tools.Logging.parse_xml_logger().info("Browsing resources source directory")
 
     _default_dir = tools.Registry.get_value(
@@ -127,6 +127,6 @@ def op_browser_resources_target_dir(context):
         reg_.REG_RES_TAR_DIR,
         _browser_dir,
     )
-    context["txt_res_tar_dir"].lineedit.setText(_target_dir)
-    context["txt_res_tar_dir"].lineedit.setCursorPosition(0)
+    self.txt_res_tar_dir.lineedit.setText(_target_dir)
+    self.txt_res_tar_dir.lineedit.setCursorPosition(0)
     tools.Logging.parse_xml_logger().info("Completed browsing resources target directory")

@@ -19,26 +19,10 @@ class ParseXMLCSWidget(qt.QtFrameLayoutCSWidget):
         self.scrollarea.setSizePolicy(
             qt.QtWidgets.QSizePolicy.Expanding, qt.QtWidgets.QSizePolicy.Expanding
         )
-        _btn_update = qt.QtButtonCSWidget(text="update")
-        _btn_add = qt.QtButtonCSWidget(text="add")
-        _btn_remove = qt.QtButtonCSWidget(text="remove")
-        _btn_clean_group = qt.QtButtonCSWidget(text="clean_group")
-        _btn_clean_all = qt.QtButtonCSWidget(text="clean_all")
 
         tools.Logging.gui_logger().setLevel(level=logging.INFO)
 
-        dynamic_box = store.DynamicUIGroupManager()
-
-        _btn_add.clicked.connect(
-            lambda: dynamic_box.add_group(
-                id="群組_點位資訊", widget=qt.QtGroupHBoxCSWidget(text="點位資訊")
-            )
-        )
-        _btn_remove.clicked.connect(lambda: dynamic_box.remove_group(id="群組_點位資訊"))
-        _btn_clean_group.clicked.connect(
-            lambda: dynamic_box.clear_group(group_id="群組_點位資訊")
-        )
-        _btn_clean_all.clicked.connect(lambda: dynamic_box.clear_all())
+        self.dynamic_box = store.DynamicUIGroupManager()
 
         self.box_xml_path = qt.QtGroupHBoxCSWidget(text="XML路徑")
         self.ui_le_xml_path = qt.QtTextLineCSWidget(text="")
@@ -59,12 +43,11 @@ class ParseXMLCSWidget(qt.QtFrameLayoutCSWidget):
         self.box_xml_path.layout.addWidget(self.ui_btn_initialize)
         self.box_xml_path.layout.addWidget(self.ui_btn_browser)
         self.scrollarea.layout.addWidget(self.box_xml_path)
-        self.scrollarea.layout.addWidget(dynamic_box.groupbox)
+        self.scrollarea.layout.addWidget(self.dynamic_box.groupbox)
 
         self.ui_btn_initialize.clicked.connect(
             lambda: operator.op_initialize_xml_path(self)
         )
         self.ui_btn_browser.clicked.connect(lambda: operator.op_browser_xml_path(self))
 
-        self.dynamic_box = dynamic_box
         self.frame_layout.addWidget(self.scrollarea)
