@@ -19,6 +19,7 @@ class Packages(core.Packages):
         for mod in cls.upload(packages=packages):
             tools.Logging.packages_logger().info(f"Reloading module: {mod}")
             importlib.reload(mod)
+        tools.Logging.packages_logger().info(f"Completed reloading modules")
 
     @classmethod
     def upload(cls, packages=None):
@@ -43,5 +44,5 @@ class Packages(core.Packages):
                 tools.Logging.packages_logger().warning(
                     f"Invalid type for module key: {mod}"
                 )
-
+        tools.Logging.packages_logger().info("Completed unloading modules")
         return unloaded_modules

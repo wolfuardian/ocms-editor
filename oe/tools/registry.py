@@ -32,7 +32,7 @@ class Registry(core.Registry):
 
     @classmethod
     def get_value(cls, key_name, subkey_name, value_name, default=""):
-        tools.Logging.registry_logger().info(
+        tools.Logging.registry_logger().debug(
             f"Getting value '{value_name}' from subkey '{subkey_name}' in key '{key_name}'"
         )
         with winreg.OpenKey(
@@ -43,7 +43,7 @@ class Registry(core.Registry):
                     value = winreg.QueryValueEx(subkey, value_name)[0]
                     return value
             except PermissionError:
-                tools.Logging.operator_logger().error(
+                tools.Logging.parser_xml_logger().error(
                     "Permission denied: Unable to access the registry."
                 )
                 return default
