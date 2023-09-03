@@ -1,5 +1,3 @@
-from PySide2 import QtWidgets
-
 from oe.utils import qt
 
 from . import operator
