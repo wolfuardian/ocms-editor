@@ -15,5 +15,8 @@ class Registry:
 
     REG_XML_DOC = "Pref_XmlDocument"
 
+class IO:
+    SIZE_UNITS = ["B", "KB", "MB", "GB", "TB", "PB"]
+
 class Qt:
     ICON_DIR = "/oe/utils/resources/"

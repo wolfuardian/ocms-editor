@@ -25,13 +25,13 @@ def op_initialize_xml_path(self):
             reg_.REG_XML_PATH,
             tools.Maya.browser(1, _default_path),
         )
-        self.ui_le_xml_path.lineedit.setText(_target_dir)
+        self.txt_xml_path.lineedit.setText(_target_dir)
     else:
-        self.ui_le_xml_path.lineedit.setText(_default_path)
-    self.ui_btn_initialize.set_force_visible(False)
-    self.ui_le_xml_path.set_force_visible(True)
-    self.ui_le_xml_path.lineedit.setCursorPosition(0)
-    self.ui_btn_browser.set_force_visible(True)
+        self.txt_xml_path.lineedit.setText(_default_path)
+    self.btn_initialize.set_force_visible(False)
+    self.txt_xml_path.set_force_visible(True)
+    self.txt_xml_path.lineedit.setCursorPosition(0)
+    self.btn_browser.set_force_visible(True)
 
     parse_xml(self)
 
@@ -52,8 +52,8 @@ def op_browser_xml_path(self):
         reg_.REG_XML_PATH,
         _browser_path,
     )
-    self.ui_le_xml_path.lineedit.setText(_target_dir)
-    self.ui_le_xml_path.lineedit.setCursorPosition(0)
+    self.txt_xml_path.lineedit.setText(_target_dir)
+    self.txt_xml_path.lineedit.setCursorPosition(0)
 
     parse_xml(self)
 
@@ -113,6 +113,7 @@ def parse_xml(self):
                 data_objects_enum_model_by_type[typ] = tools.XML.enumerator(
                     nodes_objects_by_type[typ], attr="model"
                 )
+
                 nodes_objects_valid_by_type[typ] = tools.XML.extractor(
                     nodes_objects_by_type[typ],
                     pos_attrs=["model", "bundle"],
@@ -235,6 +236,13 @@ def parse_xml(self):
     prop.set_prop_data_objects_enum_model_by_type(data_objects_enum_model_by_type)
     prop.set_prop_data_objects_enum_bundle_by_type(data_objects_enum_bundle_by_type)
 
+    tools.Logging.storage_logger().info("Updating storage xml data")
+    from oe import storage
+
+    storage.XMLData.purse()
+    storage.XMLData.update(store.ParseXMLData)
+
+    tools.Logging.gui_logger().info("Constructing dynamic ui group")
     construct_ui(self)
 
 
@@ -246,7 +254,6 @@ def construct_ui(self):
     tools.Logging.gui_logger().info(
         "Notice: Some widgets may have some differences due to different datasource"
     )
-    tools.Logging.gui_logger().info("Constructing dynamic ui group manager")
     self.dynamic_box.add_group(
         id="點位物件統計", widget=qt.QtGroupVBoxCSWidget(text="點位物件統計")
     )
@@ -279,7 +286,7 @@ def construct_ui(self):
         id="// TAGS",
         widget=qt.QtTextLineCSWidget(
             title="// TAGS",
-            text=tools.String.join_with_commas(p.tags),
+            text=tools.String.list_to_string(p.tags),
             readonly=True,
         ),
     )
@@ -288,7 +295,7 @@ def construct_ui(self):
         id="// ATTRS",
         widget=qt.QtTextLineCSWidget(
             title="// ATTRS",
-            text=tools.String.join_with_commas(p.attrs),
+            text=tools.String.list_to_string(p.attrs),
             readonly=True,
         ),
     )
@@ -297,7 +304,7 @@ def construct_ui(self):
         id="// TYPES",
         widget=qt.QtTextLineCSWidget(
             title="// TYPES",
-            text=tools.String.join_with_commas(p.types),
+            text=tools.String.list_to_string(p.types),
             readonly=True,
         ),
     )
@@ -319,7 +326,7 @@ def construct_ui(self):
                     widget=qt.QtTextLineCSWidget(
                         title=f"{typ} 數量",
                         text=[
-                            tools.String.join_with_commas(
+                            tools.String.list_to_string(
                                 p.props["data_objects_by_type"][typ]
                             ),
                             len(p.props["nodes_objects_by_type"][typ]).__str__(),
@@ -334,7 +341,7 @@ def construct_ui(self):
                     widget=qt.QtTextLineCSWidget(
                         title=f"{typ} Bundle",
                         text=[
-                            tools.String.join_with_commas(
+                            tools.String.list_to_string(
                                 p.props["data_objects_enum_bundle_by_type"][typ]
                             ),
                             len(
@@ -351,7 +358,7 @@ def construct_ui(self):
                     widget=qt.QtTextLineCSWidget(
                         title=f"{typ} Model",
                         text=[
-                            tools.String.join_with_commas(
+                            tools.String.list_to_string(
                                 p.props["data_objects_enum_model_by_type"][typ]
                             ),
                             len(
@@ -373,7 +380,7 @@ def construct_ui(self):
                     widget=qt.QtTextLineCSWidget(
                         title=f"核實設備",
                         text=[
-                            tools.String.join_with_commas(
+                            tools.String.list_to_string(
                                 p.props["data_objects_valid_by_type"][typ]
                             ),
                             len(p.props["data_objects_valid_by_type"][typ]).__str__(),
@@ -385,7 +392,7 @@ def construct_ui(self):
                 _w = qt.QtTextLineCSWidget(
                     title=f"無效設備",
                     text=[
-                        tools.String.join_with_commas(
+                        tools.String.list_to_string(
                             p.props["data_objects_invalid_by_type"][typ]
                         ),
                         len(p.props["data_objects_invalid_by_type"][typ]).__str__(),
@@ -403,7 +410,7 @@ def construct_ui(self):
                 _w = qt.QtTextLineCSWidget(
                     title=f"暫代設備",
                     text=[
-                        tools.String.join_with_commas(
+                        tools.String.list_to_string(
                             p.props["data_objects_temporary_by_type"][typ]
                         ),
                         len(p.props["data_objects_temporary_by_type"][typ]).__str__(),
@@ -426,7 +433,7 @@ def construct_ui(self):
                 _w = qt.QtTextLineCSWidget(
                     title=f"重複設備",
                     text=[
-                        tools.String.join_with_commas(
+                        tools.String.list_to_string(
                             p.props["data_objects_duplicate_by_type"][typ]
                         ),
                         len(p.props["data_objects_duplicate_by_type"][typ]).__str__(),
@@ -475,7 +482,7 @@ def construct_ui(self):
                     widget=qt.QtTextLineCSWidget(
                         title=f"{typ} Model",
                         text=[
-                            tools.String.join_with_commas(
+                            tools.String.list_to_string(
                                 p.props["data_objects_enum_model_by_type"][typ]
                             ),
                             len(
@@ -492,7 +499,7 @@ def construct_ui(self):
                     widget=qt.QtTextLineCSWidget(
                         title=f"{typ} 數量",
                         text=[
-                            tools.String.join_with_commas(
+                            tools.String.list_to_string(
                                 p.props["data_objects_by_type"][typ]
                             ),
                             len(p.props["nodes_objects_by_type"][typ]).__str__(),
@@ -512,7 +519,7 @@ def construct_ui(self):
                     widget=qt.QtTextLineCSWidget(
                         title=f"核實設備",
                         text=[
-                            tools.String.join_with_commas(
+                            tools.String.list_to_string(
                                 p.props["data_objects_valid_by_type"][typ]
                             ),
                             len(p.props["data_objects_valid_by_type"][typ]).__str__(),
@@ -524,7 +531,7 @@ def construct_ui(self):
                 _w = qt.QtTextLineCSWidget(
                     title=f"無效設備",
                     text=[
-                        tools.String.join_with_commas(
+                        tools.String.list_to_string(
                             p.props["data_objects_invalid_by_type"][typ]
                         ),
                         len(p.props["data_objects_invalid_by_type"][typ]).__str__(),
@@ -547,7 +554,7 @@ def construct_ui(self):
                 _w = qt.QtTextLineCSWidget(
                     title=f"重複設備",
                     text=[
-                        tools.String.join_with_commas(
+                        tools.String.list_to_string(
                             p.props["data_objects_duplicate_by_type"][typ]
                         ),
                         len(p.props["data_objects_duplicate_by_type"][typ]).__str__(),

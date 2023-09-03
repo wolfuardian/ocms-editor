@@ -678,6 +678,8 @@ class QtInfoBoxCSWidget(QtGroupBoxCSWidget):
         label.setFont(QtGui.QFont(font))
         label.setWordWrap(True)
 
+        self.pixmap = QtLabelCSWidget()
+
         if title:
             self.setTitle(title)
         if text:
@@ -694,10 +696,9 @@ class QtInfoBoxCSWidget(QtGroupBoxCSWidget):
             )
             icon_filepath = project_dir + qt_.ICON_DIR + icon
             try:
-                pixmap = QtLabelCSWidget()
-                pixmap.setPixmap(QtGui.QPixmap(icon_filepath))
-                pixmap.setFixedSize(20, 20)
-                layout.addWidget(pixmap)
+                self.pixmap.setPixmap(QtGui.QPixmap(icon_filepath))
+                self.pixmap.setFixedSize(20, 20)
+                layout.addWidget(self.pixmap)
             except Exception as e:
                 print(e)
         else:
@@ -721,10 +722,9 @@ class QtInfoBoxCSWidget(QtGroupBoxCSWidget):
             else:
                 icon_filepath = ""
 
-            pixmap = QtLabelCSWidget()
-            pixmap.setPixmap(QtGui.QPixmap(icon_filepath))
-            pixmap.setFixedSize(20, 20)
-            layout.addWidget(pixmap)
+            self.pixmap.setPixmap(QtGui.QPixmap(icon_filepath))
+            self.pixmap.setFixedSize(20, 20)
+            layout.addWidget(self.pixmap)
 
         if width:
             self.setFixedWidth(width)
@@ -752,10 +752,34 @@ class QtInfoBoxCSWidget(QtGroupBoxCSWidget):
 
     def set_status(self, status):
         self.setStyleSheet(status)
+        self.set_icon(status)
 
     def set_extra_stylesheet(self):
         stylesheet = self.styleSheet() + "\n" + QtStylesheet.Tooltip
         self.setStyleSheet(stylesheet)
+
+    def set_icon(self, status):
+        project_dir = Registry.get_value(
+            reg_.REG_KEY, reg_.REG_SUB, "Pref_ModuleProjectDirectory", ""
+        )
+        icon_dir = project_dir + qt_.ICON_DIR
+        icon_filepath = ""
+        if status == QtInfoBoxStatus.Info:
+            icon_filepath = ":/info.png"
+        elif status == QtInfoBoxStatus.Help:
+            icon_filepath = ":/help.png"
+        elif status == QtInfoBoxStatus.Warning:
+            icon_filepath = ":/warningIcon.svg"
+        elif status == QtInfoBoxStatus.Error:
+            icon_filepath = ":/error.png"
+        elif status == QtInfoBoxStatus.Success:
+            icon_filepath = icon_dir + "success.png"
+        elif status == QtInfoBoxStatus.Disable:
+            icon_filepath = ":/RS_disable.png"
+        else:
+            icon_filepath = ""
+
+        self.pixmap.setPixmap(QtGui.QPixmap(icon_filepath))
 
 
 # Molecular Widget
@@ -1010,6 +1034,76 @@ class QtCheckBoxLineCSWidget(QtDefaultCSWidget):
     def remove_from(self, parent):
         self.setParent(None)
         parent.removeWidget(self)
+
+class QtTreeCSWidget(QtWidgets.QTreeWidget):
+    """Custom QtTreeWidget subclass"""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setSelectionMode(QtWidgets.QAbstractItemView.NoSelection)
+        self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        font = QtGui.QFont("Microsoft JhengHei", 8)
+        font.setLetterSpacing(QtGui.QFont.PercentageSpacing, 100)
+        self.setFont(QtGui.QFont(font))
+
+        self.current_item: QtTreeItemCSWidget = self.currentItem()
+
+    def add_to(self, parent):
+        parent.addWidget(self)
+        return self
+
+    def remove_from(self, parent):
+        self.setParent(None)
+        parent.removeWidget(self)
+
+    def set_status(self, status):
+        self.setStyleSheet(status)
+
+    def set_extra_stylesheet(self):
+        stylesheet = self.styleSheet() + "\n" + QtStylesheet.Tooltip
+        self.setStyleSheet(stylesheet)
+
+
+class QtTreeItemCSWidget(QtWidgets.QTreeWidgetItem):
+    """Custom QtTreeItem subclass"""
+
+    class Status:
+        Normal = QtGui.QBrush(QtGui.QColor(0, 0, 0, 0), QtCore.Qt.NoBrush)
+        Changed = QtGui.QBrush(QtGui.QColor("#5d5335"))
+        Override = QtGui.QBrush(QtGui.QColor("#5D4935"))
+        Missing = QtGui.QBrush(QtGui.QColor("#5d3535"))
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.tree: QtTreeCSWidget = QtTreeCSWidget()
+
+        self.matched_path = ""
+
+        self.status = self.Status()
+        self.current_status = self.status.Normal
+
+    def set_status(self, status):
+        if status == self.Status.Normal:
+            self.set_background(self.Status.Normal)
+            self.current_status = self.status.Normal
+            self.setText(1, self.matched_path)
+
+        if status == self.Status.Changed:
+            self.set_background(self.Status.Changed)
+            self.current_status = self.status.Changed
+
+        if status == self.Status.Override:
+            self.set_background(self.Status.Override)
+            self.current_status = self.status.Override
+
+        if status == self.Status.Missing:
+            self.set_background(self.Status.Missing)
+            self.current_status = self.status.Missing
+            self.setText(1, "找不到路徑")
+
+    def set_background(self, brush):
+        for colum in range(0, self.columnCount()):
+            self.setBackground(colum, brush)
 
 
 # Element Widget
@@ -1267,6 +1361,142 @@ class QtButtonStatus:
             QPushButton:pressed {{
                 background-color: {_hex("104E8B")};
                 color: {_hex("63b2ff")};
+            }}
+        """
+    Info = f"""
+            QPushButton {{
+                color: {_hex("bdbdbd")};
+                border: 1px solid {_hex("B0B0B0")};
+                background-color: {_hex("525252")};
+                padding-left: 6px;
+                padding-right: 6px;
+                padding-top: 3px;
+                padding-bottom: 3px;
+                outline: none;
+                text-align: center;
+            }}
+
+            QPushButton:hover {{
+                border: 1px solid {_hex("B0B0B0")};
+            }}
+            QPushButton:pressed {{
+                background-color: {_hex("707070")};
+            }}
+            """
+    Help = f"""
+            QPushButton {{
+                color: {_hex("bdbdbd")};
+                border: 1px solid {_hex("1E90FF")};
+                background-color: {_hex("3c3c3c")};
+                padding-left: 6px;
+                padding-right: 6px;
+                padding-top: 3px;
+                padding-bottom: 3px;
+                outline: none;
+                text-align: center;
+            }}
+
+            QPushButton:hover {{
+                border: 1px solid {_hex("B0B0B0")};
+            }}
+            QPushButton:pressed {{
+                background-color: {_hex("707070")};
+            }}
+            """
+    Warning = f"""
+            QPushButton {{
+                color: {_hex("bdbdbd")};
+                border: 1px solid {_hex("fbb549")};
+                background-color: {_hex("3e3527")};
+                padding-left: 6px;
+                padding-right: 6px;
+                padding-top: 3px;
+                padding-bottom: 3px;
+                outline: none;
+                text-align: center;
+            }}
+
+            QPushButton:hover {{
+                border: 1px solid {_hex("B0B0B0")};
+            }}
+            QPushButton:pressed {{
+                background-color: {_hex("707070")};
+            }}
+            """
+
+    Error = f"""
+            QPushButton {{
+                color: {_hex("bdbdbd")};
+                border: 1px solid {_hex("cf3539")};
+                background-color: {_hex("5d3535")};
+                padding-left: 6px;
+                padding-right: 6px;
+                padding-top: 3px;
+                padding-bottom: 3px;
+                outline: none;
+                text-align: center;
+            }}
+
+            QPushButton:hover {{
+                border: 1px solid {_hex("B0B0B0")};
+            }}
+            QPushButton:pressed {{
+                background-color: {_hex("707070")};
+            }}
+            """
+
+    Success = f"""
+            QPushButton {{
+                color: {_hex("bdbdbd")};
+                border: 1px solid {_hex("348E34")};
+                background-color: {_hex("174117")};
+                padding-left: 6px;
+                padding-right: 6px;
+                padding-top: 3px;
+                padding-bottom: 3px;
+                outline: none;
+                text-align: center;
+            }}
+
+            QPushButton:hover {{
+                border: 1px solid {_hex("B0B0B0")};
+            }}
+            QPushButton:pressed {{
+                background-color: {_hex("707070")};
+            }}
+            """
+
+    Disable = f"""
+            QPushButton {{
+                color: {_hex("bdbdbd")};
+                border: 1px solid {_hex("000000")};
+                background-color: {_hex("2b2b2b")};
+                padding-left: 6px;
+                padding-right: 6px;
+                padding-top: 3px;
+                padding-bottom: 3px;
+                outline: none;
+                text-align: center;
+            }}
+
+            QPushButton:hover {{
+                border: 1px solid {_hex("B0B0B0")};
+            }}
+            QPushButton:pressed {{
+                background-color: {_hex("707070")};
+            }}
+            """
+    Invisible = f"""
+            QPushButton {{
+                border: 1px solid {_hex("3c3c3c")};
+                background-color: transparent;
+                color: transparent;
+                padding-left: 6px;
+                padding-right: 6px;
+                padding-top: 3px;
+                padding-bottom: 3px;
+                outline: none;
+                text-align: center;
             }}
         """
 

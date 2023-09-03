@@ -2,6 +2,7 @@ from maya.app.general import mayaMixin
 
 import oe.tools as tools
 import oe.module as module
+import oe.storage as storage
 
 from oe.utils import qt
 
@@ -14,7 +15,6 @@ class Setup(
 ):
     def __init__(self, parent=tools.Maya.get_main_window()):
         super(Setup, self).__init__(parent)
-
 
         self.setWindowTitle(ver)
         self.setMinimumWidth(360)
@@ -39,10 +39,16 @@ class Setup(
 
         frame_set_project_dir_widget = module.SetProjectDirectoryCSWidget()
         frame_parse_xml = module.ParseXMLCSWidget()
+        frame_parse_resources = module.ParseResourcesCSWidget()
         # frame_parse_resources = module.ParseResourcesCSWidget()
+
+        frame_set_project_dir_widget.frame_btn.toggle = False
+        frame_parse_xml.frame_btn.toggle = False
+        # frame_parse_resources.frame_btn.toggle = False
 
         tab_load.layout.addWidget(frame_set_project_dir_widget)
         tab_load.layout.addWidget(frame_parse_xml)
+        tab_load.layout.addWidget(frame_parse_resources)
         # tab_load.layout.addWidget(frame_parse_resources)
         # </editor-fold>
 
@@ -69,4 +75,8 @@ class Setup(
             frame_set_project_dir_widget,
             frame_parse_xml,
         ]
+
+        storage.UIData.ui["frame_set_project_dir_widget"] = frame_set_project_dir_widget
+        storage.UIData.ui["frame_parse_xml"] = frame_parse_xml
+
         # </editor-fold>
