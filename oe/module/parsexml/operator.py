@@ -7,7 +7,7 @@ from . import store, prop
 
 
 def op_initialize_xml_path(self):
-    tools.Logging.parser_xml_logger().info("Initializing xml path")
+    tools.Logging.parse_xml_logger().info("Initializing xml path")
 
     _default_path = tools.Registry.get_value(
         reg_.REG_KEY, reg_.REG_SUB, reg_.REG_XML_PATH, ""
@@ -15,7 +15,7 @@ def op_initialize_xml_path(self):
     if _default_path == "":
         _browser_path = tools.Maya.browser(1, _default_path)
         if _browser_path == "":
-            tools.Logging.parser_xml_logger().warning("User canceled the browser dialog.")
+            tools.Logging.parse_xml_logger().warning("User canceled the browser dialog.")
             return
         _target_dir = tools.Registry.set_value(
             reg_.REG_KEY,
@@ -31,18 +31,18 @@ def op_initialize_xml_path(self):
     self.ui_le_xml_path.lineedit.setCursorPosition(0)
     self.ui_btn_browser.set_force_visible(True)
 
-    parser_xml(self)
+    parse_xml(self)
 
 
 def op_browser_xml_path(self):
-    tools.Logging.parser_xml_logger().info("Browsing xml path")
+    tools.Logging.parse_xml_logger().info("Browsing xml path")
 
     _default_path = tools.Registry.get_value(
         reg_.REG_KEY, reg_.REG_SUB, reg_.REG_XML_PATH, ""
     )
     _browser_path = tools.Maya.browser(1, _default_path)
     if _browser_path == "":
-        tools.Logging.parser_xml_logger().warning("User canceled the browser dialog.")
+        tools.Logging.parse_xml_logger().warning("User canceled the browser dialog.")
         return
     _target_dir = tools.Registry.set_value(
         reg_.REG_KEY,
@@ -53,24 +53,24 @@ def op_browser_xml_path(self):
     self.ui_le_xml_path.lineedit.setText(_target_dir)
     self.ui_le_xml_path.lineedit.setCursorPosition(0)
 
-    parser_xml(self)
+    parse_xml(self)
 
 
-def parser_xml(self):
+def parse_xml(self):
     tools.Logging.gui_logger().info("Initializing dynamic ui group manager")
     self.dynamic_box.clear_all()
 
-    tools.Logging.parser_xml_logger().info("Initializing parser xml data")
-    self.parser = store.ParserXMLData()
+    tools.Logging.parse_xml_logger().info("Initializing parse xml data")
+    self.parse = store.ParseXMLData()
 
     _path = tools.Registry.get_value(reg_.REG_KEY, reg_.REG_SUB, reg_.REG_XML_PATH, "")
 
-    tools.Logging.parser_xml_logger().info("Loading xml data")
-    self.parser.load(_path)
+    tools.Logging.parse_xml_logger().info("Loading xml data")
+    self.parse.load(_path)
 
-    tools.Logging.parser_xml_logger().info("Starting constructing variables")
-    nodes_objects = self.parser.nodes_objects
-    nodes_datasource = self.parser.nodes_datasource
+    tools.Logging.parse_xml_logger().info("Starting constructing variables")
+    nodes_objects = self.parse.nodes_objects
+    nodes_datasource = self.parse.nodes_datasource
     nodes_objects_by_type = {}
     nodes_objects_valid_by_type = {}
     nodes_objects_invalid_by_type = {}
@@ -78,8 +78,8 @@ def parser_xml(self):
     nodes_objects_duplicate_by_type = {}
     nodes_objects_available_by_type = {}
 
-    data_objects = self.parser.data_objects
-    data_datasource = self.parser.data_datasource
+    data_objects = self.parse.data_objects
+    data_datasource = self.parse.data_datasource
     data_objects_by_type = {}
     data_objects_valid_by_type = {}
     data_objects_invalid_by_type = {}
@@ -90,15 +90,15 @@ def parser_xml(self):
     data_objects_enum_model_by_type = {}
     data_objects_enum_bundle_by_type = {}
 
-    data_types = self.parser.types
+    data_types = self.parse.types
 
-    non_device_types = self.parser.non_device_types
+    non_device_types = self.parse.non_device_types
 
     for typ in data_types:
-        tools.Logging.parser_xml_logger().info("Constructing variables for type: " + typ)
+        tools.Logging.parse_xml_logger().info("Constructing variables for type: " + typ)
         typ = typ.__str__()
         nodes_objects_by_type[typ] = tools.XML.iterator(
-            self.parser.root, tag="Object", attr="type", kwd=typ
+            self.parse.root, tag="Object", attr="type", kwd=typ
         )
         data_objects_by_type[typ] = tools.XML.enumerator(
             nodes_objects_by_type[typ], attr="name", mode=1
@@ -217,7 +217,7 @@ def parser_xml(self):
                     if node.get("name") in data_objects_duplicate_by_type[typ]:
                         nodes_objects_duplicate_by_type[typ].append(node)
 
-    tools.Logging.parser_xml_logger().info("Setting variables")
+    tools.Logging.parse_xml_logger().info("Setting variables")
     prop.set_prop_nodes_objects_by_type(nodes_objects_by_type)
     prop.set_prop_nodes_objects_valid_by_type(nodes_objects_valid_by_type)
     prop.set_prop_nodes_objects_invalid_by_type(nodes_objects_invalid_by_type)
@@ -233,15 +233,15 @@ def parser_xml(self):
     prop.set_prop_data_objects_enum_model_by_type(data_objects_enum_model_by_type)
     prop.set_prop_data_objects_enum_bundle_by_type(data_objects_enum_bundle_by_type)
 
-    tools.Logging.parser_xml_logger().info("Updating parser xml data")
-    self.parser.update()
+    tools.Logging.parse_xml_logger().info("Updating parse xml data")
+    self.parse.update()
 
     construct_ui(self)
 
 
 def construct_ui(self):
-    p = self.parser
-    tools.Logging.parser_xml_logger().info("Notice: Current datasource is " + p.data_datasource)
+    p = self.parse
+    tools.Logging.parse_xml_logger().info("Notice: Current datasource is " + p.data_datasource)
     tools.Logging.gui_logger().info("Notice: Some widgets may have some differences due to different datasource")
     tools.Logging.gui_logger().info("Constructing dynamic ui group manager")
     self.dynamic_box.add_group(

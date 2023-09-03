@@ -11,7 +11,7 @@ def _hex(h):
     return "#" + h
 
 
-class ParserXMLCSWidget(qt.QtFrameLayoutCSWidget):
+class ParseXMLCSWidget(qt.QtFrameLayoutCSWidget):
     def __init__(self, parent=None, text="核實XML"):
         super().__init__(parent, text)
 

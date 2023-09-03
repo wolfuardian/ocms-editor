@@ -3,7 +3,7 @@ import oe.tools as tools
 from oe.utils import qt
 
 
-class ParserXMLData:
+class ParseXMLData:
     props = {}
     path = None
     xmlstring = None

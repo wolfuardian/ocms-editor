@@ -41,7 +41,7 @@ class Logging:
     def packages_logger(cls): pass
     def operator_logger(cls): pass
     def widget_logger(cls): pass
-    def parser_xml_logger(cls): pass
+    def parse_xml_logger(cls): pass
 
 @interface
 class Packages:

@@ -38,12 +38,12 @@ class Setup(
         tab_save = qt.QtTabItemCSWidget()
 
         frame_set_project_dir_widget = module.SetProjectDirectoryCSWidget()
-        frame_parser_xml = module.ParserXMLCSWidget()
-        # frame_parser_resources = module.ParserResourcesCSWidget()
+        frame_parse_xml = module.ParseXMLCSWidget()
+        # frame_parse_resources = module.ParseResourcesCSWidget()
 
         tab_load.layout.addWidget(frame_set_project_dir_widget)
-        tab_load.layout.addWidget(frame_parser_xml)
-        # tab_load.layout.addWidget(frame_parser_resources)
+        tab_load.layout.addWidget(frame_parse_xml)
+        # tab_load.layout.addWidget(frame_parse_resources)
         # </editor-fold>
 
         # <editor-fold desc="CODE_BLOCK: Assembly Widget">
@@ -67,6 +67,6 @@ class Setup(
 
         self.frame_widgets = [
             frame_set_project_dir_widget,
-            frame_parser_xml,
+            frame_parse_xml,
         ]
         # </editor-fold>

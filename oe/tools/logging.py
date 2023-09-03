@@ -29,5 +29,5 @@ class Logging(core.Logging):
         return logging.getLogger("Packages")
 
     @classmethod
-    def parser_xml_logger(cls):
-        return logging.getLogger("ParserXML")
+    def parse_xml_logger(cls):
+        return logging.getLogger("ParseXML")

@@ -43,7 +43,7 @@ class Registry(core.Registry):
                     value = winreg.QueryValueEx(subkey, value_name)[0]
                     return value
             except PermissionError:
-                tools.Logging.parser_xml_logger().error(
+                tools.Logging.parse_xml_logger().error(
                     "Permission denied: Unable to access the registry."
                 )
                 return default
