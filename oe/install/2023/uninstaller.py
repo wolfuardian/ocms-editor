@@ -117,6 +117,10 @@ def uninstall():
     if cmds.layout(maya_shelf, exists=True):
         cmds.deleteUI(maya_shelf, layout=True)
 
+def onMayaDroppedPythonFile(*args, **kwargs):
+    uninstall()
+
+
 
 if __name__ == "__main__":
     uninstall()

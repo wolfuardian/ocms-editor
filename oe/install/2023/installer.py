@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import importlib
 import os
 import winreg
 import getpass
@@ -146,6 +147,10 @@ gui.show()"""
         label="run",
     )
 
+def onMayaDroppedPythonFile(*args, **kwargs):
+    install()
+    import oe
+    importlib.reload(oe)
 
 if __name__ == "__main__":
     install()
