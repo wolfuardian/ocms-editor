@@ -17,7 +17,9 @@ class Setup(
         super(Setup, self).__init__(parent)
 
         self.setWindowTitle(ver)
-        self.setMinimumWidth(360)
+        # self.setSizePolicy(qt.QtWidgets.QSizePolicy.Expanding, qt.QtWidgets.QSizePolicy.Minimum)
+        self.window_size_factor = 1.0
+
 
         # <editor-fold desc="CODE_BLOCK: Initialize">
         layout = qt.QtWidgets.QVBoxLayout()
@@ -31,6 +33,7 @@ class Setup(
         menubar.setToolTip("💡 此功能列僅供開發者使用")
         action_reset = qt.QtWidgets.QAction("R")
         action_expand_all = qt.QtWidgets.QAction("😎")
+        action_resize_win = qt.QtWidgets.QAction("💻")
 
         tab = qt.QtTabCSWidget()
         tab_load = qt.QtTabItemCSWidget()
@@ -59,6 +62,7 @@ class Setup(
         layout.addWidget(tab)
         menubar.addAction(action_reset)
         menubar.addAction(action_expand_all)
+        menubar.addAction(action_resize_win)
         self.setLayout(layout)
         self.layout().setMenuBar(menubar)
         # </editor-fold>
@@ -70,13 +74,17 @@ class Setup(
         self.tab_tool = tab_load
         self.action_reset = action_reset
         self.action_expand_all = action_expand_all
+        self.action_resize_win = action_resize_win
 
         self.frame_widgets = [
             frame_set_project_dir_widget,
             frame_parse_xml,
+            frame_parse_resources,
         ]
 
         storage.UIData.ui["frame_set_project_dir_widget"] = frame_set_project_dir_widget
         storage.UIData.ui["frame_parse_xml"] = frame_parse_xml
+
+        self.toggle_resize_win()
 
         # </editor-fold>

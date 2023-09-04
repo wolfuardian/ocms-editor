@@ -888,7 +888,7 @@ class QtTextLineCSWidget(QtDefaultCSWidget):
 
         if title:
             self.label = QtLabelCSWidget()
-            self.label.setFixedWidth(80)
+            self.label.setFixedWidth(100)
             if title:
                 self.label.setText(title)
             font = QtGui.QFont(QtFonts.MicrosoftJhengHei, 8, QtGui.QFont.Bold)
