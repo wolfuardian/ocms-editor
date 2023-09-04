@@ -8,6 +8,7 @@ from oe.utils import qt
 
 from version import version as ver
 
+
 class Setup(
     mayaMixin.MayaQWidgetDockableMixin,
     mayaMixin.MayaQWidgetBaseMixin,
@@ -19,7 +20,6 @@ class Setup(
         self.setWindowTitle(ver)
         # self.setSizePolicy(qt.QtWidgets.QSizePolicy.Expanding, qt.QtWidgets.QSizePolicy.Minimum)
         self.window_size_factor = 1.0
-
 
         # <editor-fold desc="CODE_BLOCK: Initialize">
         layout = qt.QtWidgets.QVBoxLayout()
@@ -44,6 +44,7 @@ class Setup(
         frame_parse_xml = module.ParseXMLCSWidget()
         frame_parse_res = module.ParseResourcesCSWidget()
         frame_import_res = module.ImportResourcesCSWidget()
+        frame_writexml = module.WriteXMLCSWidget()
         # frame_parse_res = module.ParseResourcesCSWidget()
 
         # frame_set_project.frame_btn.toggle = False
@@ -54,6 +55,7 @@ class Setup(
         tab_load.layout.addWidget(frame_parse_xml)
         tab_load.layout.addWidget(frame_parse_res)
         tab_load.layout.addWidget(frame_import_res)
+        tab_load.layout.addWidget(frame_writexml)
         # tab_load.layout.addWidget(frame_parse_res)
         # </editor-fold>
 
@@ -83,12 +85,14 @@ class Setup(
             frame_parse_xml,
             frame_parse_res,
             frame_import_res,
+            frame_writexml,
         ]
 
         storage.UIData.ui["frame_set_project"] = frame_set_project
         storage.UIData.ui["frame_parse_xml"] = frame_parse_xml
         storage.UIData.ui["frame_parse_res"] = frame_parse_res
         storage.UIData.ui["frame_import_res"] = frame_import_res
+        storage.UIData.ui["frame_writexml"] = frame_writexml
 
         self.toggle_resize_win()
 

@@ -271,7 +271,17 @@ def get_compound_attr_values(node: str, compound_attr: str) -> dict:
     :param compound_attr: The compound attribute to get values from.
     :return: The dictionary of compound attribute values.
     """
-    children_attrs = cmds.attributeQuery(compound_attr, node=node, listChildren=True)
+    children_attrs = None
+    if not cmds.objExists(node):
+        print(f"Node {node} does not exist.")
+    if cmds.attributeQuery(compound_attr, node=node, exists=True):
+        children_attrs = cmds.attributeQuery(
+            compound_attr, node=node, listChildren=True
+        )
+    else:
+        print(f"Attribute {compound_attr} does not exist in node {node}.")
+    if not children_attrs:
+        return {}
     return {
         child_attr: cmds.getAttr(f"{node}.{child_attr}")
         for child_attr in children_attrs
@@ -349,7 +359,7 @@ def import_model(file: str) -> str:
     root_node = root_nodes[0]
 
     if len(root_nodes) != 1:
-        group_name = cmds.group(empty=True, name=f"{_filename}_gp")
+        group_name = cmds.group(empty=True, name=f"_{_filename}_gp")
         for root_node in root_nodes:
             cmds.parent(root_node, group_name)
         root_node = group_name
@@ -357,10 +367,10 @@ def import_model(file: str) -> str:
         return root_node
 
     if is_group(root_node):
-        root_node = cmds.rename(root_node, f"{_filename}_gp")
+        root_node = cmds.rename(root_node, f"_{_filename}_gp")
     else:
         root_node = create_group_and_assign_selected_obj(
-            group_name=f"{_filename}_gp", obj_name=root_nodes[0]
+            group_name=f"_{_filename}_gp", obj_name=root_nodes[0]
         )
 
     print(f"{_split_path} has been imported.")
@@ -916,6 +926,64 @@ class TaskSyncXMLNodes:
             "organized_nodes", self._organized_nodes.__str__()
         )
 
+    def task__apply_transform(self):
+        """
+        This function applies the transform.
+        """
+        timer = TimeRecorder()
+        progressbar = ProgressBar()
+        ls_transform = cmds.ls(type="transform")
+        for current, current_node in enumerate(ls_transform):
+            if not has_custom_attrs(current_node, "System"):
+                self.show_progress_info_with_message(
+                    timer, progressbar, current + 1, len(ls_transform)
+                )
+                continue
+
+            transform_attrs = get_compound_attr_values(current_node, "Transform")
+            if len(transform_attrs) == 0:
+                print(f"Node {current_node} has no transform attributes.")
+                continue
+            maya_object = cmds.ls(current_node)[0]
+
+            print(f"Applying transform to {cmds.ls(current_node)}...")
+            if transform_attrs.get("positionx"):
+                cmds.setAttr(
+                    maya_object + ".translateX", float(transform_attrs.get("positionx"))
+                )
+            if transform_attrs.get("positiony"):
+                cmds.setAttr(
+                    maya_object + ".translateY", float(transform_attrs.get("positiony"))
+                )
+            if transform_attrs.get("positionz"):
+                cmds.setAttr(
+                    maya_object + ".translateZ", float(transform_attrs.get("positionz"))
+                )
+            if transform_attrs.get("rotationx"):
+                cmds.setAttr(
+                    maya_object + ".rotateX", float(transform_attrs.get("rotationx"))
+                )
+            if transform_attrs.get("rotationy"):
+                cmds.setAttr(
+                    maya_object + ".rotateY", float(transform_attrs.get("rotationy"))
+                )
+            if transform_attrs.get("rotationz"):
+                cmds.setAttr(
+                    maya_object + ".rotateZ", float(transform_attrs.get("rotationz"))
+                )
+            if transform_attrs.get("scalex"):
+                cmds.setAttr(
+                    maya_object + ".scaleX", float(transform_attrs.get("scalex"))
+                )
+            if transform_attrs.get("scaley"):
+                cmds.setAttr(
+                    maya_object + ".scaleY", float(transform_attrs.get("scaley"))
+                )
+            if transform_attrs.get("scalez"):
+                cmds.setAttr(
+                    maya_object + ".scaleZ", float(transform_attrs.get("scalez"))
+                )
+
     def execute_tasks(self):
         """
         This function executes the tasks.
@@ -953,6 +1021,9 @@ class TaskSyncXMLNodes:
 
         print("\nMoving objects to their parents...")
         self.task__organizing_the_group()
+
+        print("\nApplying transform...")
+        self.task__apply_transform()
 
         print("All tasks completed successfully!")
 
@@ -1176,8 +1247,8 @@ def import_resources(self):
     task_sync_xml_nodes = TaskSyncXMLNodes(storage.XMLData.root)
     task_sync_xml_nodes.execute_tasks()
 
-    self.btn_import_resources.set_force_visible(False)
-    self.box_xml_path.set_force_visible(False)
+    self.btn_import_res.set_force_visible(False)
+    self.box_import_res.set_force_visible(False)
     tools.Logging.import_resources_logger().info(
         "Completed importing resources, please check the script editor for more information"
     )
@@ -1187,9 +1258,7 @@ def import_resources(self):
 
 def construct_ui(self):
     # p = self.parse
-    self.dynamic_box.add_group(
-        id="匯入結果", widget=qt.QtGroupVBoxCSWidget(text="匯入結果")
-    )
+    self.dynamic_box.add_group(id="匯入結果", widget=qt.QtGroupVBoxCSWidget(text="匯入結果"))
     self.dynamic_box.add_widget(
         parent_id="匯入結果",
         id="剩餘的錯誤數量提示",

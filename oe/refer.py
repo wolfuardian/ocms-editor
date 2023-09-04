@@ -9,8 +9,7 @@ class Registry:
     REG_SUB = f"{Product.ID}"
 
     REG_PROJ_DIR = "Pref_ProjectDirectory"
-    REG_RES_SRC_DIR = "Pref_ResourcesSourceDirectory"
-    REG_RES_TAR_DIR = "Pref_ResourcesTargetDirectory"
+    REG_RES_DIR = "Pref_ResourcesDirectory"
     REG_XML_PATH = "Pref_XmlPath"
 
     REG_XML_DOC = "Pref_XmlDocument"

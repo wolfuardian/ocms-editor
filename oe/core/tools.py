@@ -44,6 +44,7 @@ class Logging:
     def parse_xml_logger(cls): pass
     def parse_resources_logger(cls): pass
     def import_resources_logger(cls): pass
+    def write_xml_logger(cls): pass
 
 @interface
 class Packages:
@@ -64,6 +65,7 @@ class IO:
     def get_maxsize_file(cls, paths): pass
     def get_minsize_file(cls, paths): pass
     def bytes_to_readable_size(cls, paths, is_reverse, is_dict): pass
+    def browser_explorer(cls, path): pass
 
 @interface
 class XML:

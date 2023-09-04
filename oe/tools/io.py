@@ -3,6 +3,7 @@ import io
 import re
 import os
 import glob
+import subprocess
 
 import oe.tools as tools
 import oe.core.tools as core
@@ -84,3 +85,12 @@ class IO(core.IO):
             size_bytes /= 1024
             i += 1
         return f"{size_bytes:.{precision}f} {size_units[i]}"
+
+    @classmethod
+    def browser_explorer(cls, path):
+        if not os.path.exists(path):
+            raise ValueError(f"{path} does not exist.")
+
+        path = path.replace("/", "\\")
+        command = f'explorer /root,"{path}"'
+        subprocess.Popen(command, shell=True)

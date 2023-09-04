@@ -51,7 +51,7 @@ class SetProjectDirectoryCSWidget(qt.QtFrameLayoutCSWidget):
         self.frame_layout.addWidget(self.scrollarea)
 
         # Validate
-        self.validate_init_proj_dir()
+        # self.validate_init_proj_dir()
 
     def validate_init_proj_dir(self):
         tools.Logging.set_project_logger().info(

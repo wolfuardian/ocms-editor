@@ -15,22 +15,22 @@ def op_init_res_dir(self):
     )
 
     _default_dir = tools.Registry.get_value(
-        reg_.REG_KEY, reg_.REG_SUB, reg_.REG_RES_SRC_DIR, ""
+        reg_.REG_KEY, reg_.REG_SUB, reg_.REG_RES_DIR, ""
     )
     if _default_dir == "":
         _target_dir = tools.Registry.set_value(
             reg_.REG_KEY,
             reg_.REG_SUB,
-            reg_.REG_RES_SRC_DIR,
+            reg_.REG_RES_DIR,
             tools.Maya.browser(3, _default_dir),
         )
-        self.txt_res_src_dir.lineedit.setText(_target_dir)
+        self.txt_res_dir.lineedit.setText(_target_dir)
     else:
-        self.txt_res_src_dir.lineedit.setText(_default_dir)
-    self.btn_init_res_src_dir.set_force_visible(False)
-    self.txt_res_src_dir.set_force_visible(True)
-    self.txt_res_src_dir.lineedit.setCursorPosition(0)
-    self.btn_browser_res_src_dir.set_force_visible(True)
+        self.txt_res_dir.lineedit.setText(_default_dir)
+    self.btn_init_res_dir.set_force_visible(False)
+    self.txt_res_dir.set_force_visible(True)
+    self.txt_res_dir.lineedit.setCursorPosition(0)
+    self.btn_browser_res_dir.set_force_visible(True)
     tools.Logging.parse_resources_logger().info(
         "Completed initializing resources source directory"
     )
@@ -41,7 +41,7 @@ def op_browser_resources_source_dir(self):
     tools.Logging.parse_resources_logger().info("Browsing resources source directory")
 
     _default_dir = tools.Registry.get_value(
-        reg_.REG_KEY, reg_.REG_SUB, reg_.REG_RES_SRC_DIR, ""
+        reg_.REG_KEY, reg_.REG_SUB, reg_.REG_RES_DIR, ""
     )
     _browser_dir = tools.Maya.browser(3, _default_dir)
     if _browser_dir == "":
@@ -52,11 +52,11 @@ def op_browser_resources_source_dir(self):
     _target_dir = tools.Registry.set_value(
         reg_.REG_KEY,
         reg_.REG_SUB,
-        reg_.REG_RES_SRC_DIR,
+        reg_.REG_RES_DIR,
         _browser_dir,
     )
-    self.txt_res_src_dir.lineedit.setText(_target_dir)
-    self.txt_res_src_dir.lineedit.setCursorPosition(0)
+    self.txt_res_dir.lineedit.setText(_target_dir)
+    self.txt_res_dir.lineedit.setCursorPosition(0)
     tools.Logging.parse_resources_logger().info(
         "Completed browsing resources source directory"
     )
@@ -72,7 +72,7 @@ def parse_resources(self):
     self.parse = store.ParseResourcesData()
 
     _dir = tools.Registry.get_value(
-        reg_.REG_KEY, reg_.REG_SUB, reg_.REG_RES_SRC_DIR, ""
+        reg_.REG_KEY, reg_.REG_SUB, reg_.REG_RES_DIR, ""
     )
 
     tools.Logging.parse_resources_logger().info("Loading resources directory")

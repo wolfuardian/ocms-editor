@@ -49,3 +49,7 @@ class Logging(core.Logging):
     @classmethod
     def import_resources_logger(cls):
         return logging.getLogger("ImportResources")
+
+    @classmethod
+    def write_xml_logger(cls):
+        return logging.getLogger("WriteXML")

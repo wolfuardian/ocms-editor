@@ -48,7 +48,7 @@ class ParseXMLCSWidget(qt.QtFrameLayoutCSWidget):
         self.frame_layout.addWidget(self.scrollarea)
 
         # Validate
-        self.validate_init_xml_path()
+        # self.validate_init_xml_path()
 
     def validate_init_xml_path(self):
         tools.Logging.parse_xml_logger().info("Validating initialize xml path")
