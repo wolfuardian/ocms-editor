@@ -5,6 +5,7 @@ import oe.tools as tools
 from oe.utils import qt
 
 from . import operator, store
+from oe.refer import Registry as reg_
 
 
 def _hex(h):
@@ -16,10 +17,10 @@ class ParseResourcesCSWidget(qt.QtFrameLayoutCSWidget):
         super().__init__(parent, text)
 
         self.scrollarea = qt.QtScrollareaCSWidget()
-        self.scrollarea.setFixedHeight(600)
-        # self.scrollarea.setSizePolicy(
-        #     qt.QtWidgets.QSizePolicy.Expanding, qt.QtWidgets.QSizePolicy.MinimumExpanding
-        # )
+        self.scrollarea.setSizePolicy(
+            qt.QtWidgets.QSizePolicy.Expanding,
+            qt.QtWidgets.QSizePolicy.MinimumExpanding,
+        )
 
         self.dynamic_box = store.DynamicUIGroupManager()
 
@@ -45,10 +46,23 @@ class ParseResourcesCSWidget(qt.QtFrameLayoutCSWidget):
         self.scrollarea.layout.addWidget(self.dynamic_box.groupbox)
 
         self.btn_init_res_src_dir.clicked.connect(
-            lambda: operator.op_initialize_resources_source_dir(self)
+            lambda: operator.op_init_res_dir(self)
         )
         self.btn_browser_res_src_dir.clicked.connect(
             lambda: operator.op_browser_resources_source_dir(self)
         )
 
         self.frame_layout.addWidget(self.scrollarea)
+
+        # Validate
+        self.validate_init_res_dir()
+
+    def validate_init_res_dir(self):
+        tools.Logging.parse_xml_logger().info(
+            "Validating initialize resources directory"
+        )
+        _default_dir = tools.Registry.get_value(
+            reg_.REG_KEY, reg_.REG_SUB, reg_.REG_RES_SRC_DIR, ""
+        )
+        if _default_dir != "":
+            operator.op_init_res_dir(self)

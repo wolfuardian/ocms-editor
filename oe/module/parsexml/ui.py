@@ -5,6 +5,7 @@ import oe.tools as tools
 from oe.utils import qt
 
 from . import operator, store
+from oe.refer import Registry as reg_
 
 
 def _hex(h):
@@ -32,9 +33,7 @@ class ParseXMLCSWidget(qt.QtFrameLayoutCSWidget):
             height=32,
             status=qt.QtButtonStatus.Invert,
         )
-        self.btn_browser = qt.QtButtonCSWidget(
-            icon="open_file.png", text="", height=32
-        )
+        self.btn_browser = qt.QtButtonCSWidget(icon="open_file.png", text="", height=32)
         self.btn_browser.set_force_visible(False)
 
         self.box_xml_path.layout.addWidget(self.txt_xml_path)
@@ -43,9 +42,18 @@ class ParseXMLCSWidget(qt.QtFrameLayoutCSWidget):
         self.scrollarea.layout.addWidget(self.box_xml_path)
         self.scrollarea.layout.addWidget(self.dynamic_box.groupbox)
 
-        self.btn_initialize.clicked.connect(
-            lambda: operator.op_initialize_xml_path(self)
-        )
+        self.btn_initialize.clicked.connect(lambda: operator.op_init_xml_path(self))
         self.btn_browser.clicked.connect(lambda: operator.op_browser_xml_path(self))
 
         self.frame_layout.addWidget(self.scrollarea)
+
+        # Validate
+        self.validate_init_xml_path()
+
+    def validate_init_xml_path(self):
+        tools.Logging.parse_xml_logger().info("Validating initialize xml path")
+        _default_path = tools.Registry.get_value(
+            reg_.REG_KEY, reg_.REG_SUB, reg_.REG_XML_PATH, ""
+        )
+        if _default_path != "":
+            operator.op_init_xml_path(self)

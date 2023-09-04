@@ -40,6 +40,7 @@ class Logging:
     def gui_logger(cls): pass
     def packages_logger(cls): pass
     def storage_logger(cls): pass
+    def set_project_logger(cls): pass
     def parse_xml_logger(cls): pass
     def parse_resources_logger(cls): pass
 

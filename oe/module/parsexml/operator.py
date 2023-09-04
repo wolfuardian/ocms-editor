@@ -1,4 +1,5 @@
 import oe.tools as tools
+import oe.storage as storage
 
 from oe.utils import qt
 from oe.refer import Registry as reg_
@@ -6,7 +7,7 @@ from oe.refer import Registry as reg_
 from . import store, prop
 
 
-def op_initialize_xml_path(self):
+def op_init_xml_path(self):
     tools.Logging.parse_xml_logger().info("Initializing xml path")
 
     _default_path = tools.Registry.get_value(

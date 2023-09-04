@@ -10,7 +10,7 @@ class Tweak(ui_setup.Setup):
     def __init__(self):
         super(Tweak, self).__init__()
 
-        self.frame_widget_toggle = False
+        self.frame_widget_toggle = True
 
         self.action_reset.triggered.connect(gui.show)
         self.action_reset.setShortcut("Shift+`")
@@ -35,3 +35,4 @@ class Tweak(ui_setup.Setup):
         )
         _fixed_width = qt.QtGui.QGuiApplication.primaryScreen().size().width() / 4
         self.setMinimumWidth(_fixed_width * (self.window_size_factor + 1))
+        self.action_resize_win.setText("▮" if self.window_size_factor == 0 else "■")

@@ -9,7 +9,7 @@ from oe.refer import Registry as reg_
 from . import store, prop
 
 
-def op_initialize_resources_source_dir(self):
+def op_init_res_dir(self):
     tools.Logging.parse_resources_logger().info("Initializing resources source directory")
 
     _default_dir = tools.Registry.get_value(
@@ -32,7 +32,6 @@ def op_initialize_resources_source_dir(self):
     tools.Logging.parse_resources_logger().info(
         "Completed initializing resources source directory"
     )
-
     parse_resources(self)
 
 
@@ -63,8 +62,8 @@ def op_browser_resources_source_dir(self):
 
 def parse_resources(self):
     # <editor-fold desc="CODE_BLOCK: DEBUG_MODE">
-    from oe.module.parsexml import operator as xml_op
-    xml_op.op_initialize_xml_path(storage.UIData.ui["frame_parse_xml"])
+    # from oe.module.parsexml import operator as xml_op
+    # xml_op.op_init_xml_path(storage.UIData.ui["frame_parse_xml"])
     # </editor-fold>
 
     tools.Logging.gui_logger().info("Initializing dynamic ui group manager")

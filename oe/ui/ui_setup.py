@@ -40,19 +40,21 @@ class Setup(
         tab_edit = qt.QtTabItemCSWidget()
         tab_save = qt.QtTabItemCSWidget()
 
-        frame_set_project_dir_widget = module.SetProjectDirectoryCSWidget()
+        frame_set_project = module.SetProjectDirectoryCSWidget()
         frame_parse_xml = module.ParseXMLCSWidget()
-        frame_parse_resources = module.ParseResourcesCSWidget()
-        # frame_parse_resources = module.ParseResourcesCSWidget()
+        frame_parse_res = module.ParseResourcesCSWidget()
+        # frame_import_res = module.ImportResourcesCSWidget()
+        # frame_parse_res = module.ParseResourcesCSWidget()
 
-        frame_set_project_dir_widget.frame_btn.toggle = False
-        frame_parse_xml.frame_btn.toggle = False
-        # frame_parse_resources.frame_btn.toggle = False
+        # frame_set_project.frame_btn.toggle = False
+        # frame_parse_xml.frame_btn.toggle = False
+        # frame_parse_res.frame_btn.toggle = False
 
-        tab_load.layout.addWidget(frame_set_project_dir_widget)
+        tab_load.layout.addWidget(frame_set_project)
         tab_load.layout.addWidget(frame_parse_xml)
-        tab_load.layout.addWidget(frame_parse_resources)
-        # tab_load.layout.addWidget(frame_parse_resources)
+        tab_load.layout.addWidget(frame_parse_res)
+        # tab_load.layout.addWidget(frame_import_res)
+        # tab_load.layout.addWidget(frame_parse_res)
         # </editor-fold>
 
         # <editor-fold desc="CODE_BLOCK: Assembly Widget">
@@ -77,13 +79,16 @@ class Setup(
         self.action_resize_win = action_resize_win
 
         self.frame_widgets = [
-            frame_set_project_dir_widget,
+            frame_set_project,
             frame_parse_xml,
-            frame_parse_resources,
+            frame_parse_res,
+            # frame_import_res,
         ]
 
-        storage.UIData.ui["frame_set_project_dir_widget"] = frame_set_project_dir_widget
+        storage.UIData.ui["frame_set_project"] = frame_set_project
         storage.UIData.ui["frame_parse_xml"] = frame_parse_xml
+        storage.UIData.ui["frame_parse_res"] = frame_parse_res
+        # storage.UIData.ui["frame_import_res"] = frame_import_res
 
         self.toggle_resize_win()
 
