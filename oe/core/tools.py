@@ -43,6 +43,7 @@ class Logging:
     def set_project_logger(cls): pass
     def parse_xml_logger(cls): pass
     def parse_resources_logger(cls): pass
+    def import_resources_logger(cls): pass
 
 @interface
 class Packages:

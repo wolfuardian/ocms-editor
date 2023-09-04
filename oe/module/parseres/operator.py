@@ -10,7 +10,9 @@ from . import store, prop
 
 
 def op_init_res_dir(self):
-    tools.Logging.parse_resources_logger().info("Initializing resources source directory")
+    tools.Logging.parse_resources_logger().info(
+        "Initializing resources source directory"
+    )
 
     _default_dir = tools.Registry.get_value(
         reg_.REG_KEY, reg_.REG_SUB, reg_.REG_RES_SRC_DIR, ""
@@ -43,7 +45,9 @@ def op_browser_resources_source_dir(self):
     )
     _browser_dir = tools.Maya.browser(3, _default_dir)
     if _browser_dir == "":
-        tools.Logging.parse_resources_logger().warning("User canceled the browser dialog.")
+        tools.Logging.parse_resources_logger().warning(
+            "User canceled the browser dialog."
+        )
         return
     _target_dir = tools.Registry.set_value(
         reg_.REG_KEY,
@@ -61,11 +65,6 @@ def op_browser_resources_source_dir(self):
 
 
 def parse_resources(self):
-    # <editor-fold desc="CODE_BLOCK: DEBUG_MODE">
-    # from oe.module.parsexml import operator as xml_op
-    # xml_op.op_init_xml_path(storage.UIData.ui["frame_parse_xml"])
-    # </editor-fold>
-
     tools.Logging.gui_logger().info("Initializing dynamic ui group manager")
     self.dynamic_box.clear_all()
 
@@ -86,7 +85,6 @@ def parse_resources(self):
     models_paths_sorted_filesizes = self.parse.models_paths_sorted_filesizes
     models_names_mapping_by_type = {}
     models_paths_mapping_by_type = {}
-    models_paths_changed_by_type = {}
 
     _tmp_enum_models_by_type = {}
     if storage.XMLData.data_datasource == "OCMS":
@@ -119,13 +117,16 @@ def parse_resources(self):
             else:
                 models_paths_mapping_by_type[typ][name] = ""
 
-    models_paths_changed_by_type = copy.deepcopy(models_paths_mapping_by_type)
-
     tools.Logging.parse_resources_logger().info("Setting variables")
     prop.set_prop_models_names_mapping_by_type(models_names_mapping_by_type)
     prop.set_prop_models_paths_mapping_by_type(models_paths_mapping_by_type)
-    prop.set_prop_models_paths_changed_by_type(models_paths_changed_by_type)
 
+    # Storage
+    tools.Logging.storage_logger().info("Saving resources data")
+    storage.ResourcesData.purse()
+    storage.ResourcesData.update(store.ParseResourcesData)
+
+    tools.Logging.gui_logger().info("Constructing dynamic ui group")
     construct_ui(self)
 
 
@@ -214,14 +215,14 @@ def construct_ui(self):
             ),
         )
 
-        p.props["models_names_mapping_by_type"][typ] = {
-            (model.split("/")[-1] if "/" in model else model).lower(): model
-            for model in models
-        }
-        p.props["models_paths_mapping_by_type"][typ] = {
-            os.path.splitext(os.path.basename(path))[0].lower(): path
-            for path in p.models_paths
-        }
+        # p.props["models_names_mapping_by_type"][typ] = {
+        #     (model.split("/")[-1] if "/" in model else model).lower(): model
+        #     for model in models
+        # }
+        # p.props["models_paths_mapping_by_type"][typ] = {
+        #     os.path.splitext(os.path.basename(path))[0].lower(): path
+        #     for path in p.models_paths
+        # }
 
         _tmp_models_names = dict(p.props["models_names_mapping_by_type"][typ])
         _tmp_models_paths = dict(p.props["models_paths_mapping_by_type"][typ])

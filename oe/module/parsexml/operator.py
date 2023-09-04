@@ -237,9 +237,9 @@ def parse_xml(self):
     prop.set_prop_data_objects_enum_model_by_type(data_objects_enum_model_by_type)
     prop.set_prop_data_objects_enum_bundle_by_type(data_objects_enum_bundle_by_type)
 
-    tools.Logging.storage_logger().info("Updating storage xml data")
+    # Storage
+    tools.Logging.storage_logger().info("Saving xml data")
     from oe import storage
-
     storage.XMLData.purse()
     storage.XMLData.update(store.ParseXMLData)
 

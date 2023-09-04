@@ -45,3 +45,7 @@ class Logging(core.Logging):
     @classmethod
     def parse_resources_logger(cls):
         return logging.getLogger("ParseResources")
+
+    @classmethod
+    def import_resources_logger(cls):
+        return logging.getLogger("ImportResources")

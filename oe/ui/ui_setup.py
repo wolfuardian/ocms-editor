@@ -43,7 +43,7 @@ class Setup(
         frame_set_project = module.SetProjectDirectoryCSWidget()
         frame_parse_xml = module.ParseXMLCSWidget()
         frame_parse_res = module.ParseResourcesCSWidget()
-        # frame_import_res = module.ImportResourcesCSWidget()
+        frame_import_res = module.ImportResourcesCSWidget()
         # frame_parse_res = module.ParseResourcesCSWidget()
 
         # frame_set_project.frame_btn.toggle = False
@@ -53,7 +53,7 @@ class Setup(
         tab_load.layout.addWidget(frame_set_project)
         tab_load.layout.addWidget(frame_parse_xml)
         tab_load.layout.addWidget(frame_parse_res)
-        # tab_load.layout.addWidget(frame_import_res)
+        tab_load.layout.addWidget(frame_import_res)
         # tab_load.layout.addWidget(frame_parse_res)
         # </editor-fold>
 
@@ -82,13 +82,13 @@ class Setup(
             frame_set_project,
             frame_parse_xml,
             frame_parse_res,
-            # frame_import_res,
+            frame_import_res,
         ]
 
         storage.UIData.ui["frame_set_project"] = frame_set_project
         storage.UIData.ui["frame_parse_xml"] = frame_parse_xml
         storage.UIData.ui["frame_parse_res"] = frame_parse_res
-        # storage.UIData.ui["frame_import_res"] = frame_import_res
+        storage.UIData.ui["frame_import_res"] = frame_import_res
 
         self.toggle_resize_win()
 

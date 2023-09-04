@@ -57,5 +57,35 @@ class XMLData:
 
         cls.non_device_types = store.non_device_types
 
+class ResourcesData:
+    props = {}
+
+    dir = None
+    models_paths = None
+    models_paths_sorted_by_size = None
+    models_paths_sorted_filenames = None
+    models_paths_sorted_filesizes = None
+
+    @classmethod
+    def purse(cls):
+        cls.props = {}
+
+        cls.dir = None
+        cls.models_paths = None
+        cls.models_paths_sorted_by_size = None
+        cls.models_paths_sorted_filenames = None
+        cls.models_paths_sorted_filesizes = None
+
+    @classmethod
+    def update(cls, store):
+        cls.props = store.props
+
+        cls.dir = store.dir
+        cls.models_paths = store.models_paths
+        cls.models_paths_sorted_by_size = store.models_paths_sorted_by_size
+        cls.models_paths_sorted_filenames = store.models_paths_sorted_filenames
+        cls.models_paths_sorted_filesizes = store.models_paths_sorted_filesizes
+
+
 class UIData:
     ui = {}
