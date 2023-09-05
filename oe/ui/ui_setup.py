@@ -6,7 +6,7 @@ import oe.storage as storage
 
 from oe.utils import qt
 
-from version import version as ver
+from product import prod_id as prod_id
 
 
 class Setup(
@@ -17,7 +17,7 @@ class Setup(
     def __init__(self, parent=tools.Maya.get_main_window()):
         super(Setup, self).__init__(parent)
 
-        self.setWindowTitle(ver)
+        self.setWindowTitle(prod_id)
         # self.setSizePolicy(qt.QtWidgets.QSizePolicy.Expanding, qt.QtWidgets.QSizePolicy.Minimum)
         self.window_size_factor = 1.0
 
