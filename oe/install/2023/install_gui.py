@@ -2,6 +2,7 @@
 import os
 import sys
 import shutil
+import getpass
 import logging
 import zipfile
 import textwrap
@@ -20,15 +21,7 @@ def _hex(h):
     return "#" + h
 
 
-def log_error(logger_name, error_code):
-    error_messages = {
-        "aaa": "Product file not found in zip file.",
-        "bbb": "Product id is empty.",
-        "ccc": "product id format is incorrect.",
-    }
-    logging.getLogger(logger_name).error(
-        error_messages.get(error_code, "Unknown error")
-    )
+DEBUG_MODE = True
 
 
 class TaskSetupMayaModuleFile:
@@ -105,9 +98,20 @@ class TaskSetupMayaModuleFile:
         self.version = self.prod_id.split("-")[2]
         self.module_folder_dir = self.module_folder_dir.replace("\\", "/")
 
-        with open(self.maya_mod_file, "w") as f:
-            f.write(f"+ {self.mod} {self.version} {self.module_folder_dir}\n")
-            f.write(f"scripts: {self.module_folder_dir}\n")
+        if DEBUG_MODE:
+            env_dir = f"C:/Users/{getpass.getuser()}/PycharmProjects"
+            ver = "ocms-editor-2308-0024"
+            mod = ver.split("-")[0] + "-" + ver.split("-")[1]
+            mod_ver = ver.split("-")[2]
+            mod_dir = f"{env_dir}/{mod}"
+
+            with open(self.maya_mod_file, "w") as f:
+                f.write(f"+ {mod} {mod_ver} {mod_dir}\n")
+                f.write(f"scripts: {mod_dir}")
+        else:
+            with open(self.maya_mod_file, "w") as f:
+                f.write(f"+ {self.mod} {self.version} {self.module_folder_dir}\n")
+                f.write(f"scripts: {self.module_folder_dir}\n")
 
     def execute_tasks(self):
         self.task__setup_maya_module()
@@ -165,7 +169,10 @@ class TaskOperateFile:
 
     def task__move_zip_to_module_dir(self):
         new_filepath = self.func__get_correct_filename()
-        shutil.move(self.zip_filepath, new_filepath)
+        if DEBUG_MODE:
+            shutil.copy2(self.zip_filepath, new_filepath)
+        else:
+            shutil.move(self.zip_filepath, new_filepath)
         self.zip_filepath = new_filepath
 
     def task__create_module_dir(self):
@@ -362,7 +369,6 @@ class InstallWindow(QtWidgets.QDialog):
 
         uninstall_vbl.addWidget(self.uninstall_btn)
         layout.addLayout(uninstall_vbl)
-
 
     def func__center_window(self):
         parent = self.func__get_maya_main_window()
