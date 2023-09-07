@@ -12,7 +12,7 @@ import oe.tools as tools
 import oe.storage as storage
 
 from oe.utils import qt
-from oe.refer import Registry as reg_
+from oe.utils import const as c
 
 from . import store, prop
 
@@ -1232,7 +1232,7 @@ def op_import_resources(self):
 def import_resources(self):
     # Execute the task of collecting the FBXs.
     task_collect_fbx = TaskCollectFBXs(
-        tools.Registry.get_value(reg_.REG_KEY, reg_.REG_SUB, reg_.REG_PROJ_DIR, ""),
+        tools.Registry.get_value(c.REG_KEY, c.REG_SUB, c.REG_PROJ_DIR, ""),
         storage.ResourcesData.props["models_paths_mapping_by_type"],
     )
     task_collect_fbx.execute_tasks()

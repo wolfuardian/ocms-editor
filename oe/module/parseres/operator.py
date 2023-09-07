@@ -5,7 +5,7 @@ import oe.tools as tools
 import oe.storage as storage
 
 from oe.utils import qt
-from oe.refer import Registry as reg_
+from oe.utils import const as c
 from . import store, prop
 
 
@@ -15,13 +15,13 @@ def op_init_res_dir(self):
     )
 
     _default_dir = tools.Registry.get_value(
-        reg_.REG_KEY, reg_.REG_SUB, reg_.REG_RES_DIR, ""
+        c.REG_KEY, c.REG_SUB, c.REG_RES_DIR, ""
     )
     if _default_dir == "":
         _target_dir = tools.Registry.set_value(
-            reg_.REG_KEY,
-            reg_.REG_SUB,
-            reg_.REG_RES_DIR,
+            c.REG_KEY,
+            c.REG_SUB,
+            c.REG_RES_DIR,
             tools.Maya.browser(3, _default_dir),
         )
         self.resource_dir_txt.lineedit.setText(_target_dir)
@@ -41,7 +41,7 @@ def op_browser_resources_source_dir(self):
     tools.Log.parse_resources_logger().info("Browsing resources source directory")
 
     _default_dir = tools.Registry.get_value(
-        reg_.REG_KEY, reg_.REG_SUB, reg_.REG_RES_DIR, ""
+        c.REG_KEY, c.REG_SUB, c.REG_RES_DIR, ""
     )
     _browser_dir = tools.Maya.browser(3, _default_dir)
     if _browser_dir == "":
@@ -50,9 +50,9 @@ def op_browser_resources_source_dir(self):
         )
         return
     _target_dir = tools.Registry.set_value(
-        reg_.REG_KEY,
-        reg_.REG_SUB,
-        reg_.REG_RES_DIR,
+        c.REG_KEY,
+        c.REG_SUB,
+        c.REG_RES_DIR,
         _browser_dir,
     )
     self.resource_dir_txt.lineedit.setText(_target_dir)
@@ -72,7 +72,7 @@ def parse_resources(self):
     self.parse = store.ParseResourcesData()
 
     _dir = tools.Registry.get_value(
-        reg_.REG_KEY, reg_.REG_SUB, reg_.REG_RES_DIR, ""
+        c.REG_KEY, c.REG_SUB, c.REG_RES_DIR, ""
     )
 
     tools.Log.parse_resources_logger().info("Loading resources directory")

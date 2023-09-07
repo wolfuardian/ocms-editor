@@ -4,7 +4,7 @@ import oe.tools as tools
 
 from oe.ui import ui_tweak
 
-from oe.refer import Product as prod_
+from oe.utils import const as c
 
 
 global instance
@@ -12,7 +12,7 @@ global instance
 
 def show():
     global instance
-    tools.Log.gui_logger().info(f"Reloading {prod_.ID} packages")
+    tools.Log.gui_logger().info(f"Reloading {c.PRODUCT_ID} packages")
     tools.Packages.reload(packages=["oe"])
 
     try:

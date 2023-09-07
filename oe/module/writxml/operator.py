@@ -13,7 +13,7 @@ import oe.tools as tools
 import oe.storage as storage
 
 from oe.utils import qt
-from oe.refer import Registry as reg_
+from oe.utils import const as c
 
 from . import store, prop
 
@@ -343,7 +343,7 @@ class OCMSMAYAETWrite:
                         "Version": "2021.02.02",
                     }
                     self._comp_name = "ComponentV2"
-                elif Mode == 1:
+                elif mode == 1:
                     data_source.attrib = {
                         "ProductType": "OCMS2_0",
                         "Version": "2023.02.16",
@@ -491,7 +491,7 @@ def op_write_xml(self):
     tools.Log.write_xml_logger().info("Browsing writing xml path")
 
     _default_dir = tools.Registry.get_value(
-        reg_.REG_KEY, reg_.REG_SUB, reg_.REG_PROJ_DIR, ""
+        c.REG_KEY, c.REG_SUB, c.REG_PROJ_DIR, ""
     )
     _browser_path = tools.Maya.browser(0, _default_dir)
     if _browser_path == "":
@@ -520,7 +520,7 @@ def op_browser_explorer(self):
 def write_xml(self):
     tools.Log.write_xml_logger().info("Writing XML")
     _project_dir = tools.Registry.get_value(
-        reg_.REG_KEY, reg_.REG_SUB, reg_.REG_PROJ_DIR, ""
+        c.REG_KEY, c.REG_SUB, c.REG_PROJ_DIR, ""
     )
 
     _top_level_node = None

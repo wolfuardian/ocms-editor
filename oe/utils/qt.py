@@ -1,7 +1,6 @@
 from PySide2 import QtWidgets, QtCore, QtGui
 
-from oe.refer import Qt as qt_
-from oe.refer import Registry as reg_
+from oe.utils import const as c
 
 from oe.tools.registry import Registry
 
@@ -200,9 +199,9 @@ class QtButtonCSWidget(QtWidgets.QPushButton):
 
         if icon:
             project_dir = Registry.get_value(
-                reg_.REG_KEY, reg_.REG_SUB, "Pref_ModuleProjectDirectory", ""
+                c.REG_KEY, c.REG_SUB, "Pref_ModuleProjectDirectory", ""
             )
-            icon_filepath = project_dir + qt_.ICON_DIR + icon
+            icon_filepath = project_dir + c.ICON_DIR + icon
             try:
                 self.setIcon(QtGui.QIcon(icon_filepath))
             except Exception as e:
@@ -230,15 +229,18 @@ class QtButtonCSWidget(QtWidgets.QPushButton):
         self.setParent(None)
         parent.removeWidget(self)
 
-    def set_icon(self, icon):
-        project_dir = Registry.get_value(
-            reg_.REG_KEY, reg_.REG_SUB, "Pref_ModuleProjectDirectory", ""
-        )
-        icon_filepath = project_dir + qt_.ICON_DIR + icon
-        try:
-            self.setIcon(QtGui.QIcon(icon_filepath))
-        except Exception as e:
-            print(e)
+    def set_icon(self, icon: str):
+        if icon.startswith(":/"):
+            self.setIcon(QtGui.QIcon(icon))
+        else:
+            project_dir = Registry.get_value(
+                c.REG_KEY, c.REG_SUB, "Pref_ModuleProjectDirectory", ""
+            )
+            icon_filepath = project_dir + c.ICON_DIR + icon
+            try:
+                self.setIcon(QtGui.QIcon(icon_filepath))
+            except Exception as e:
+                print(e)
 
     def set_text(self, text):
         self.setText(text)
@@ -753,9 +755,9 @@ class QtInfoBoxCSWidget(QtGroupBoxCSWidget):
             self.set_status(QtInfoBoxStatus.Default)
         if icon:
             project_dir = Registry.get_value(
-                reg_.REG_KEY, reg_.REG_SUB, "Pref_ModuleProjectDirectory", ""
+                c.REG_KEY, c.REG_SUB, "Pref_ModuleProjectDirectory", ""
             )
-            icon_filepath = project_dir + qt_.ICON_DIR + icon
+            icon_filepath = project_dir + c.ICON_DIR + icon
             try:
                 self.pixmap.setPixmap(QtGui.QPixmap(icon_filepath))
                 self.pixmap.setFixedSize(20, 20)
@@ -764,9 +766,9 @@ class QtInfoBoxCSWidget(QtGroupBoxCSWidget):
                 print(e)
         else:
             project_dir = Registry.get_value(
-                reg_.REG_KEY, reg_.REG_SUB, "Pref_ModuleProjectDirectory", ""
+                c.REG_KEY, c.REG_SUB, "Pref_ModuleProjectDirectory", ""
             )
-            icon_dir = project_dir + qt_.ICON_DIR
+            icon_dir = project_dir + c.ICON_DIR
             icon_filepath = ""
             if status == QtInfoBoxStatus.Info:
                 icon_filepath = ":/info.png"
@@ -821,9 +823,9 @@ class QtInfoBoxCSWidget(QtGroupBoxCSWidget):
 
     def set_icon(self, status):
         project_dir = Registry.get_value(
-            reg_.REG_KEY, reg_.REG_SUB, "Pref_ModuleProjectDirectory", ""
+            c.REG_KEY, c.REG_SUB, "Pref_ModuleProjectDirectory", ""
         )
-        icon_dir = project_dir + qt_.ICON_DIR
+        icon_dir = project_dir + c.ICON_DIR
         icon_filepath = ""
         if status == QtInfoBoxStatus.Info:
             icon_filepath = ":/info.png"
@@ -1347,9 +1349,9 @@ class QtLineEditStatus:
 
 class QtCheckBoxStatus:
     project_dir = Registry.get_value(
-        reg_.REG_KEY, reg_.REG_SUB, "Pref_ModuleProjectDirectory", ""
+        c.REG_KEY, c.REG_SUB, "Pref_ModuleProjectDirectory", ""
     )
-    icon_filepath = project_dir + qt_.ICON_DIR + "so-checkmark.svg"
+    icon_filepath = project_dir + c.ICON_DIR + "so-checkmark.svg"
 
     Default = f"""
         QCheckBox {{
@@ -1402,6 +1404,11 @@ class QtButtonStatus:
             }}
             QPushButton:pressed {{
                 background-color: {_hex("707070")};
+            }}
+            QPushButton:disabled {{
+                color: {_hex("636363")};
+                border: 1px solid {_hex("3c3c3c")};
+                background-color: {_hex("2b2b2b")};
             }}
         """
 

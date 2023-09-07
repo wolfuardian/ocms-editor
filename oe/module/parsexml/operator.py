@@ -1,62 +1,57 @@
 import oe.tools as tools
 import oe.storage as storage
+import oe.core.maya as core
 
 from oe.utils import qt
-from oe.refer import Registry as reg_
+from oe.utils import const as c
 
 from . import store, prop
 
 
 def op_init_xml_path(self):
-    tools.Log.parse_xml_logger().info("Initializing xml path")
+    tools.Log.info(__name__, "Initializing xml path")
 
-    _default_path = tools.Registry.get_value(
-        reg_.REG_KEY, reg_.REG_SUB, reg_.REG_XML_PATH, ""
-    )
-    if _default_path == "":
-        _browser_path = tools.Maya.browser(1, _default_path)
-        if _browser_path == "":
-            tools.Log.parse_xml_logger().warning(
-                "User canceled the browser dialog."
-            )
-            return
-        _target_dir = tools.Registry.set_value(
-            reg_.REG_KEY,
-            reg_.REG_SUB,
-            reg_.REG_XML_PATH,
-            tools.Maya.browser(1, _default_path),
-        )
-        self.xml_path_text.lineedit.setText(_target_dir)
-    else:
-        self.xml_path_text.lineedit.setText(_default_path)
-    self.init_btn.set_force_visible(False)
-    self.xml_path_text.set_force_visible(True)
-    self.xml_path_text.lineedit.setCursorPosition(0)
-    self.browse_btn.set_force_visible(True)
-
-    parse_xml(self)
+    op_browser_xml_path(self)
 
 
 def op_browser_xml_path(self):
-    tools.Log.parse_xml_logger().info("Browsing xml path")
+    tools.Log.info(__name__, "Browsing xml path")
 
-    _default_path = tools.Registry.get_value(
-        reg_.REG_KEY, reg_.REG_SUB, reg_.REG_XML_PATH, ""
-    )
-    _browser_path = tools.Maya.browser(1, _default_path)
-    if _browser_path == "":
-        tools.Log.parse_xml_logger().warning("User canceled the browser dialog.")
-        return
-    _target_dir = tools.Registry.set_value(
-        reg_.REG_KEY,
-        reg_.REG_SUB,
-        reg_.REG_XML_PATH,
-        _browser_path,
-    )
-    self.xml_path_text.lineedit.setText(_target_dir)
-    self.xml_path_text.lineedit.setCursorPosition(0)
+    sel_path = core.browser(storage, tools, c.REG_XML_PATH, 1)
 
+    validate_xml_path(self)
+
+    Widget(self.xml_path_txt.lineedit).set_text(sel_path)
+
+    Widget(self.init_btn).hide()
+    Widget(self.parse_btn).show()
+    Widget(self.browse_btn).show()
+    Widget(self.xml_path_txt).show()
+
+
+def op_parse_xml(self):
     parse_xml(self)
+
+
+def validate_xml_path(self):
+    _xml_path = storage.Registry(c.REG_XML_PATH).get()
+    if not storage.Path(_xml_path).is_valid():
+        return
+    if not storage.Path(_xml_path).is_xml():
+        Widget(self.parse_btn).disable()
+        _setup_xml_path_ui(self, _xml_path)
+        return
+
+    Widget(self.parse_btn).enable()
+    _setup_xml_path_ui(self, _xml_path)
+
+
+def _setup_xml_path_ui(self, _xml_path):
+    Widget(self.xml_path_txt.lineedit).set_text(_xml_path)
+    Widget(self.init_btn).hide()
+    Widget(self.parse_btn).show()
+    Widget(self.browse_btn).show()
+    Widget(self.xml_path_txt).show()
 
 
 def parse_xml(self):
@@ -66,7 +61,7 @@ def parse_xml(self):
     tools.Log.parse_xml_logger().info("Initializing parse xml data")
     self.parse = store.ParseXMLData()
 
-    _path = tools.Registry.get_value(reg_.REG_KEY, reg_.REG_SUB, reg_.REG_XML_PATH, "")
+    _path = tools.Registry.get_value(c.REG_KEY, c.REG_SUB, c.REG_XML_PATH, "")
 
     tools.Log.parse_xml_logger().info("Loading xml data")
     self.parse.load(_path)
@@ -240,6 +235,7 @@ def parse_xml(self):
     # Storage
     tools.Log.storage_logger().info("Saving xml data")
     from oe import storage
+
     storage.XMLData.purse()
     storage.XMLData.update(store.ParseXMLData)
 
@@ -255,9 +251,7 @@ def construct_ui(self):
     tools.Log.gui_logger().info(
         "Notice: Some widgets may have some differences due to different datasource"
     )
-    self.dynamic_ui.add_group(
-        id="點位物件統計", widget=qt.QtGroupVBoxCSWidget(text="點位物件統計")
-    )
+    self.dynamic_ui.add_group(id="點位物件統計", widget=qt.QtGroupVBoxCSWidget(text="點位物件統計"))
     self.dynamic_ui.add_widget(
         parent_id="點位物件統計",
         id="物件數量",
@@ -589,3 +583,24 @@ def construct_ui(self):
                         ),
                     )
     tools.Log.gui_logger().info("Completed constructing dynamic ui group manager")
+
+
+class Widget:
+    def __init__(self, widget):
+        self.widget = widget
+
+    def hide(self):
+        self.widget.set_force_visible(False)
+
+    def show(self):
+        self.widget.set_force_visible(True)
+
+    def enable(self):
+        self.widget.setEnabled(True)
+
+    def disable(self):
+        self.widget.setEnabled(False)
+
+    def set_text(self, text):
+        self.widget.setText(text)
+        self.widget.setCursorPosition(0)
