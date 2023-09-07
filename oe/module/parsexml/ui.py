@@ -1,59 +1,47 @@
-import logging
-
-import oe.tools as tools
-
 from oe.utils import qt
 
 from . import operator, store
-from oe.refer import Registry as reg_
-
-
-def _hex(h):
-    return "#" + h
 
 
 class ParseXMLCSWidget(qt.QtFrameLayoutCSWidget):
-    def __init__(self, parent=None, text="核實XML"):
-        super().__init__(parent, text)
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.set_text("核實XML")
 
         self.scrollarea = qt.QtScrollareaCSWidget()
         self.scrollarea.setSizePolicy(
             qt.QtWidgets.QSizePolicy.Expanding, qt.QtWidgets.QSizePolicy.Expanding
         )
 
-        self.dynamic_box = store.DynamicUIGroupManager()
+        self.dynamic_ui = store.DynamicUIGroupManager()
 
-        self.box_xml_path = qt.QtGroupHBoxCSWidget(text="XML路徑")
-        self.txt_xml_path = qt.QtTextLineCSWidget(text="")
-        self.txt_xml_path.lineedit.setReadOnly(True)
-        self.txt_xml_path.set_force_visible(False)
-        self.btn_initialize = qt.QtButtonCSWidget(
-            icon="open_file.png",
-            text="  初始化",
-            height=32,
-            status=qt.QtButtonStatus.Invert,
-        )
-        self.btn_browser = qt.QtButtonCSWidget(icon="open_file.png", text="", height=32)
-        self.btn_browser.set_force_visible(False)
+        self.xml_path_box = qt.QtGroupHBoxCSWidget()
+        self.xml_path_box.set_text("XML路徑")
 
-        self.box_xml_path.layout.addWidget(self.txt_xml_path)
-        self.box_xml_path.layout.addWidget(self.btn_initialize)
-        self.box_xml_path.layout.addWidget(self.btn_browser)
-        self.scrollarea.layout.addWidget(self.box_xml_path)
-        self.scrollarea.layout.addWidget(self.dynamic_box.groupbox)
+        self.xml_path_text = qt.QtTextLineCSWidget()
+        self.xml_path_text.set_text("")
+        self.xml_path_text.lineedit.setReadOnly(True)
+        self.xml_path_text.set_force_visible(False)
 
-        self.btn_initialize.clicked.connect(lambda: operator.op_init_xml_path(self))
-        self.btn_browser.clicked.connect(lambda: operator.op_browser_xml_path(self))
+        self.init_btn = qt.QtButtonCSWidget()
+        self.init_btn.set_icon("open_file.png")
+        self.init_btn.set_text("  初始化")
+        self.init_btn.set_height(32)
+
+        self.browse_btn = qt.QtButtonCSWidget()
+        self.browse_btn.set_icon("open_folder.png")
+        self.browse_btn.set_text("")
+        self.browse_btn.set_height(32)
+        self.browse_btn.set_force_visible(False)
+
+        self.xml_path_box.layout.addWidget(self.xml_path_text)
+        self.xml_path_box.layout.addWidget(self.init_btn)
+        self.xml_path_box.layout.addWidget(self.browse_btn)
+        self.scrollarea.layout.addWidget(self.xml_path_box)
+        self.scrollarea.layout.addWidget(self.dynamic_ui.groupbox)
+
+        self.init_btn.clicked.connect(lambda: operator.op_init_xml_path(self))
+        self.browse_btn.clicked.connect(lambda: operator.op_browser_xml_path(self))
 
         self.frame_layout.addWidget(self.scrollarea)
-
-        # Validate
-        # self.validate_init_xml_path()
-
-    def validate_init_xml_path(self):
-        tools.Logging.parse_xml_logger().info("Validating initialize xml path")
-        _default_path = tools.Registry.get_value(
-            reg_.REG_KEY, reg_.REG_SUB, reg_.REG_XML_PATH, ""
-        )
-        if _default_path != "":
-            operator.op_init_xml_path(self)

@@ -1,64 +1,49 @@
-import oe.tools as tools
-
 from oe.utils import qt
 
 from . import operator
-from oe.refer import Registry as reg_
-
-
-def _hex(h):
-    return "#" + h
 
 
 class SetProjectDirectoryCSWidget(qt.QtFrameLayoutCSWidget):
-    def __init__(self, parent=None, text="設定專案目錄"):
-        super().__init__(parent, text)
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.set_text("設定專案目錄")
 
         self.scrollarea = qt.QtScrollareaCSWidget()
+        self.scrollarea.setSizePolicy(
+            qt.QtWidgets.QSizePolicy.Expanding, qt.QtWidgets.QSizePolicy.Expanding
+        )
 
-        # Construct
-        # <專案目錄>
-        self.box_proj_dir = qt.QtGroupHBoxCSWidget(text="專案目錄")
-        self.txt_proj_dir = qt.QtTextLineCSWidget(text="")
-        self.txt_proj_dir.lineedit.setReadOnly(True)
-        self.txt_proj_dir.set_force_visible(False)
-        self.btn_init_proj_dir = qt.QtButtonCSWidget(
-            icon="open_folder.png",
-            text="  初始化",
-            height=32,
-            status=qt.QtButtonStatus.Invert,
-        )
-        self.btn_browser_proj_dir = qt.QtButtonCSWidget(
-            icon="open_folder.png", text="", height=32
-        )
-        self.btn_browser_proj_dir.set_force_visible(False)
+        self.project_dir_box = qt.QtGroupHBoxCSWidget()
+        self.project_dir_box.set_text("專案目錄")
 
-        # Connect function
-        # <專案目錄>
-        self.btn_init_proj_dir.clicked.connect(
-            lambda: operator.op_initialize_project_dir(self)
+        self.project_dir_text = qt.QtTextLineCSWidget()
+        self.project_dir_text.set_text("")
+        self.project_dir_text.lineedit.setReadOnly(True)
+        self.project_dir_text.set_force_visible(False)
+
+        self.init_project_dir_btn = qt.QtButtonCSWidget()
+        self.init_project_dir_btn.set_icon("open_folder.png")
+        self.init_project_dir_btn.set_text("  初始化")
+        self.init_project_dir_btn.set_height(32)
+
+        self.browse_project_dir_btn = qt.QtButtonCSWidget()
+        self.browse_project_dir_btn.set_icon("open_folder.png")
+        self.browse_project_dir_btn.set_text("")
+        self.browse_project_dir_btn.set_height(32)
+        self.browse_project_dir_btn.set_force_visible(False)
+
+        self.init_project_dir_btn.clicked.connect(
+            lambda: operator.op_init_project_dir(self)
         )
-        self.btn_browser_proj_dir.clicked.connect(
+        self.browse_project_dir_btn.clicked.connect(
             lambda: operator.op_browser_project_dir(self)
         )
 
-        # Assembly UI
-        self.box_proj_dir.layout.addWidget(self.txt_proj_dir)
-        self.box_proj_dir.layout.addWidget(self.btn_init_proj_dir)
-        self.box_proj_dir.layout.addWidget(self.btn_browser_proj_dir)
-        self.scrollarea.layout.addWidget(self.box_proj_dir)
+        self.project_dir_box.layout.addWidget(self.project_dir_text)
+        self.project_dir_box.layout.addWidget(self.init_project_dir_btn)
+        self.project_dir_box.layout.addWidget(self.browse_project_dir_btn)
+
+        self.scrollarea.layout.addWidget(self.project_dir_box)
 
         self.frame_layout.addWidget(self.scrollarea)
-
-        # Validate
-        # self.validate_init_proj_dir()
-
-    def validate_init_proj_dir(self):
-        tools.Logging.set_project_logger().info(
-            "Validating initialize project directory"
-        )
-        _default_dir = tools.Registry.get_value(
-            reg_.REG_KEY, reg_.REG_SUB, reg_.REG_PROJ_DIR, ""
-        )
-        if _default_dir != "":
-            operator.op_initialize_project_dir(self)

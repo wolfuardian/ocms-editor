@@ -1,51 +1,45 @@
-import logging
-
-import oe.tools as tools
-
 from oe.utils import qt
 
 from . import operator, store
 
 
-def _hex(h):
-    return "#" + h
-
-
 class WriteXMLCSWidget(qt.QtFrameLayoutCSWidget):
-    def __init__(self, parent=None, text="匯出XML檔案"):
-        super().__init__(parent, text)
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.set_text("匯出XML檔案")
 
         self.scrollarea = qt.QtScrollareaCSWidget()
         self.scrollarea.setSizePolicy(
             qt.QtWidgets.QSizePolicy.Expanding, qt.QtWidgets.QSizePolicy.Expanding
         )
 
-        self.dynamic_box = store.DynamicUIGroupManager()
+        self.dynamic_ui = store.DynamicUIGroupManager()
 
-        self.box_writexml = qt.QtGroupHBoxCSWidget(text="XML路徑")
-        self.txt_writexml_path = qt.QtTextLineCSWidget(text="")
-        self.txt_writexml_path.lineedit.setReadOnly(True)
-        self.btn_writexml = qt.QtButtonCSWidget(
-            icon="export_file.png",
-            text="  匯出XML",
-            height=32,
-            status=qt.QtButtonStatus.Invert,
-        )
-        self.btn_browser_explorer = qt.QtButtonCSWidget(
-            icon="folder.png",
-            height=32,
-        )
-        self.box_writexml.layout.addWidget(self.txt_writexml_path)
-        self.box_writexml.layout.addWidget(self.btn_writexml)
-        self.box_writexml.layout.addWidget(self.btn_browser_explorer)
-        self.scrollarea.layout.addWidget(self.box_writexml)
-        self.scrollarea.layout.addWidget(self.dynamic_box.groupbox)
+        self.xml_box = qt.QtGroupHBoxCSWidget()
+        self.xml_box.set_text("XML路徑")
 
-        self.btn_writexml.clicked.connect(
-            lambda: operator.op_write_xml(self)
-        )
-        self.btn_browser_explorer.clicked.connect(
-            lambda: operator.op_browser_explorer(self)
-        )
+        self.xml_path_txt = qt.QtTextLineCSWidget()
+        self.xml_path_txt.set_text("")
+        self.xml_path_txt.lineedit.setReadOnly(True)
+
+        self.write_xml_btn = qt.QtButtonCSWidget()
+        self.write_xml_btn.set_icon("export_file.png")
+        self.write_xml_btn.set_text("  匯出XML")
+        self.write_xml_btn.set_height(32)
+
+        self.browse_btn = qt.QtButtonCSWidget()
+        self.browse_btn.set_icon("folder.png")
+        self.browse_btn.set_height(32)
+
+        self.write_xml_btn.clicked.connect(lambda: operator.op_write_xml(self))
+        self.browse_btn.clicked.connect(lambda: operator.op_browser_explorer(self))
+
+        self.xml_box.layout.addWidget(self.xml_path_txt)
+        self.xml_box.layout.addWidget(self.write_xml_btn)
+        self.xml_box.layout.addWidget(self.browse_btn)
+
+        self.scrollarea.layout.addWidget(self.xml_box)
+        self.scrollarea.layout.addWidget(self.dynamic_ui.groupbox)
+
         self.frame_layout.addWidget(self.scrollarea)
-        self._browser_path = ""

@@ -1,37 +1,34 @@
-import logging
-
-import oe.tools as tools
-
 from oe.utils import qt
 
 from . import operator, store
 
 
-def _hex(h):
-    return "#" + h
-
-
 class ImportResourcesCSWidget(qt.QtFrameLayoutCSWidget):
-    def __init__(self, parent=None, text="匯入模型資源"):
-        super().__init__(parent, text)
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.set_text("匯入模型資源")
 
         self.scrollarea = qt.QtScrollareaCSWidget()
         self.scrollarea.setSizePolicy(
             qt.QtWidgets.QSizePolicy.Expanding, qt.QtWidgets.QSizePolicy.Expanding
         )
 
-        self.dynamic_box = store.DynamicUIGroupManager()
+        self.dynamic_ui = store.DynamicUIGroupManager()
 
-        self.box_import_res = qt.QtGroupHBoxCSWidget(text="模型資源")
-        self.btn_import_res = qt.QtButtonCSWidget(
-            icon="open_file.png",
-            text="  匯入資源",
-            height=32,
-            status=qt.QtButtonStatus.Invert,
-        )
-        self.box_import_res.layout.addWidget(self.btn_import_res)
-        self.scrollarea.layout.addWidget(self.box_import_res)
-        self.scrollarea.layout.addWidget(self.dynamic_box.groupbox)
+        self.res_import_box = qt.QtGroupHBoxCSWidget()
+        self.res_import_box.set_text("模型資源")
 
-        self.btn_import_res.clicked.connect(lambda: operator.op_import_resources(self))
+        self.import_res_btn = qt.QtButtonCSWidget()
+        self.import_res_btn.set_icon("open_file.png")
+        self.import_res_btn.set_text("  匯入資源")
+        self.import_res_btn.set_height(32)
+
+        self.import_res_btn.clicked.connect(lambda: operator.op_import_resources(self))
+
+        self.res_import_box.layout.addWidget(self.import_res_btn)
+
+        self.scrollarea.layout.addWidget(self.res_import_box)
+        self.scrollarea.layout.addWidget(self.dynamic_ui.groupbox)
+
         self.frame_layout.addWidget(self.scrollarea)

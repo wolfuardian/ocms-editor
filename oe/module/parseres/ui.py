@@ -1,20 +1,13 @@
-import logging
-
-import oe.tools as tools
-
 from oe.utils import qt
 
 from . import operator, store
-from oe.refer import Registry as reg_
-
-
-def _hex(h):
-    return "#" + h
 
 
 class ParseResourcesCSWidget(qt.QtFrameLayoutCSWidget):
-    def __init__(self, parent=None, text="核實模型檔"):
-        super().__init__(parent, text)
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.set_text("核實模型檔")
 
         self.scrollarea = qt.QtScrollareaCSWidget()
         self.scrollarea.setSizePolicy(
@@ -22,47 +15,39 @@ class ParseResourcesCSWidget(qt.QtFrameLayoutCSWidget):
             qt.QtWidgets.QSizePolicy.MinimumExpanding,
         )
 
-        self.dynamic_box = store.DynamicUIGroupManager()
+        self.dynamic_ui = store.DynamicUIGroupManager()
 
-        self.box_res_dir = qt.QtGroupHBoxCSWidget(text="來源模型檔目錄")
-        self.txt_res_dir = qt.QtTextLineCSWidget(text="")
-        self.txt_res_dir.lineedit.setReadOnly(True)
-        self.txt_res_dir.set_force_visible(False)
-        self.btn_init_res_dir = qt.QtButtonCSWidget(
-            icon="open_folder.png",
-            text="  初始化",
-            height=32,
-            status=qt.QtButtonStatus.Invert,
-        )
-        self.btn_browser_res_dir = qt.QtButtonCSWidget(
-            icon="open_folder.png", text="", height=32
-        )
-        self.btn_browser_res_dir.set_force_visible(False)
+        self.resource_dir_box = qt.QtGroupHBoxCSWidget()
+        self.resource_dir_box.set_text("來源模型檔目錄")
 
-        self.box_res_dir.layout.addWidget(self.txt_res_dir)
-        self.box_res_dir.layout.addWidget(self.btn_init_res_dir)
-        self.box_res_dir.layout.addWidget(self.btn_browser_res_dir)
-        self.scrollarea.layout.addWidget(self.box_res_dir)
-        self.scrollarea.layout.addWidget(self.dynamic_box.groupbox)
+        self.resource_dir_txt = qt.QtTextLineCSWidget()
+        self.resource_dir_txt.set_text("")
+        self.resource_dir_txt.lineedit.setReadOnly(True)
+        self.resource_dir_txt.set_force_visible(False)
 
-        self.btn_init_res_dir.clicked.connect(
+        self.init_resource_dir_btn = qt.QtButtonCSWidget()
+        self.init_resource_dir_btn.set_icon("open_folder.png")
+        self.init_resource_dir_btn.set_text("  初始化")
+        self.init_resource_dir_btn.set_height(32)
+
+        self.browse_resource_dir_btn = qt.QtButtonCSWidget()
+        self.browse_resource_dir_btn.set_icon("open_folder.png")
+        self.browse_resource_dir_btn.set_text("")
+        self.browse_resource_dir_btn.set_height(32)
+        self.browse_resource_dir_btn.set_force_visible(False)
+
+        self.init_resource_dir_btn.clicked.connect(
             lambda: operator.op_init_res_dir(self)
         )
-        self.btn_browser_res_dir.clicked.connect(
+        self.browse_resource_dir_btn.clicked.connect(
             lambda: operator.op_browser_resources_source_dir(self)
         )
 
+        self.resource_dir_box.layout.addWidget(self.resource_dir_txt)
+        self.resource_dir_box.layout.addWidget(self.init_resource_dir_btn)
+        self.resource_dir_box.layout.addWidget(self.browse_resource_dir_btn)
+
+        self.scrollarea.layout.addWidget(self.resource_dir_box)
+        self.scrollarea.layout.addWidget(self.dynamic_ui.groupbox)
+
         self.frame_layout.addWidget(self.scrollarea)
-
-        # Validate
-        # self.validate_init_res_dir()
-
-    def validate_init_res_dir(self):
-        tools.Logging.parse_xml_logger().info(
-            "Validating initialize resources directory"
-        )
-        _default_dir = tools.Registry.get_value(
-            reg_.REG_KEY, reg_.REG_SUB, reg_.REG_RES_DIR, ""
-        )
-        if _default_dir != "":
-            operator.op_init_res_dir(self)
