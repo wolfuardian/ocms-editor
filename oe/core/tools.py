@@ -33,7 +33,10 @@ class Registry:
 
 @interface
 class Log:
-    def logger(cls, name): pass
+    def debug(cls, name): pass
+    def info(cls, name): pass
+    def warning(cls, name): pass
+    def error(cls, name): pass
     def installer_logger(cls): pass
     def registry_logger(cls): pass
     def fileio_logger(cls): pass
@@ -58,6 +61,9 @@ class Dictionary:
 
 @interface
 class IO:
+    def is_exists(cls, path): pass
+    def is_dir(cls, path): pass
+    def is_file(cls, path): pass
     def read_utf16(cls, path): pass
     def convert_to_unix_path(cls, path): pass
     def convert_paths_to_unix_style(cls, paths): pass
@@ -81,4 +87,6 @@ class XML:
 class String:
     def list_to_string(cls, lst): pass
     def dict_to_string(cls, dictionary): pass
+    def wrap_text(cls, text, left="<", right=">"): pass
+
 # fmt: on

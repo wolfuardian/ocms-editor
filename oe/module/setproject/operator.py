@@ -1,51 +1,65 @@
 import oe.tools as tools
 import oe.storage as storage
 
-from oe.refer import Registry as reg_
+from oe.refer import Registry as reg
 
 
 def op_init_project_dir(self):
-    tools.Log.set_project_logger().info("Initializing project directory")
+    tools.Log.info(__name__, "Initializing project directory")
 
-    _default_dir = tools.Registry.get_value(
-        reg_.REG_KEY, reg_.REG_SUB, reg_.REG_PROJ_DIR, ""
-    )
-    if _default_dir == "":
-        _target_dir = tools.Registry.set_value(
-            reg_.REG_KEY,
-            reg_.REG_SUB,
-            reg_.REG_PROJ_DIR,
-            tools.Maya.browser(3, _default_dir),
-        )
-        self.project_dir_text.lineedit.setText(_target_dir)
-    else:
-        self.project_dir_text.lineedit.setText(_default_dir)
-    self.init_project_dir_btn.set_force_visible(False)
-    self.project_dir_text.set_force_visible(True)
-    self.project_dir_text.lineedit.setCursorPosition(0)
-    self.browse_project_dir_btn.set_force_visible(True)
-    # tools.Log.set_project_logger().info("Completed initializing project directory")
-    tools.Log.logger(__name__).info("Completed initializing project directory")
-
-
+    op_browser_project_dir(self)
 
 
 def op_browser_project_dir(self):
-    tools.Log.set_project_logger().info("Browsing project directory")
+    tools.Log.info(__name__, "Browsing project directory")
 
-    _default_dir = tools.Registry.get_value(
-        reg_.REG_KEY, reg_.REG_SUB, reg_.REG_PROJ_DIR, ""
-    )
-    _browser_dir = tools.Maya.browser(3, _default_dir)
-    if _browser_dir == "":
-        tools.Log.set_project_logger().warning("User canceled the browser dialog.")
+    sel_path = Operator.browser()
+
+    Widget(self.project_dir_txt.lineedit).update_txt(sel_path)
+
+    Widget(self.init_project_dir_btn).hide()
+    Widget(self.project_dir_txt).show()
+    Widget(self.browse_project_dir_btn).show()
+
+
+def validate_project_dir(self):
+    _project_dir = storage.Registry(reg.REG_PROJ_DIR).get()
+    if not storage.Path(_project_dir).is_valid():
         return
-    _target_dir = tools.Registry.set_value(
-        reg_.REG_KEY,
-        reg_.REG_SUB,
-        reg_.REG_PROJ_DIR,
-        _browser_dir,
-    )
-    self.project_dir_text.lineedit.setText(_target_dir)
-    self.project_dir_text.lineedit.setCursorPosition(0)
-    tools.Log.set_project_logger().info("Completed browsing project directory")
+
+    _setup_project_dir_ui(self, _project_dir)
+
+
+def _setup_project_dir_ui(self, _project_dir):
+    Widget(self.project_dir_txt.lineedit).update_txt(_project_dir)
+    Widget(self.project_dir_txt).show()
+    Widget(self.init_project_dir_btn).hide()
+    Widget(self.browse_project_dir_btn).show()
+
+
+class Operator:
+    @classmethod
+    def browser(cls):
+        _default = storage.Registry(reg.REG_PROJ_DIR).get()
+
+        _browser = tools.Maya.browser(3, _default)
+        if _browser == "":
+            tools.Log.warning(__name__, "User canceled the browser dialog.")
+            return _default
+
+        return storage.Registry(reg.REG_PROJ_DIR).set(_browser)
+
+
+class Widget:
+    def __init__(self, widget):
+        self.widget = widget
+
+    def hide(self):
+        self.widget.set_force_visible(False)
+
+    def show(self):
+        self.widget.set_force_visible(True)
+
+    def update_txt(self, text):
+        self.widget.setText(text)
+        self.widget.setCursorPosition(0)

@@ -16,3 +16,7 @@ class String(core.String):
             if dictionary
             else ""
         )
+
+    @classmethod
+    def wrap_text(cls, text, left="<", right=">"):
+        return f"{left}{text}{right}"

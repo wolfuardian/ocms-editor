@@ -13,6 +13,18 @@ from oe.refer import IO as io_
 
 class IO(core.IO):
     @classmethod
+    def is_exists(cls, path: str) -> bool:
+        return os.path.exists(path)
+
+    @classmethod
+    def is_dir(cls, path: str) -> bool:
+        return os.path.isdir(path)
+
+    @classmethod
+    def is_file(cls, path: str) -> bool:
+        return os.path.isfile(path)
+
+    @classmethod
     def read_utf16(cls, path: str) -> Union[str, Any]:
         try:
             with io.open(path, mode="r", encoding="utf-16") as file:

@@ -17,10 +17,10 @@ class SetProjectDirectoryCSWidget(qt.QtFrameLayoutCSWidget):
         self.project_dir_box = qt.QtGroupHBoxCSWidget()
         self.project_dir_box.set_text("專案目錄")
 
-        self.project_dir_text = qt.QtTextLineCSWidget()
-        self.project_dir_text.set_text("")
-        self.project_dir_text.lineedit.setReadOnly(True)
-        self.project_dir_text.set_force_visible(False)
+        self.project_dir_txt = qt.QtTextLineCSWidget()
+        self.project_dir_txt.set_text("")
+        self.project_dir_txt.lineedit.setReadOnly(True)
+        self.project_dir_txt.set_force_visible(False)
 
         self.init_project_dir_btn = qt.QtButtonCSWidget()
         self.init_project_dir_btn.set_icon("open_folder.png")
@@ -40,10 +40,12 @@ class SetProjectDirectoryCSWidget(qt.QtFrameLayoutCSWidget):
             lambda: operator.op_browser_project_dir(self)
         )
 
-        self.project_dir_box.layout.addWidget(self.project_dir_text)
+        self.project_dir_box.layout.addWidget(self.project_dir_txt)
         self.project_dir_box.layout.addWidget(self.init_project_dir_btn)
         self.project_dir_box.layout.addWidget(self.browse_project_dir_btn)
 
         self.scrollarea.layout.addWidget(self.project_dir_box)
 
         self.frame_layout.addWidget(self.scrollarea)
+
+        operator.validate_project_dir(self)
