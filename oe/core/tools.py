@@ -64,6 +64,7 @@ class IO:
     def is_exists(cls, path): pass
     def is_dir(cls, path): pass
     def is_file(cls, path): pass
+    def is_xml(cls, path): pass
     def read_utf16(cls, path): pass
     def convert_to_unix_path(cls, path): pass
     def convert_paths_to_unix_style(cls, paths): pass

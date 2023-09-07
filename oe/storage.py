@@ -1,7 +1,7 @@
 import os
 import oe.tools as tools
 
-from oe.refer import Registry as reg_
+from oe.utils import const as c
 
 
 class XMLData:
@@ -100,33 +100,50 @@ class UIData:
 
 class Path:
     def __init__(self, path):
-        self.path = path
-        self.is_dir = False
-        self.is_file = False
-        self.is_exists = False
+        self.__path = path
+        self.__is_dir = False
+        self.__is_file = False
+        self.__is_exists = False
+
+        self.__is_xml = False
 
         self.validate()
 
     def purse(self):
-        self.path = None
-        self.is_dir = False
-        self.is_file = False
-        self.is_exists = False
+        self.__path = None
+        self.__is_dir = False
+        self.__is_file = False
+        self.__is_exists = False
+
+        self.__is_xml = False
 
     def validate(self):
-        if not self.path or self.path == "":
+        if not self.__path or self.__path == "":
             self.purse()
         else:
-            self.is_exists = tools.IO.is_exists(self.path)
-            self.is_dir = tools.IO.is_dir(self.path)
-            self.is_file = tools.IO.is_file(self.path)
+            self.__is_exists = tools.IO.is_exists(self.__path)
+            self.__is_dir = tools.IO.is_dir(self.__path)
+            self.__is_file = tools.IO.is_file(self.__path)
+            self.__is_xml = tools.IO.is_xml(self.__path)
 
     def is_valid(self):
-        return self.is_exists and (self.is_dir or self.is_file)
+        return self.__is_exists and (self.__is_dir or self.__is_file)
+
+    def is_dir(self):
+        return self.__is_dir
+
+    def is_file(self):
+        return self.__is_file
+
+    def is_exists(self):
+        return self.__is_exists
+
+    def is_xml(self):
+        return self.__is_xml
 
 
 class Registry:
-    def __init__(self, name, key=reg_.REG_KEY, sub=reg_.REG_SUB):
+    def __init__(self, name, key=c.REG_KEY, sub=c.REG_SUB):
         self._key = key
         self._sub = sub
         self._name = name

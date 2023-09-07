@@ -8,7 +8,7 @@ import subprocess
 import oe.tools as tools
 import oe.core.tools as core
 
-from oe.refer import IO as io_
+from oe.utils import const as c
 
 
 class IO(core.IO):
@@ -23,6 +23,10 @@ class IO(core.IO):
     @classmethod
     def is_file(cls, path: str) -> bool:
         return os.path.isfile(path)
+
+    @classmethod
+    def is_xml(cls, path: str) -> bool:
+        return path.endswith(".xml")
 
     @classmethod
     def read_utf16(cls, path: str) -> Union[str, Any]:
@@ -91,7 +95,7 @@ class IO(core.IO):
         size_units: Optional[List[str]] = None,
     ) -> str:
         if size_units is None:
-            size_units = io_.SIZE_UNITS
+            size_units = c.SIZE_UNITS
         i = 0
         while size_bytes >= 1024 and i < len(size_units) - 1:
             size_bytes /= 1024
