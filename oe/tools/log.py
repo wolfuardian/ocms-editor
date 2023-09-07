@@ -1,10 +1,16 @@
 import logging
-
 import oe.tools as tools
 import oe.core.tools as core
 
+from oe.utils.const import NAME_MAPPING
 
-class Logging(core.Logging):
+class Log(core.Log):
+    @classmethod
+    def logger(cls, name):
+        actual_name = NAME_MAPPING.get(name, name)
+        logger = logging.getLogger(actual_name)
+        return logger
+
     @classmethod
     def installer_logger(cls):
         return logging.getLogger("Installer")

@@ -1224,7 +1224,7 @@ class TaskImportFBXs:
 
 
 def op_import_resources(self):
-    tools.Logging.import_resources_logger().info("Importing resources...")
+    tools.Log.import_resources_logger().info("Importing resources...")
 
     import_resources(self)
 
@@ -1247,9 +1247,9 @@ def import_resources(self):
     task_sync_xml_nodes = TaskSyncXMLNodes(storage.XMLData.root)
     task_sync_xml_nodes.execute_tasks()
 
-    self.btn_import_res.set_force_visible(False)
-    self.box_import_res.set_force_visible(False)
-    tools.Logging.import_resources_logger().info(
+    self.import_res_btn.set_force_visible(False)
+    self.res_import_box.set_force_visible(False)
+    tools.Log.import_resources_logger().info(
         "Completed importing resources, please check the script editor for more information"
     )
 
@@ -1258,8 +1258,8 @@ def import_resources(self):
 
 def construct_ui(self):
     # p = self.parse
-    self.dynamic_box.add_group(id="匯入結果", widget=qt.QtGroupVBoxCSWidget(text="匯入結果"))
-    self.dynamic_box.add_widget(
+    self.dynamic_ui.add_group(id="匯入結果", widget=qt.QtGroupVBoxCSWidget(text="匯入結果"))
+    self.dynamic_ui.add_widget(
         parent_id="匯入結果",
         id="剩餘的錯誤數量提示",
         widget=qt.QtInfoBoxCSWidget(
@@ -1267,4 +1267,4 @@ def construct_ui(self):
             status=qt.QtInfoBoxStatus.Success,
         ),
     )
-    tools.Logging.gui_logger().info("Completed constructing dynamic ui group manager")
+    tools.Log.gui_logger().info("Completed constructing dynamic ui group manager")

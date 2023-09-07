@@ -85,12 +85,12 @@ class DynamicUIGroupManager:
     def remove_widget(self, parent_id, id):
         if parent_id not in self.context:
             # raise ValueError(f"Parent group ID {parent_id} does not exist.")
-            tools.Logging.gui_logger().warning(
+            tools.Log.gui_logger().warning(
                 f"Widget ID {id} does not exist in group {parent_id}."
             )
             return
         if id not in self.context[parent_id]["children"]:
-            tools.Logging.gui_logger().warning(
+            tools.Log.gui_logger().warning(
                 f"Widget ID {id} does not exist in group {parent_id}."
             )
             return

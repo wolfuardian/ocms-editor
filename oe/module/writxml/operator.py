@@ -488,19 +488,19 @@ def OCMSMAYAWritXML(_ver_int, _root, _file):
 
 
 def op_write_xml(self):
-    tools.Logging.write_xml_logger().info("Browsing writing xml path")
+    tools.Log.write_xml_logger().info("Browsing writing xml path")
 
     _default_dir = tools.Registry.get_value(
         reg_.REG_KEY, reg_.REG_SUB, reg_.REG_PROJ_DIR, ""
     )
     _browser_path = tools.Maya.browser(0, _default_dir)
     if _browser_path == "":
-        tools.Logging.set_project_logger().warning("User canceled the browser dialog.")
+        tools.Log.set_project_logger().warning("User canceled the browser dialog.")
         return
 
-    self.txt_writexml_path.lineedit.setText(_browser_path)
-    self.txt_writexml_path.lineedit.setCursorPosition(0)
-    tools.Logging.set_project_logger().info("Completed writing xml path")
+    self.xml_path_txt.lineedit.setText(_browser_path)
+    self.xml_path_txt.lineedit.setCursorPosition(0)
+    tools.Log.set_project_logger().info("Completed writing xml path")
 
     self._browser_path = _browser_path
 
@@ -513,12 +513,12 @@ def op_browser_explorer(self):
     try:
         tools.IO.browser_explorer(_dir)
     except ValueError as e:
-        tools.Logging.write_xml_logger().error(e)
+        tools.Log.write_xml_logger().error(e)
         return
 
 
 def write_xml(self):
-    tools.Logging.write_xml_logger().info("Writing XML")
+    tools.Log.write_xml_logger().info("Writing XML")
     _project_dir = tools.Registry.get_value(
         reg_.REG_KEY, reg_.REG_SUB, reg_.REG_PROJ_DIR, ""
     )
@@ -539,7 +539,7 @@ def write_xml(self):
     OCMSMAYAWritXML(0, _top_level_node, self._browser_path)
 
 
-    tools.Logging.write_xml_logger().info(
+    tools.Log.write_xml_logger().info(
         "Completed writing XML, please check the script editor for more information."
     )
 
@@ -548,8 +548,8 @@ def write_xml(self):
 
 def construct_ui(self):
     # p = self.parse
-    self.dynamic_box.add_group(id="匯出結果", widget=qt.QtGroupVBoxCSWidget(text="匯出結果"))
-    self.dynamic_box.add_widget(
+    self.dynamic_ui.add_group(id="匯出結果", widget=qt.QtGroupVBoxCSWidget(text="匯出結果"))
+    self.dynamic_ui.add_widget(
         parent_id="匯出結果",
         id="已完成匯出XML，點擊右側按鈕開啟檔案位置",
         widget=qt.QtInfoBoxCSWidget(
@@ -557,4 +557,4 @@ def construct_ui(self):
             status=qt.QtInfoBoxStatus.Success,
         ),
     )
-    tools.Logging.gui_logger().info("Completed constructing dynamic ui group manager")
+    tools.Log.gui_logger().info("Completed constructing dynamic ui group manager")

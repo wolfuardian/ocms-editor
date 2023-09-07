@@ -10,7 +10,7 @@ from . import store, prop
 
 
 def op_init_res_dir(self):
-    tools.Logging.parse_resources_logger().info(
+    tools.Log.parse_resources_logger().info(
         "Initializing resources source directory"
     )
 
@@ -24,28 +24,28 @@ def op_init_res_dir(self):
             reg_.REG_RES_DIR,
             tools.Maya.browser(3, _default_dir),
         )
-        self.txt_res_dir.lineedit.setText(_target_dir)
+        self.resource_dir_txt.lineedit.setText(_target_dir)
     else:
-        self.txt_res_dir.lineedit.setText(_default_dir)
-    self.btn_init_res_dir.set_force_visible(False)
-    self.txt_res_dir.set_force_visible(True)
-    self.txt_res_dir.lineedit.setCursorPosition(0)
-    self.btn_browser_res_dir.set_force_visible(True)
-    tools.Logging.parse_resources_logger().info(
+        self.resource_dir_txt.lineedit.setText(_default_dir)
+    self.init_resource_dir_btn.set_force_visible(False)
+    self.resource_dir_txt.set_force_visible(True)
+    self.resource_dir_txt.lineedit.setCursorPosition(0)
+    self.browse_resource_dir_btn.set_force_visible(True)
+    tools.Log.parse_resources_logger().info(
         "Completed initializing resources source directory"
     )
     parse_resources(self)
 
 
 def op_browser_resources_source_dir(self):
-    tools.Logging.parse_resources_logger().info("Browsing resources source directory")
+    tools.Log.parse_resources_logger().info("Browsing resources source directory")
 
     _default_dir = tools.Registry.get_value(
         reg_.REG_KEY, reg_.REG_SUB, reg_.REG_RES_DIR, ""
     )
     _browser_dir = tools.Maya.browser(3, _default_dir)
     if _browser_dir == "":
-        tools.Logging.parse_resources_logger().warning(
+        tools.Log.parse_resources_logger().warning(
             "User canceled the browser dialog."
         )
         return
@@ -55,9 +55,9 @@ def op_browser_resources_source_dir(self):
         reg_.REG_RES_DIR,
         _browser_dir,
     )
-    self.txt_res_dir.lineedit.setText(_target_dir)
-    self.txt_res_dir.lineedit.setCursorPosition(0)
-    tools.Logging.parse_resources_logger().info(
+    self.resource_dir_txt.lineedit.setText(_target_dir)
+    self.resource_dir_txt.lineedit.setCursorPosition(0)
+    tools.Log.parse_resources_logger().info(
         "Completed browsing resources source directory"
     )
 
@@ -65,20 +65,20 @@ def op_browser_resources_source_dir(self):
 
 
 def parse_resources(self):
-    tools.Logging.gui_logger().info("Initializing dynamic ui group manager")
-    self.dynamic_box.clear_all()
+    tools.Log.gui_logger().info("Initializing dynamic ui group manager")
+    self.dynamic_ui.clear_all()
 
-    tools.Logging.parse_resources_logger().info("Initializing parse resources data")
+    tools.Log.parse_resources_logger().info("Initializing parse resources data")
     self.parse = store.ParseResourcesData()
 
     _dir = tools.Registry.get_value(
         reg_.REG_KEY, reg_.REG_SUB, reg_.REG_RES_DIR, ""
     )
 
-    tools.Logging.parse_resources_logger().info("Loading resources directory")
+    tools.Log.parse_resources_logger().info("Loading resources directory")
     self.parse.load(_dir)
 
-    tools.Logging.parse_resources_logger().info("Starting constructing variables")
+    tools.Log.parse_resources_logger().info("Starting constructing variables")
     models_paths = self.parse.models_paths
     models_paths_sorted_by_size = self.parse.models_paths_sorted_by_size
     models_paths_sorted_filenames = self.parse.models_paths_sorted_filenames
@@ -117,25 +117,25 @@ def parse_resources(self):
             else:
                 models_paths_mapping_by_type[typ][name] = ""
 
-    tools.Logging.parse_resources_logger().info("Setting variables")
+    tools.Log.parse_resources_logger().info("Setting variables")
     prop.set_prop_models_names_mapping_by_type(models_names_mapping_by_type)
     prop.set_prop_models_paths_mapping_by_type(models_paths_mapping_by_type)
 
     # Storage
-    tools.Logging.storage_logger().info("Saving resources data")
+    tools.Log.storage_logger().info("Saving resources data")
     storage.ResourcesData.purse()
     storage.ResourcesData.update(store.ParseResourcesData)
 
-    tools.Logging.gui_logger().info("Constructing dynamic ui group")
+    tools.Log.gui_logger().info("Constructing dynamic ui group")
     construct_ui(self)
 
 
 def construct_ui(self):
     p: store.ParseResourcesData = self.parse
-    tools.Logging.gui_logger().info("Constructing dynamic ui group manager")
-    self.dynamic_box.add_group(id="模型檔統計", widget=qt.QtGroupVBoxCSWidget(text="模型檔統計"))
+    tools.Log.gui_logger().info("Constructing dynamic ui group manager")
+    self.dynamic_ui.add_group(id="模型檔統計", widget=qt.QtGroupVBoxCSWidget(text="模型檔統計"))
 
-    self.dynamic_box.add_widget(
+    self.dynamic_ui.add_widget(
         parent_id="模型檔統計",
         id="所有模型 (由大到小)",
         widget=qt.QtTextLineCSWidget(
@@ -148,7 +148,7 @@ def construct_ui(self):
             readonly=True,
         ),
     )
-    self.dynamic_box.add_widget(
+    self.dynamic_ui.add_widget(
         parent_id="模型檔統計",
         id="所有模型數量",
         widget=qt.QtTextLineCSWidget(
@@ -157,13 +157,13 @@ def construct_ui(self):
             readonly=True,
         ),
     )
-    self.dynamic_box.add_widget(
+    self.dynamic_ui.add_widget(
         parent_id="模型檔統計",
         id="分隔線1",
         widget=qt.QtLineCSWidget(),
     )
 
-    self.dynamic_box.add_widget(
+    self.dynamic_ui.add_widget(
         parent_id="模型檔統計",
         id="各類模型數量",
         widget=qt.QtTextLineCSWidget(
@@ -180,14 +180,14 @@ def construct_ui(self):
         ),
     )
 
-    self.dynamic_box.add_group(id="模型分析", widget=qt.QtGroupVBoxCSWidget(text="模型分析"))
+    self.dynamic_ui.add_group(id="模型分析", widget=qt.QtGroupVBoxCSWidget(text="模型分析"))
 
     _tree = qt.QtTreeCSWidget()
     _tree.setHeaderLabels(["模型目錄", "檔案路徑"])
     header = _tree.header()
     header.setSectionResizeMode(1, qt.QtWidgets.QHeaderView.Stretch)
     _tree.setIndentation(2)
-    self.dynamic_box.add_widget(
+    self.dynamic_ui.add_widget(
         parent_id="模型分析",
         id="樹狀清單",
         widget=_tree,
@@ -204,7 +204,7 @@ def construct_ui(self):
 
     _error_count = 0
     for index, (typ, models) in enumerate(_tmp_enum_models_by_type.items()):
-        self.dynamic_box.add_widget(
+        self.dynamic_ui.add_widget(
             parent_id="模型檔統計",
             id=f"各類 {typ}",
             widget=qt.QtTextLineCSWidget(
@@ -252,7 +252,7 @@ def construct_ui(self):
         _infobox.label.setText("所有模型都已找到路徑。")
         _infobox.set_status(qt.QtInfoBoxStatus.Success)
 
-    self.dynamic_box.add_widget(
+    self.dynamic_ui.add_widget(
         parent_id="模型分析",
         id="剩餘的錯誤數量提示",
         widget=_infobox,
@@ -261,10 +261,10 @@ def construct_ui(self):
     _btn = qt.QtButtonCSWidget(text="重新查找目錄並更新列表")
     _btn.clicked.connect(lambda: parse_resources(self))
 
-    self.dynamic_box.add_widget(
+    self.dynamic_ui.add_widget(
         parent_id="模型分析",
         id="更新列表 ( 將不保留變更 )",
         widget=_btn,
     )
 
-    tools.Logging.gui_logger().info("Completed constructing dynamic ui group manager")
+    tools.Log.gui_logger().info("Completed constructing dynamic ui group manager")

@@ -15,12 +15,12 @@ class XML(core.XML):
     def iterator(cls, root, tag=None, attr=None, kwd=None):
         if attr or kwd is not None:
             if attr is None:
-                tools.Logging.parse_xml_logger().warning(
+                tools.Log.parse_xml_logger().warning(
                     "attr should not be empty when kwd used."
                 )
 
             if kwd is None:
-                tools.Logging.parse_xml_logger().warning(
+                tools.Log.parse_xml_logger().warning(
                     "kwd should not be empty when attr used."
                 )
 

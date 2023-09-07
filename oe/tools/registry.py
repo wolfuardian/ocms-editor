@@ -7,7 +7,7 @@ import oe.core.tools as core
 class Registry(core.Registry):
     @classmethod
     def create_key(cls, key_name, subkey_name):
-        tools.Logging.registry_logger().info(
+        tools.Log.registry_logger().info(
             f"Creating subkey '{subkey_name}' in key '{key_name}'"
         )
         pass
@@ -16,7 +16,7 @@ class Registry(core.Registry):
     def set_value(
         cls, key_name, subkey_name, val_name, val_data, val_type=winreg.REG_SZ
     ):
-        tools.Logging.registry_logger().info(
+        tools.Log.registry_logger().info(
             f"Setting value '{val_name}' to '{val_data}' in subkey '{subkey_name}' of key '{key_name}'"
         )
         with winreg.OpenKey(
@@ -32,7 +32,7 @@ class Registry(core.Registry):
 
     @classmethod
     def get_value(cls, key_name, subkey_name, value_name, default=""):
-        tools.Logging.registry_logger().debug(
+        tools.Log.registry_logger().debug(
             f"Getting value '{value_name}' from subkey '{subkey_name}' in key '{key_name}'"
         )
         with winreg.OpenKey(
@@ -43,32 +43,32 @@ class Registry(core.Registry):
                     value = winreg.QueryValueEx(subkey, value_name)[0]
                     return value
             except PermissionError:
-                tools.Logging.parse_xml_logger().error(
+                tools.Log.parse_xml_logger().error(
                     "Permission denied: Unable to access the registry."
                 )
                 return default
             except WindowsError:
-                tools.Logging.registry_logger().warning(
+                tools.Log.registry_logger().warning(
                     f"Subkey '{subkey_name}' does not exist in key '{key_name}'."
                 )
                 return default
             except (AttributeError, NameError):
-                tools.Logging.registry_logger().error("Function or module not found.")
+                tools.Log.registry_logger().error("Function or module not found.")
                 return default
 
             except (TypeError, ValueError):
-                tools.Logging.registry_logger().error("Invalid argument provided.")
+                tools.Log.registry_logger().error("Invalid argument provided.")
                 return default
 
             except Exception as e:
-                tools.Logging.registry_logger().error(
+                tools.Log.registry_logger().error(
                     f"An unexpected error occurred: {e}"
                 )
                 return default
 
     @classmethod
     def create_subkey(cls, key_name, subkey_name):
-        tools.Logging.registry_logger().info(
+        tools.Log.registry_logger().info(
             f"Creating subkey '{subkey_name}' in key '{key_name}'"
         )
         key = winreg.OpenKey(
@@ -81,7 +81,7 @@ class Registry(core.Registry):
     @classmethod
     def delete_subkey(cls, key_name, subkey_name):
         try:
-            tools.Logging.registry_logger().info(
+            tools.Log.registry_logger().info(
                 f"Removing subkey '{subkey_name}' from key '{key_name}'"
             )
             key = winreg.OpenKey(
@@ -91,6 +91,6 @@ class Registry(core.Registry):
             winreg.CloseKey(key)
 
         except WindowsError:
-            tools.Logging.registry_logger().warning(
+            tools.Log.registry_logger().warning(
                 f"Subkey '{subkey_name}' does not exist in key '{key_name}'."
             )

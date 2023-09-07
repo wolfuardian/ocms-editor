@@ -32,7 +32,8 @@ class Registry:
     def delete_subkey(cls, key_name, subkey_name): pass
 
 @interface
-class Logging:
+class Log:
+    def logger(cls, name): pass
     def installer_logger(cls): pass
     def registry_logger(cls): pass
     def fileio_logger(cls): pass
