@@ -31,11 +31,28 @@ class QtDefaultCSWidget(QtWidgets.QWidget):
 
     def __init__(self, parent=None, *args, **kwargs):
         super().__init__(parent=parent, *args, **kwargs)
+        self.is_cooling_down = False
+        self.cool_down_timer = QtCore.QTimer(self)
+        self.cool_down_timer.setSingleShot(True)
+        self.cool_down_timer.timeout.connect(self.reset_cool_down)
+
+        self.wheel_up_action = None
+        self.wheel_down_action = None
+
         self.force_visible = True
 
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
         self.set_extra_stylesheet()
+
+    def reset_cool_down(self):
+        self.is_cooling_down = False
+
+    def set_wheel_up_event(self, up_action):
+        self.wheel_up_action = up_action
+
+    def set_wheel_down_event(self, down_action):
+        self.wheel_down_action = down_action
 
     def set_force_visible(self, visible):
         self.force_visible = visible
@@ -52,6 +69,24 @@ class QtDefaultCSWidget(QtWidgets.QWidget):
     def set_extra_stylesheet(self):
         stylesheet = self.styleSheet() + "\n" + QtStylesheet.Tooltip
         self.setStyleSheet(stylesheet)
+
+    def wheelEvent(self, event):
+        if self.is_cooling_down:
+            return
+
+        modifiers = QtWidgets.QApplication.keyboardModifiers()
+        if modifiers == QtCore.Qt.ShiftModifier:
+            angle = event.angleDelta().y()
+            if angle > 0 and self.wheel_up_action:
+                self.wheel_up_action.trigger()
+            elif angle < 0 and self.wheel_down_action:
+                self.wheel_down_action.trigger()
+
+            self.is_cooling_down = True
+            self.cool_down_timer.start(50)
+
+        else:
+            super().wheelEvent(event)
 
 
 # Basic Widget
@@ -194,6 +229,29 @@ class QtButtonCSWidget(QtWidgets.QPushButton):
     def remove_from(self, parent):
         self.setParent(None)
         parent.removeWidget(self)
+
+    def set_icon(self, icon):
+        project_dir = Registry.get_value(
+            reg_.REG_KEY, reg_.REG_SUB, "Pref_ModuleProjectDirectory", ""
+        )
+        icon_filepath = project_dir + qt_.ICON_DIR + icon
+        try:
+            self.setIcon(QtGui.QIcon(icon_filepath))
+        except Exception as e:
+            print(e)
+
+    def set_text(self, text):
+        self.setText(text)
+
+    def set_width(self, width):
+        self.setFixedWidth(width)
+
+    def set_height(self, height):
+        self.setFixedHeight(height)
+
+    def set_spacing(self, spacing):
+        text = " " * spacing + self.text() + " " * spacing
+        self.setText(text)
 
     def set_force_visible(self, visible):
         self.force_visible = visible
@@ -588,6 +646,9 @@ class QtGroupHBoxCSWidget(QtGroupBoxCSWidget):
         else:
             self.set_status(QtGroupBoxStatus.Default)
 
+    def set_text(self, text):
+        self.setTitle("  " + text + "  ")
+
     def add_to(self, parent):
         parent.addWidget(self)
         return self
@@ -915,6 +976,9 @@ class QtTextLineCSWidget(QtDefaultCSWidget):
 
         self.set_extra_stylesheet()
 
+    def set_text(self, text):
+        self.create_line_edits(text)
+
     def create_line_edits(
         self,
         texts,
@@ -1034,6 +1098,7 @@ class QtCheckBoxLineCSWidget(QtDefaultCSWidget):
     def remove_from(self, parent):
         self.setParent(None)
         parent.removeWidget(self)
+
 
 class QtTreeCSWidget(QtWidgets.QTreeWidget):
     """Custom QtTreeWidget subclass"""
