@@ -1,3 +1,5 @@
+import oe.storage as storage
+
 from oe.utils import qt
 
 from . import operator, store
@@ -14,7 +16,7 @@ class WriteXMLCSWidget(qt.QtFrameLayoutCSWidget):
             qt.QtWidgets.QSizePolicy.Expanding, qt.QtWidgets.QSizePolicy.Expanding
         )
 
-        self.dynamic_ui = store.DynamicUIGroupManager()
+        self.dynamic_ui = storage.DynamicUIGroupManager()
 
         self.xml_box = qt.QtGroupHBoxCSWidget()
         self.xml_box.set_text("XML路徑")

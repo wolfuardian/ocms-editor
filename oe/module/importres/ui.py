@@ -1,3 +1,5 @@
+import oe.storage as storage
+
 from oe.utils import qt
 
 from . import operator, store
@@ -14,7 +16,7 @@ class ImportResourcesCSWidget(qt.QtFrameLayoutCSWidget):
             qt.QtWidgets.QSizePolicy.Expanding, qt.QtWidgets.QSizePolicy.Expanding
         )
 
-        self.dynamic_ui = store.DynamicUIGroupManager()
+        self.dynamic_ui = storage.DynamicUIGroupManager()
 
         self.res_import_box = qt.QtGroupHBoxCSWidget()
         self.res_import_box.set_text("模型資源")

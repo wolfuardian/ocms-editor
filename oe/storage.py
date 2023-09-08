@@ -1,6 +1,7 @@
 import os
 import oe.tools as tools
 
+from oe.utils import qt
 from oe.utils import const as c
 
 
@@ -144,26 +145,102 @@ class Path:
 
 class Registry:
     def __init__(self, name, key=c.REG_KEY, sub=c.REG_SUB):
-        self._key = key
-        self._sub = sub
-        self._name = name
-        self._value = None
+        self.__key = key
+        self.__sub = sub
+        self.__name = name
+        self.__value = None
 
         self._fetch()
 
     def clear(self):
-        self._key = None
-        self._sub = None
-        self._name = None
-        self._value = None
+        self.__key = None
+        self.__sub = None
+        self.__name = None
+        self.__value = None
 
     def _fetch(self):
-        self._value = tools.Registry.get_value(self._key, self._sub, self._name, "")
+        self.__value = tools.Registry.get_value(self.__key, self.__sub, self.__name, "")
 
     def set(self, value):
-        self._value = value
-        tools.Registry.set_value(self._key, self._sub, self._name, self._value)
-        return self._value
+        self.__value = value
+        tools.Registry.set_value(self.__key, self.__sub, self.__name, self.__value)
+        return self.__value
 
     def get(self):
-        return self._value
+        return self.__value
+
+
+class Widget:
+    def __init__(self, widget):
+        self.__widget = widget
+
+    def hide(self):
+        self.__widget.set_force_visible(False)
+
+    def show(self):
+        self.__widget.set_force_visible(True)
+
+    def enable(self):
+        self.__widget.setEnabled(True)
+
+    def disable(self):
+        self.__widget.setEnabled(False)
+
+    def set_text(self, text):
+        self.__widget.setText(text)
+        self.__widget.setCursorPosition(0)
+
+    def get_widget(self):
+        return self.__widget
+
+
+class DynamicUIGroupManager:
+    def __init__(self):
+        self.groupbox = qt.QtGroupVBoxCSWidget(margin=(0, 0, 0, 0))
+        self.groupbox.set_status(qt.QtGroupBoxStatus.Border)
+        self.layout = self.groupbox.layout
+        self.context = {}
+
+    def add_group(self, id, widget):
+        if id in self.context:
+            raise ValueError(f"Group ID {id} already exists.")
+        self.context[id] = {"widget": widget, "children": {}}
+        self.layout.addWidget(widget)
+
+    def remove_group(self, id):
+        if id not in self.context:
+            raise ValueError(f"Group ID {id} does not exist.")
+        widget = self.context[id]["widget"]
+        widget.deleteLater()
+        del self.context[id]
+
+    def add_widget(self, parent_id, id, widget):
+        if parent_id not in self.context:
+            raise ValueError(f"Parent group ID {parent_id} does not exist.")
+        if id in self.context[parent_id]["children"]:
+            raise ValueError(f"Widget ID {id} already exists in group {parent_id}.")
+        self.context[parent_id]["children"][id] = widget
+        self.context[parent_id]["widget"].layout.addWidget(widget)
+
+    def remove_widget(self, parent_id, id):
+        if parent_id not in self.context:
+            raise ValueError(f"Parent group ID {parent_id} does not exist.")
+        if id not in self.context[parent_id]["children"]:
+            raise ValueError(f"Widget ID {id} does not exist in group {parent_id}.")
+        widget = self.context[parent_id]["children"][id]
+        widget.deleteLater()
+        del self.context[parent_id]["children"][id]
+
+    def clear_group(self, group_id):
+        if group_id not in self.context:
+            raise ValueError(f"Group ID {group_id} does not exist.")
+        for id, widget in self.context[group_id]["children"].items():
+            widget.deleteLater()
+        self.context[group_id]["children"].clear()
+
+    def clear_all(self):
+        for group_id, group_data in self.context.items():
+            for id, widget in group_data["children"].items():
+                widget.deleteLater()
+            group_data["widget"].deleteLater()
+        self.context.clear()

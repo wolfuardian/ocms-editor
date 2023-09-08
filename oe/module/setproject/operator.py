@@ -16,11 +16,11 @@ def op_browser_project_dir(self):
 
     sel_path = core.browser(storage, tools, c.REG_PROJ_DIR, 3)
 
-    Widget(self.project_dir_txt.lineedit).set_text(sel_path)
+    storage.Widget(self.project_dir_txt.lineedit).set_text(sel_path)
 
-    Widget(self.project_dir_txt).show()
-    Widget(self.init_project_dir_btn).hide()
-    Widget(self.browse_project_dir_btn).show()
+    storage.Widget(self.project_dir_txt).show()
+    storage.Widget(self.init_project_dir_btn).hide()
+    storage.Widget(self.browse_project_dir_btn).show()
 
 
 def validate_project_dir(self):
@@ -32,22 +32,7 @@ def validate_project_dir(self):
 
 
 def _setup_project_dir_ui(self, _project_dir):
-    Widget(self.project_dir_txt.lineedit).set_text(_project_dir)
-    Widget(self.project_dir_txt).show()
-    Widget(self.init_project_dir_btn).hide()
-    Widget(self.browse_project_dir_btn).show()
-
-
-class Widget:
-    def __init__(self, widget):
-        self.widget = widget
-
-    def hide(self):
-        self.widget.set_force_visible(False)
-
-    def show(self):
-        self.widget.set_force_visible(True)
-
-    def set_text(self, text):
-        self.widget.setText(text)
-        self.widget.setCursorPosition(0)
+    storage.Widget(self.project_dir_txt).set_text(_project_dir)
+    storage.Widget(self.project_dir_txt).show()
+    storage.Widget(self.init_project_dir_btn).hide()
+    storage.Widget(self.browse_project_dir_btn).show()

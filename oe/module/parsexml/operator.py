@@ -21,12 +21,12 @@ def op_browser_xml_path(self):
 
     validate_xml_path(self)
 
-    Widget(self.xml_path_txt.lineedit).set_text(sel_path)
+    storage.Widget(self.xml_path_txt.lineedit).set_text(sel_path)
 
-    Widget(self.init_btn).hide()
-    Widget(self.parse_btn).show()
-    Widget(self.browse_btn).show()
-    Widget(self.xml_path_txt).show()
+    storage.Widget(self.init_btn).hide()
+    storage.Widget(self.parse_btn).show()
+    storage.Widget(self.browse_btn).show()
+    storage.Widget(self.xml_path_txt).show()
 
 
 def op_parse_xml(self):
@@ -38,20 +38,20 @@ def validate_xml_path(self):
     if not storage.Path(_xml_path).is_valid():
         return
     if not storage.Path(_xml_path).is_xml():
-        Widget(self.parse_btn).disable()
+        storage.Widget(self.parse_btn).disable()
         _setup_xml_path_ui(self, _xml_path)
         return
 
-    Widget(self.parse_btn).enable()
+    storage.Widget(self.parse_btn).enable()
     _setup_xml_path_ui(self, _xml_path)
 
 
 def _setup_xml_path_ui(self, _xml_path):
-    Widget(self.xml_path_txt.lineedit).set_text(_xml_path)
-    Widget(self.init_btn).hide()
-    Widget(self.parse_btn).show()
-    Widget(self.browse_btn).show()
-    Widget(self.xml_path_txt).show()
+    storage.Widget(self.xml_path_txt).set_text(_xml_path)
+    storage.Widget(self.xml_path_txt).show()
+    storage.Widget(self.init_btn).hide()
+    storage.Widget(self.parse_btn).show()
+    storage.Widget(self.browse_btn).show()
 
 
 def parse_xml(self):
@@ -583,24 +583,3 @@ def construct_ui(self):
                         ),
                     )
     tools.Log.gui_logger().info("Completed constructing dynamic ui group manager")
-
-
-class Widget:
-    def __init__(self, widget):
-        self.widget = widget
-
-    def hide(self):
-        self.widget.set_force_visible(False)
-
-    def show(self):
-        self.widget.set_force_visible(True)
-
-    def enable(self):
-        self.widget.setEnabled(True)
-
-    def disable(self):
-        self.widget.setEnabled(False)
-
-    def set_text(self, text):
-        self.widget.setText(text)
-        self.widget.setCursorPosition(0)

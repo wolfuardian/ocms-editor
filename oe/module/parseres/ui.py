@@ -1,3 +1,5 @@
+import oe.storage as storage
+
 from oe.utils import qt
 
 from . import operator, store
@@ -15,7 +17,7 @@ class ParseResourcesCSWidget(qt.QtFrameLayoutCSWidget):
             qt.QtWidgets.QSizePolicy.MinimumExpanding,
         )
 
-        self.dynamic_ui = store.DynamicUIGroupManager()
+        self.dynamic_ui = storage.DynamicUIGroupManager()
 
         self.resource_dir_box = qt.QtGroupHBoxCSWidget()
         self.resource_dir_box.set_text("來源模型檔目錄")
