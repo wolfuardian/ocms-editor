@@ -548,8 +548,8 @@ def write_xml(self):
 
 def construct_ui(self):
     # p = self.parse
-    self.groupbox.add_group(id="匯出結果", widget=qt.QtGroupVBoxCSWidget(text="匯出結果"))
-    self.groupbox.add_widget(
+    self.groupvbox.add_group(id="匯出結果", widget=qt.QtGroupVBoxCSWidget(text="匯出結果"))
+    self.groupvbox.add_widget(
         parent_id="匯出結果",
         id="已完成匯出XML，點擊右側按鈕開啟檔案位置",
         widget=qt.QtInfoBoxCSWidget(

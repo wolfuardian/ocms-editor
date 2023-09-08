@@ -56,7 +56,7 @@ def _setup_xml_path_ui(self, _xml_path):
 
 def parse_xml(self):
     tools.Log.gui_logger().info("Initializing dynamic ui group manager")
-    self.groupbox.clear_all()
+    self.groupvbox.clear_all()
 
     tools.Log.parse_xml_logger().info("Initializing parse xml data")
     self.parse = store.ParseXMLData()
@@ -251,32 +251,32 @@ def construct_ui(self):
     tools.Log.gui_logger().info(
         "Notice: Some widgets may have some differences due to different datasource"
     )
-    self.groupbox.add_group(id="點位物件統計", widget=qt.QtGroupVBoxCSWidget(text="點位物件統計"))
-    self.groupbox.add_widget(
+    self.groupvbox.add_group(id="點位物件統計", widget=qt.QtGroupVBoxCSWidget(text="點位物件統計"))
+    self.groupvbox.add_widget(
         parent_id="點位物件統計",
         id="物件數量",
         widget=qt.QtTextLineCSWidget(
             title="物件數量", text=len(p.nodes_objects).__str__(), readonly=True
         ),
     )
-    self.groupbox.add_widget(
+    self.groupvbox.add_widget(
         parent_id="點位物件統計",
         id="分隔線1",
         widget=qt.QtLineCSWidget(),
     )
-    self.groupbox.add_widget(
+    self.groupvbox.add_widget(
         parent_id="點位物件統計",
         id="Product Type",
         widget=qt.QtTextLineCSWidget(
             title="Product Type", text=p.data_datasource, readonly=True
         ),
     )
-    self.groupbox.add_widget(
+    self.groupvbox.add_widget(
         parent_id="點位物件統計",
         id="分隔線2",
         widget=qt.QtLineCSWidget(),
     )
-    self.groupbox.add_widget(
+    self.groupvbox.add_widget(
         parent_id="點位物件統計",
         id="// TAGS",
         widget=qt.QtTextLineCSWidget(
@@ -285,7 +285,7 @@ def construct_ui(self):
             readonly=True,
         ),
     )
-    self.groupbox.add_widget(
+    self.groupvbox.add_widget(
         parent_id="點位物件統計",
         id="// ATTRS",
         widget=qt.QtTextLineCSWidget(
@@ -294,7 +294,7 @@ def construct_ui(self):
             readonly=True,
         ),
     )
-    self.groupbox.add_widget(
+    self.groupvbox.add_widget(
         parent_id="點位物件統計",
         id="// TYPES",
         widget=qt.QtTextLineCSWidget(
@@ -303,7 +303,7 @@ def construct_ui(self):
             readonly=True,
         ),
     )
-    self.groupbox.add_widget(
+    self.groupvbox.add_widget(
         parent_id="點位物件統計",
         id="分隔線3",
         widget=qt.QtLineCSWidget(),
@@ -311,11 +311,11 @@ def construct_ui(self):
 
     for typ in p.types:
         if typ not in p.non_device_types:
-            self.groupbox.add_group(
+            self.groupvbox.add_group(
                 id=f"{typ} 物件", widget=qt.QtGroupVBoxCSWidget(text=f"{typ} 物件")
             )
             if p.data_datasource == "OCMS":
-                self.groupbox.add_widget(
+                self.groupvbox.add_widget(
                     parent_id=f"{typ} 物件",
                     id=f"{typ} 數量",
                     widget=qt.QtTextLineCSWidget(
@@ -330,7 +330,7 @@ def construct_ui(self):
                         ratio=0.9,
                     ),
                 )
-                self.groupbox.add_widget(
+                self.groupvbox.add_widget(
                     parent_id=f"點位物件統計",
                     id=f"{typ} Bundle",
                     widget=qt.QtTextLineCSWidget(
@@ -347,7 +347,7 @@ def construct_ui(self):
                         ratio=0.9,
                     ),
                 )
-                self.groupbox.add_widget(
+                self.groupvbox.add_widget(
                     parent_id=f"點位物件統計",
                     id=f"{typ} Model",
                     widget=qt.QtTextLineCSWidget(
@@ -364,12 +364,12 @@ def construct_ui(self):
                         ratio=0.9,
                     ),
                 )
-                self.groupbox.add_widget(
+                self.groupvbox.add_widget(
                     parent_id=f"{typ} 物件",
                     id=f"{typ} 分隔線2",
                     widget=qt.QtLineCSWidget(),
                 )
-                self.groupbox.add_widget(
+                self.groupvbox.add_widget(
                     parent_id=f"{typ} 物件",
                     id=f"{typ} 核實設備",
                     widget=qt.QtTextLineCSWidget(
@@ -397,7 +397,7 @@ def construct_ui(self):
                 )
                 if len(p.props["data_objects_invalid_by_type"][typ]) > 0:
                     _w.set_status(qt.QtLineEditStatus.Error)
-                self.groupbox.add_widget(
+                self.groupvbox.add_widget(
                     parent_id=f"{typ} 物件",
                     id=f"{typ} 無效設備",
                     widget=_w,
@@ -415,12 +415,12 @@ def construct_ui(self):
                 )
                 if len(p.props["data_objects_temporary_by_type"][typ]) > 0:
                     _w.set_status(qt.QtLineEditStatus.Error)
-                self.groupbox.add_widget(
+                self.groupvbox.add_widget(
                     parent_id=f"{typ} 物件",
                     id=f"{typ} 暫代設備",
                     widget=_w,
                 )
-                self.groupbox.add_widget(
+                self.groupvbox.add_widget(
                     parent_id=f"{typ} 物件",
                     id=f"{typ} 分隔線3",
                     widget=qt.QtLineCSWidget(),
@@ -438,14 +438,14 @@ def construct_ui(self):
                 )
                 if len(p.props["data_objects_duplicate_by_type"][typ]) > 0:
                     _w.set_status(qt.QtLineEditStatus.Warning)
-                self.groupbox.add_widget(
+                self.groupvbox.add_widget(
                     parent_id=f"{typ} 物件",
                     id=f"{typ} 重複設備",
                     widget=_w,
                 )
 
                 if len(p.props["data_objects_invalid_by_type"][typ]) > 0:
-                    self.groupbox.add_widget(
+                    self.groupvbox.add_widget(
                         parent_id=f"{typ} 物件",
                         id=f"{typ} 無效設備提示",
                         widget=qt.QtInfoBoxCSWidget(
@@ -454,7 +454,7 @@ def construct_ui(self):
                         ),
                     )
                 if len(p.props["data_objects_duplicate_by_type"][typ]) > 0:
-                    self.groupbox.add_widget(
+                    self.groupvbox.add_widget(
                         parent_id=f"{typ} 物件",
                         id=f"{typ} 重複設備提示",
                         widget=qt.QtInfoBoxCSWidget(
@@ -462,7 +462,7 @@ def construct_ui(self):
                             status=qt.QtInfoBoxStatus.Warning,
                         ),
                     )
-                self.groupbox.add_widget(
+                self.groupvbox.add_widget(
                     parent_id=f"{typ} 物件",
                     id=f"{typ} OCMS提示",
                     widget=qt.QtInfoBoxCSWidget(
@@ -471,7 +471,7 @@ def construct_ui(self):
                     ),
                 )
             elif p.data_datasource == "OCMS2_0":
-                self.groupbox.add_widget(
+                self.groupvbox.add_widget(
                     parent_id=f"點位物件統計",
                     id=f"{typ} Model",
                     widget=qt.QtTextLineCSWidget(
@@ -488,7 +488,7 @@ def construct_ui(self):
                         ratio=0.9,
                     ),
                 )
-                self.groupbox.add_widget(
+                self.groupvbox.add_widget(
                     parent_id=f"{typ} 物件",
                     id=f"{typ} 數量",
                     widget=qt.QtTextLineCSWidget(
@@ -503,12 +503,12 @@ def construct_ui(self):
                         ratio=0.9,
                     ),
                 )
-                self.groupbox.add_widget(
+                self.groupvbox.add_widget(
                     parent_id=f"{typ} 物件",
                     id=f"{typ} 分隔線2",
                     widget=qt.QtLineCSWidget(),
                 )
-                self.groupbox.add_widget(
+                self.groupvbox.add_widget(
                     parent_id=f"{typ} 物件",
                     id=f"{typ} 核實設備",
                     widget=qt.QtTextLineCSWidget(
@@ -536,12 +536,12 @@ def construct_ui(self):
                 )
                 if len(p.props["data_objects_invalid_by_type"][typ]) > 0:
                     _w.set_status(qt.QtLineEditStatus.Error)
-                self.groupbox.add_widget(
+                self.groupvbox.add_widget(
                     parent_id=f"{typ} 物件",
                     id=f"{typ} 無效設備",
                     widget=_w,
                 )
-                self.groupbox.add_widget(
+                self.groupvbox.add_widget(
                     parent_id=f"{typ} 物件",
                     id=f"{typ} 分隔線3",
                     widget=qt.QtLineCSWidget(),
@@ -559,13 +559,13 @@ def construct_ui(self):
                 )
                 if len(p.props["data_objects_duplicate_by_type"][typ]) > 0:
                     _w.set_status(qt.QtLineEditStatus.Warning)
-                self.groupbox.add_widget(
+                self.groupvbox.add_widget(
                     parent_id=f"{typ} 物件",
                     id=f"{typ} 重複設備",
                     widget=_w,
                 )
                 if len(p.props["data_objects_invalid_by_type"][typ]) > 0:
-                    self.groupbox.add_widget(
+                    self.groupvbox.add_widget(
                         parent_id=f"{typ} 物件",
                         id=f"{typ} 無效設備提示",
                         widget=qt.QtInfoBoxCSWidget(
@@ -574,7 +574,7 @@ def construct_ui(self):
                         ),
                     )
                 if len(p.props["data_objects_duplicate_by_type"][typ]) > 0:
-                    self.groupbox.add_widget(
+                    self.groupvbox.add_widget(
                         parent_id=f"{typ} 物件",
                         id=f"{typ} 重複設備提示",
                         widget=qt.QtInfoBoxCSWidget(

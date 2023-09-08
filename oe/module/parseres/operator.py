@@ -66,7 +66,7 @@ def op_browser_resources_source_dir(self):
 
 def parse_resources(self):
     tools.Log.gui_logger().info("Initializing dynamic ui group manager")
-    self.groupbox.clear_all()
+    self.groupvbox.clear_all()
 
     tools.Log.parse_resources_logger().info("Initializing parse resources data")
     self.parse = store.ParseResourcesData()
@@ -133,9 +133,9 @@ def parse_resources(self):
 def construct_ui(self):
     p: store.ParseResourcesData = self.parse
     tools.Log.gui_logger().info("Constructing dynamic ui group manager")
-    self.groupbox.add_group(id="模型檔統計", widget=qt.QtGroupVBoxCSWidget(text="模型檔統計"))
+    self.groupvbox.add_group(id="模型檔統計", widget=qt.QtGroupVBoxCSWidget(text="模型檔統計"))
 
-    self.groupbox.add_widget(
+    self.groupvbox.add_widget(
         parent_id="模型檔統計",
         id="所有模型 (由大到小)",
         widget=qt.QtTextLineCSWidget(
@@ -148,7 +148,7 @@ def construct_ui(self):
             readonly=True,
         ),
     )
-    self.groupbox.add_widget(
+    self.groupvbox.add_widget(
         parent_id="模型檔統計",
         id="所有模型數量",
         widget=qt.QtTextLineCSWidget(
@@ -157,13 +157,13 @@ def construct_ui(self):
             readonly=True,
         ),
     )
-    self.groupbox.add_widget(
+    self.groupvbox.add_widget(
         parent_id="模型檔統計",
         id="分隔線1",
         widget=qt.QtLineCSWidget(),
     )
 
-    self.groupbox.add_widget(
+    self.groupvbox.add_widget(
         parent_id="模型檔統計",
         id="各類模型數量",
         widget=qt.QtTextLineCSWidget(
@@ -180,14 +180,14 @@ def construct_ui(self):
         ),
     )
 
-    self.groupbox.add_group(id="模型分析", widget=qt.QtGroupVBoxCSWidget(text="模型分析"))
+    self.groupvbox.add_group(id="模型分析", widget=qt.QtGroupVBoxCSWidget(text="模型分析"))
 
     _tree = qt.QtTreeCSWidget()
     _tree.setHeaderLabels(["模型目錄", "檔案路徑"])
     header = _tree.header()
     header.setSectionResizeMode(1, qt.QtWidgets.QHeaderView.Stretch)
     _tree.setIndentation(2)
-    self.groupbox.add_widget(
+    self.groupvbox.add_widget(
         parent_id="模型分析",
         id="樹狀清單",
         widget=_tree,
@@ -204,7 +204,7 @@ def construct_ui(self):
 
     _error_count = 0
     for index, (typ, models) in enumerate(_tmp_enum_models_by_type.items()):
-        self.groupbox.add_widget(
+        self.groupvbox.add_widget(
             parent_id="模型檔統計",
             id=f"各類 {typ}",
             widget=qt.QtTextLineCSWidget(
@@ -252,7 +252,7 @@ def construct_ui(self):
         _infobox.label.setText("所有模型都已找到路徑。")
         _infobox.set_status(qt.QtInfoBoxStatus.Success)
 
-    self.groupbox.add_widget(
+    self.groupvbox.add_widget(
         parent_id="模型分析",
         id="剩餘的錯誤數量提示",
         widget=_infobox,
@@ -261,7 +261,7 @@ def construct_ui(self):
     _btn = qt.QtButtonCSWidget(text="重新查找目錄並更新列表")
     _btn.clicked.connect(lambda: parse_resources(self))
 
-    self.groupbox.add_widget(
+    self.groupvbox.add_widget(
         parent_id="模型分析",
         id="更新列表 ( 將不保留變更 )",
         widget=_btn,

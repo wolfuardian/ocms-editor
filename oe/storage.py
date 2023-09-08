@@ -194,7 +194,7 @@ class Widget:
         return self.__widget
 
 
-class QtGroupbox:
+class QtGroupVBox:
     def __init__(self):
         self.__groupbox = qt.QtGroupVBoxCSWidget(margin=(0, 0, 0, 0))
         self.__groupbox.set_status(qt.QtGroupBoxStatus.Border)

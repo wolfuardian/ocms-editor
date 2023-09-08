@@ -16,7 +16,7 @@ class WriteXMLCSWidget(qt.QtFrameLayoutCSWidget):
             qt.QtWidgets.QSizePolicy.Expanding, qt.QtWidgets.QSizePolicy.Expanding
         )
 
-        self.groupbox = storage.QtGroupbox()
+        self.groupvbox = storage.QtGroupVBox()
 
         self.xml_box = qt.QtGroupHBoxCSWidget()
         self.xml_box.set_text("XML路徑")
@@ -42,6 +42,6 @@ class WriteXMLCSWidget(qt.QtFrameLayoutCSWidget):
         self.xml_box.layout.addWidget(self.browse_btn)
 
         self.scrollarea.layout.addWidget(self.xml_box)
-        self.scrollarea.layout.addWidget(self.groupbox.get_groupbox())
+        self.scrollarea.layout.addWidget(self.groupvbox.get_groupbox())
 
         self.frame_layout.addWidget(self.scrollarea)

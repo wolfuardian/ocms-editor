@@ -16,7 +16,7 @@ class ParseXMLCSWidget(qt.QtFrameLayoutCSWidget):
             qt.QtWidgets.QSizePolicy.Expanding, qt.QtWidgets.QSizePolicy.Expanding
         )
 
-        self.groupbox = storage.QtGroupbox()
+        self.groupvbox = storage.QtGroupVBox()
 
         self.xml_path_box = qt.QtGroupHBoxCSWidget()
         self.xml_path_box.set_text("XML路徑")
@@ -49,7 +49,7 @@ class ParseXMLCSWidget(qt.QtFrameLayoutCSWidget):
         self.xml_path_box.layout.addWidget(self.parse_btn)
         self.xml_path_box.layout.addWidget(self.browse_btn)
         self.scrollarea.layout.addWidget(self.xml_path_box)
-        self.scrollarea.layout.addWidget(self.groupbox.get_groupbox())
+        self.scrollarea.layout.addWidget(self.groupvbox.get_groupbox())
 
         self.init_btn.clicked.connect(lambda: operator.op_init_xml_path(self))
         self.parse_btn.clicked.connect(lambda: operator.op_parse_xml(self))

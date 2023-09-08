@@ -1258,8 +1258,8 @@ def import_resources(self):
 
 def construct_ui(self):
     # p = self.parse
-    self.groupbox.add_group(id="匯入結果", widget=qt.QtGroupVBoxCSWidget(text="匯入結果"))
-    self.groupbox.add_widget(
+    self.groupvbox.add_group(id="匯入結果", widget=qt.QtGroupVBoxCSWidget(text="匯入結果"))
+    self.groupvbox.add_widget(
         parent_id="匯入結果",
         id="剩餘的錯誤數量提示",
         widget=qt.QtInfoBoxCSWidget(
