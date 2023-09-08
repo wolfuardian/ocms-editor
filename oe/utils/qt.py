@@ -266,6 +266,8 @@ class QtButtonCSWidget(QtWidgets.QPushButton):
         stylesheet = self.styleSheet() + "\n" + QtStylesheet.Tooltip
         self.setStyleSheet(stylesheet)
 
+    def set_tooltip(self, text):
+        self.setToolTip(text)
 
 class QtTabCSWidget(QtWidgets.QTabWidget):
     """Custom QTabWidget subclass"""

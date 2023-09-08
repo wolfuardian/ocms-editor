@@ -55,7 +55,7 @@ class Setup(
         tab_load.layout.addWidget(frame_parse_xml)
         tab_load.layout.addWidget(frame_parse_res)
         tab_load.layout.addWidget(frame_import_res)
-        tab_load.layout.addWidget(frame_writexml)
+        tab_save.layout.addWidget(frame_writexml)
 
         tab.addTab(tab_load, "讀取")
         tab.addTab(tab_edit, "編輯")
@@ -91,10 +91,10 @@ class Setup(
             frame_writexml,
         ]
 
-        storage.UIData.ui["frame_set_project"] = frame_set_project
-        storage.UIData.ui["frame_parse_xml"] = frame_parse_xml
-        storage.UIData.ui["frame_parse_res"] = frame_parse_res
-        storage.UIData.ui["frame_import_res"] = frame_import_res
-        storage.UIData.ui["frame_writexml"] = frame_writexml
+        storage.UIData.ui.setdefault("frame_set_project", frame_set_project)
+        storage.UIData.ui.setdefault("frame_parse_xml", frame_parse_xml)
+        storage.UIData.ui.setdefault("frame_parse_res", frame_parse_res)
+        storage.UIData.ui.setdefault("frame_import_res", frame_import_res)
+        storage.UIData.ui.setdefault("frame_writexml", frame_writexml)
 
         self.toggle_resize_win()

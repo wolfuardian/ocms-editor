@@ -6,6 +6,9 @@ from oe.utils import const as c
 
 
 class XMLData:
+    __is_done = False
+    __is_updatable = False
+
     props = {}
 
     path = None
@@ -46,6 +49,10 @@ class XMLData:
 
     @classmethod
     def update(cls, store):
+        if not cls.__is_updatable:
+            raise ValueError("XMLData is not updatable.")
+
+        # TODO: Check if store is valid
         cls.props = store.props
 
         cls.path = store.path
@@ -64,8 +71,28 @@ class XMLData:
 
         cls.non_device_types = store.non_device_types
 
+    @classmethod
+    def open(cls):
+        cls.__is_updatable = True
+
+    @classmethod
+    def close(cls):
+        cls.__is_updatable = False
+
+    @classmethod
+    def done(cls):
+        cls.__is_done = True
+        cls.__is_updatable = False
+
+    @classmethod
+    def is_valid(cls):
+        return cls.__is_done and cls.__is_updatable
+
 
 class ResourcesData:
+    __is_done = False
+    __is_updatable = False
+
     props = {}
 
     dir = None
@@ -86,6 +113,9 @@ class ResourcesData:
 
     @classmethod
     def update(cls, store):
+        if not cls.__is_updatable:
+            raise ValueError("ResourcesData is not updatable.")
+
         cls.props = store.props
 
         cls.dir = store.dir
@@ -94,9 +124,30 @@ class ResourcesData:
         cls.models_paths_sorted_filenames = store.models_paths_sorted_filenames
         cls.models_paths_sorted_filesizes = store.models_paths_sorted_filesizes
 
+    @classmethod
+    def open(cls):
+        cls.__is_updatable = True
+
+    @classmethod
+    def close(cls):
+        cls.__is_updatable = False
+
+    @classmethod
+    def done(cls):
+        cls.__is_done = True
+        cls.__is_updatable = False
+
+    @classmethod
+    def is_valid(cls):
+        return cls.__is_done and cls.__is_updatable
+
 
 class UIData:
     ui = {}
+
+    @classmethod
+    def purse(cls):
+        cls.ui = {}
 
 
 class Path:
@@ -108,9 +159,9 @@ class Path:
 
         self.__is_xml = False
 
-        self.validate()
+        self.__validate()
 
-    def purse(self):
+    def __purse(self):
         self.__path = None
         self.__is_dir = False
         self.__is_file = False
@@ -118,9 +169,9 @@ class Path:
 
         self.__is_xml = False
 
-    def validate(self):
+    def __validate(self):
         if not self.__path or self.__path == "":
-            self.purse()
+            self.__purse()
         else:
             self.__is_exists = tools.IO.is_exists(self.__path)
             self.__is_dir = tools.IO.is_dir(self.__path)

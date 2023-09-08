@@ -1224,7 +1224,7 @@ class TaskImportFBXs:
 
 
 def op_import_resources(self):
-    tools.Log.import_resources_logger().info("Importing resources...")
+    tools.Log.info(__name__, "Importing resources...")
 
     import_resources(self)
 
@@ -1249,8 +1249,9 @@ def import_resources(self):
 
     self.import_res_btn.set_force_visible(False)
     self.res_import_box.set_force_visible(False)
-    tools.Log.import_resources_logger().info(
-        "Completed importing resources, please check the script editor for more information"
+    tools.Log.info(
+        __name__,
+        "Completed importing resources, please check the script editor for more information",
     )
 
     construct_ui(self)
@@ -1267,4 +1268,4 @@ def construct_ui(self):
             status=qt.QtInfoBoxStatus.Success,
         ),
     )
-    tools.Log.gui_logger().info("Completed constructing dynamic ui group manager")
+    tools.Log.info(__name__, "Completed constructing dynamic ui group manager")

@@ -7,17 +7,16 @@ import oe.core.tools as core
 class Registry(core.Registry):
     @classmethod
     def create_key(cls, key_name, subkey_name):
-        tools.Log.registry_logger().info(
-            f"Creating subkey '{subkey_name}' in key '{key_name}'"
-        )
+        tools.Log.info(__name__, f"Creating subkey '{subkey_name}' in key '{key_name}'")
         pass
 
     @classmethod
     def set_value(
         cls, key_name, subkey_name, val_name, val_data, val_type=winreg.REG_SZ
     ):
-        tools.Log.registry_logger().info(
-            f"Setting value '{val_name}' to '{val_data}' in subkey '{subkey_name}' of key '{key_name}'"
+        tools.Log.info(
+            __name__,
+            f"Setting value '{val_name}' to '{val_data}' in subkey '{subkey_name}' of key '{key_name}'",
         )
         with winreg.OpenKey(
             winreg.HKEY_CURRENT_USER, key_name, 0, winreg.KEY_WRITE
@@ -32,9 +31,6 @@ class Registry(core.Registry):
 
     @classmethod
     def get_value(cls, key_name, subkey_name, value_name, default=""):
-        tools.Log.registry_logger().debug(
-            f"Getting value '{value_name}' from subkey '{subkey_name}' in key '{key_name}'"
-        )
         with winreg.OpenKey(
             winreg.HKEY_CURRENT_USER, key_name, 0, winreg.KEY_READ
         ) as key:
@@ -43,34 +39,31 @@ class Registry(core.Registry):
                     value = winreg.QueryValueEx(subkey, value_name)[0]
                     return value
             except PermissionError:
-                tools.Log.parse_xml_logger().error(
-                    "Permission denied: Unable to access the registry."
+                tools.Log.error(
+                    __name__, "Permission denied: Unable to access the registry."
                 )
                 return default
             except WindowsError:
-                tools.Log.registry_logger().warning(
-                    f"Subkey '{subkey_name}' does not exist in key '{key_name}'."
+                tools.Log.warning(
+                    __name__,
+                    f"Subkey '{subkey_name}' does not exist in key '{key_name}'.",
                 )
                 return default
             except (AttributeError, NameError):
-                tools.Log.registry_logger().error("Function or module not found.")
+                tools.Log.error(__name__, f"Function or module not found.")
                 return default
 
             except (TypeError, ValueError):
-                tools.Log.registry_logger().error("Invalid argument provided.")
+                tools.Log.error(__name__, f"Invalid argument provided.")
                 return default
 
             except Exception as e:
-                tools.Log.registry_logger().error(
-                    f"An unexpected error occurred: {e}"
-                )
+                tools.Log.error(__name__, f"An unexpected error occurred: {e}")
                 return default
 
     @classmethod
     def create_subkey(cls, key_name, subkey_name):
-        tools.Log.registry_logger().info(
-            f"Creating subkey '{subkey_name}' in key '{key_name}'"
-        )
+        tools.Log.info(__name__, f"Creating subkey '{subkey_name}' in key '{key_name}'")
         key = winreg.OpenKey(
             winreg.HKEY_CURRENT_USER, key_name, 0, winreg.KEY_ALL_ACCESS
         )
@@ -81,8 +74,8 @@ class Registry(core.Registry):
     @classmethod
     def delete_subkey(cls, key_name, subkey_name):
         try:
-            tools.Log.registry_logger().info(
-                f"Removing subkey '{subkey_name}' from key '{key_name}'"
+            tools.Log.info(
+                __name__, f"Removing subkey '{subkey_name}' from key '{key_name}'"
             )
             key = winreg.OpenKey(
                 winreg.HKEY_CURRENT_USER, key_name, 0, winreg.KEY_ALL_ACCESS
@@ -91,6 +84,6 @@ class Registry(core.Registry):
             winreg.CloseKey(key)
 
         except WindowsError:
-            tools.Log.registry_logger().warning(
-                f"Subkey '{subkey_name}' does not exist in key '{key_name}'."
+            tools.Log.warning(
+                __name__, f"Subkey '{subkey_name}' does not exist in key '{key_name}'."
             )

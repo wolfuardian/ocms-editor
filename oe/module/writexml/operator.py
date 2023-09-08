@@ -1,13 +1,4 @@
-import os
-import re
-import json
-import math
-import time
-import shutil
-
-import xml.etree.ElementTree as Et
-import maya.cmds as cmds
-
+# -*- coding: utf-8 -*-
 import oe.module.importres.operator
 import oe.tools as tools
 import oe.storage as storage
@@ -488,19 +479,19 @@ def OCMSMAYAWritXML(_ver_int, _root, _file):
 
 
 def op_write_xml(self):
-    tools.Log.write_xml_logger().info("Browsing writing xml path")
+    tools.Log.info(__name__, "Browsing writing xml path")
 
     _default_dir = tools.Registry.get_value(
         c.REG_KEY, c.REG_SUB, c.REG_PROJ_DIR, ""
     )
     _browser_path = tools.Maya.browser(0, _default_dir)
     if _browser_path == "":
-        tools.Log.set_project_logger().warning("User canceled the browser dialog.")
+        tools.Log.info(__name__, "User canceled the browser dialog.")
         return
 
     self.xml_path_txt.lineedit.setText(_browser_path)
     self.xml_path_txt.lineedit.setCursorPosition(0)
-    tools.Log.set_project_logger().info("Completed writing xml path")
+    tools.Log.info(__name__, "Completed writing xml path")
 
     self._browser_path = _browser_path
 
@@ -513,12 +504,12 @@ def op_browser_explorer(self):
     try:
         tools.IO.browser_explorer(_dir)
     except ValueError as e:
-        tools.Log.write_xml_logger().error(e)
+        tools.Log.error(__name__, e)
         return
 
 
 def write_xml(self):
-    tools.Log.write_xml_logger().info("Writing XML")
+    tools.Log.info(__name__, "Writing XML")
     _project_dir = tools.Registry.get_value(
         c.REG_KEY, c.REG_SUB, c.REG_PROJ_DIR, ""
     )
@@ -539,10 +530,7 @@ def write_xml(self):
     OCMSMAYAWritXML(0, _top_level_node, self._browser_path)
 
 
-    tools.Log.write_xml_logger().info(
-        "Completed writing XML, please check the script editor for more information."
-    )
-
+    tools.Log.info(__name__ ,"Completed writing XML, please check the script editor for more information.")
     construct_ui(self)
 
 
@@ -557,4 +545,4 @@ def construct_ui(self):
             status=qt.QtInfoBoxStatus.Success,
         ),
     )
-    tools.Log.gui_logger().info("Completed constructing dynamic ui group manager")
+    tools.Log.info(__name__, "Completed constructing dynamic ui group manager")

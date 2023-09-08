@@ -14,6 +14,9 @@ def interface(cls):
     attrs = {n: classmethod(abc.abstractmethod(f)) for n, f in inspect.getmembers(cls, predicate=inspect.isfunction)}
     return type(cls.__name__, (Interface, cls), attrs)
 
+@interface
+class UI:
+    def update(cls): pass
 
 @interface
 class Maya:
@@ -37,18 +40,6 @@ class Log:
     def info(cls, name): pass
     def warning(cls, name): pass
     def error(cls, name): pass
-    def installer_logger(cls): pass
-    def registry_logger(cls): pass
-    def fileio_logger(cls): pass
-    def maya_logger(cls): pass
-    def gui_logger(cls): pass
-    def packages_logger(cls): pass
-    def storage_logger(cls): pass
-    def set_project_logger(cls): pass
-    def parse_xml_logger(cls): pass
-    def parse_resources_logger(cls): pass
-    def import_resources_logger(cls): pass
-    def write_xml_logger(cls): pass
 
 @interface
 class Packages:

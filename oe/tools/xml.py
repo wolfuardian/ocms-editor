@@ -1,4 +1,3 @@
-import io
 import warnings
 import xml.etree.ElementTree as Et
 
@@ -15,14 +14,9 @@ class XML(core.XML):
     def iterator(cls, root, tag=None, attr=None, kwd=None):
         if attr or kwd is not None:
             if attr is None:
-                tools.Log.parse_xml_logger().warning(
-                    "attr should not be empty when kwd used."
-                )
-
+                tools.Log.warning(__name__, "attr should not be empty when kwd used.")
             if kwd is None:
-                tools.Log.parse_xml_logger().warning(
-                    "kwd should not be empty when attr used."
-                )
+                tools.Log.warning(__name__, "kwd should not be empty when attr used.")
 
         return [elem for elem in root.iter(tag) if elem.get(attr) == kwd]
 
@@ -86,18 +80,17 @@ class XML(core.XML):
             if pos_op != "&":
                 if pos_op != "and":
                     if pos_op != "or":
-                        warnings.simplefilter("error", UserWarning)
-                        warnings.warn(
-                            "option_pos should only be like '|', '&', 'and', 'or'."
+                        tools.Log.warning(
+                            __name__,
+                            "option_pos should only be like '|', '&', 'and', 'or'.",
                         )
-
         if neg_op != "|":
             if neg_op != "&":
                 if neg_op != "and":
                     if neg_op != "or":
-                        warnings.simplefilter("error", UserWarning)
-                        warnings.warn(
-                            "option_neg should only be like '|', '&', 'and', 'or'."
+                        tools.Log.warning(
+                            __name__,
+                            "option_neg should only be like '|', '&', 'and', 'or'.",
                         )
 
         valid = None

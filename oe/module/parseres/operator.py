@@ -1,84 +1,89 @@
-import copy
 import os
 
 import oe.tools as tools
 import oe.storage as storage
+import oe.core.maya as core
 
 from oe.utils import qt
 from oe.utils import const as c
 from . import store, prop
 
 
+def op_fetch_res_dir(self):
+    tools.Log.info(__name__, "Fetching resources directory")
+
+    validate_resources_dir(self)
+
+
 def op_init_res_dir(self):
-    tools.Log.parse_resources_logger().info(
-        "Initializing resources source directory"
-    )
+    tools.Log.info(__name__, "Initializing resources source directory")
 
-    _default_dir = tools.Registry.get_value(
-        c.REG_KEY, c.REG_SUB, c.REG_RES_DIR, ""
-    )
-    if _default_dir == "":
-        _target_dir = tools.Registry.set_value(
-            c.REG_KEY,
-            c.REG_SUB,
-            c.REG_RES_DIR,
-            tools.Maya.browser(3, _default_dir),
-        )
-        self.resource_dir_txt.lineedit.setText(_target_dir)
+    op_browser_resources_dir(self)
+
+
+def op_browser_resources_dir(self):
+    tools.Log.info(__name__, "Browsing resources directory")
+
+    sel_path = core.browser(storage, tools, c.REG_RES_DIR, 3)
+
+    validate_resources_dir(self)
+
+    storage.Widget(self.resource_dir_txt.lineedit).set_text(sel_path)
+
+    storage.Widget(self.resource_dir_txt).show()
+    storage.Widget(self.init_btn).hide()
+    storage.Widget(self.browse_btn).show()
+    storage.Widget(self.parse_btn).show()
+
+
+def op_parse_resources(self):
+    tools.Log.info(__name__, "Parsing resources")
+
+    parse_resources(self)
+
+
+def validate_resources_dir(self):
+    tools.Log.info(__name__, "Validating resources directory")
+
+    _resources_dir = storage.Registry(c.REG_RES_DIR).get()
+    _xml_path = storage.Registry(c.REG_XML_PATH).get()
+    if (
+        not storage.Path(_resources_dir).is_valid()
+        or not storage.Path(_resources_dir).is_dir()
+        or not storage.XMLData.is_valid()
+    ):
+        storage.Widget(self.parse_btn).disable()
+        storage.ResourcesData.close()
     else:
-        self.resource_dir_txt.lineedit.setText(_default_dir)
-    self.init_resource_dir_btn.set_force_visible(False)
-    self.resource_dir_txt.set_force_visible(True)
-    self.resource_dir_txt.lineedit.setCursorPosition(0)
-    self.browse_resource_dir_btn.set_force_visible(True)
-    tools.Log.parse_resources_logger().info(
-        "Completed initializing resources source directory"
-    )
-    parse_resources(self)
+        storage.Widget(self.parse_btn).enable()
+        storage.ResourcesData.open()
+
+    _setup_ui(self, _resources_dir)
 
 
-def op_browser_resources_source_dir(self):
-    tools.Log.parse_resources_logger().info("Browsing resources source directory")
+def _setup_ui(self, _resources_dir):
+    tools.Log.info(__name__, "Setting up resources directory ui")
 
-    _default_dir = tools.Registry.get_value(
-        c.REG_KEY, c.REG_SUB, c.REG_RES_DIR, ""
-    )
-    _browser_dir = tools.Maya.browser(3, _default_dir)
-    if _browser_dir == "":
-        tools.Log.parse_resources_logger().warning(
-            "User canceled the browser dialog."
-        )
-        return
-    _target_dir = tools.Registry.set_value(
-        c.REG_KEY,
-        c.REG_SUB,
-        c.REG_RES_DIR,
-        _browser_dir,
-    )
-    self.resource_dir_txt.lineedit.setText(_target_dir)
-    self.resource_dir_txt.lineedit.setCursorPosition(0)
-    tools.Log.parse_resources_logger().info(
-        "Completed browsing resources source directory"
-    )
-
-    parse_resources(self)
+    storage.Widget(self.resource_dir_txt.lineedit).set_text(_resources_dir)
+    storage.Widget(self.resource_dir_txt).show()
+    storage.Widget(self.init_btn).hide()
+    storage.Widget(self.browse_btn).show()
+    storage.Widget(self.parse_btn).show()
 
 
 def parse_resources(self):
-    tools.Log.gui_logger().info("Initializing dynamic ui group manager")
+    tools.Log.info(__name__, "Initializing dynamic ui group manager")
     self.groupvbox.clear_all()
 
-    tools.Log.parse_resources_logger().info("Initializing parse resources data")
+    tools.Log.info(__name__, "Initializing parse resources data")
     self.parse = store.ParseResourcesData()
 
-    _dir = tools.Registry.get_value(
-        c.REG_KEY, c.REG_SUB, c.REG_RES_DIR, ""
-    )
+    _dir = tools.Registry.get_value(c.REG_KEY, c.REG_SUB, c.REG_RES_DIR, "")
 
-    tools.Log.parse_resources_logger().info("Loading resources directory")
+    tools.Log.info(__name__, "Loading resources directory")
     self.parse.load(_dir)
 
-    tools.Log.parse_resources_logger().info("Starting constructing variables")
+    tools.Log.info(__name__, "Starting constructing variables")
     models_paths = self.parse.models_paths
     models_paths_sorted_by_size = self.parse.models_paths_sorted_by_size
     models_paths_sorted_filenames = self.parse.models_paths_sorted_filenames
@@ -117,22 +122,22 @@ def parse_resources(self):
             else:
                 models_paths_mapping_by_type[typ][name] = ""
 
-    tools.Log.parse_resources_logger().info("Setting variables")
+    tools.Log.info(__name__, "Setting variables")
     prop.set_prop_models_names_mapping_by_type(models_names_mapping_by_type)
     prop.set_prop_models_paths_mapping_by_type(models_paths_mapping_by_type)
 
     # Storage
-    tools.Log.storage_logger().info("Saving resources data")
+    tools.Log.info(__name__, "Saving resources data")
     storage.ResourcesData.purse()
     storage.ResourcesData.update(store.ParseResourcesData)
 
-    tools.Log.gui_logger().info("Constructing dynamic ui group")
+    tools.Log.info(__name__, "Constructing dynamic ui group")
     construct_ui(self)
 
 
 def construct_ui(self):
     p: store.ParseResourcesData = self.parse
-    tools.Log.gui_logger().info("Constructing dynamic ui group manager")
+    tools.Log.info(__name__, "Constructing dynamic ui group manager")
     self.groupvbox.add_group(id="模型檔統計", widget=qt.QtGroupVBoxCSWidget(text="模型檔統計"))
 
     self.groupvbox.add_widget(
@@ -267,4 +272,4 @@ def construct_ui(self):
         widget=_btn,
     )
 
-    tools.Log.gui_logger().info("Completed constructing dynamic ui group manager")
+    tools.Log.info(__name__, "Completed constructing dynamic ui group manager")

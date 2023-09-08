@@ -8,6 +8,12 @@ from oe.utils import const as c
 from . import store, prop
 
 
+def op_fetch_xml_path(self):
+    tools.Log.info(__name__, "Fetching xml path")
+
+    validate_xml_path(self)
+
+
 def op_init_xml_path(self):
     tools.Log.info(__name__, "Initializing xml path")
 
@@ -23,30 +29,39 @@ def op_browser_xml_path(self):
 
     storage.Widget(self.xml_path_txt.lineedit).set_text(sel_path)
 
-    storage.Widget(self.init_btn).hide()
-    storage.Widget(self.parse_btn).show()
-    storage.Widget(self.browse_btn).show()
     storage.Widget(self.xml_path_txt).show()
+    storage.Widget(self.init_btn).hide()
+    storage.Widget(self.browse_btn).show()
+    storage.Widget(self.parse_btn).show()
 
 
 def op_parse_xml(self):
-    parse_xml(self)
+    tools.Log.info(__name__, "Parsing xml")
+
+    frame_parse_xml(self)
 
 
 def validate_xml_path(self):
+    tools.Log.info(__name__, "Validating xml path")
+
     _xml_path = storage.Registry(c.REG_XML_PATH).get()
-    if not storage.Path(_xml_path).is_valid():
-        return
-    if not storage.Path(_xml_path).is_xml():
+    if (
+        not storage.Path(_xml_path).is_valid()
+        or not storage.Path(_xml_path).is_file()
+        or not storage.Path(_xml_path).is_xml()
+    ):
         storage.Widget(self.parse_btn).disable()
-        _setup_xml_path_ui(self, _xml_path)
-        return
+        storage.XMLData.close()
+    else:
+        storage.Widget(self.parse_btn).enable()
+        storage.XMLData.open()
 
-    storage.Widget(self.parse_btn).enable()
-    _setup_xml_path_ui(self, _xml_path)
+    _setup_ui(self, _xml_path)
 
 
-def _setup_xml_path_ui(self, _xml_path):
+def _setup_ui(self, _xml_path):
+    tools.Log.info(__name__, "Setting up xml path ui")
+
     storage.Widget(self.xml_path_txt.lineedit).set_text(_xml_path)
     storage.Widget(self.xml_path_txt).show()
     storage.Widget(self.init_btn).hide()
@@ -54,19 +69,19 @@ def _setup_xml_path_ui(self, _xml_path):
     storage.Widget(self.browse_btn).show()
 
 
-def parse_xml(self):
-    tools.Log.gui_logger().info("Initializing dynamic ui group manager")
+def frame_parse_xml(self):
+    tools.Log.info(__name__, "Initializing dynamic ui group manager")
     self.groupvbox.clear_all()
 
-    tools.Log.parse_xml_logger().info("Initializing parse xml data")
+    tools.Log.info(__name__, "Initializing parse xml data")
     self.parse = store.ParseXMLData()
 
     _path = tools.Registry.get_value(c.REG_KEY, c.REG_SUB, c.REG_XML_PATH, "")
 
-    tools.Log.parse_xml_logger().info("Loading xml data")
+    tools.Log.info(__name__, "Loading xml data")
     self.parse.load(_path)
 
-    tools.Log.parse_xml_logger().info("Starting constructing variables")
+    tools.Log.info(__name__, "Starting constructing variables")
     nodes_objects = self.parse.nodes_objects
     nodes_datasource = self.parse.nodes_datasource
     nodes_objects_by_type = {}
@@ -93,7 +108,7 @@ def parse_xml(self):
     non_device_types = self.parse.non_device_types
 
     for typ in data_types:
-        tools.Log.parse_xml_logger().info("Constructing variables for type: " + typ)
+        tools.Log.info(__name__, "Constructing variables for type: " + typ)
         typ = typ.__str__()
         nodes_objects_by_type[typ] = tools.XML.iterator(
             self.parse.root, tag="Object", attr="type", kwd=typ
@@ -216,7 +231,7 @@ def parse_xml(self):
                     if node.get("name") in data_objects_duplicate_by_type[typ]:
                         nodes_objects_duplicate_by_type[typ].append(node)
 
-    tools.Log.parse_xml_logger().info("Setting variables")
+    tools.Log.info(__name__, "Setting variables")
     prop.set_prop_nodes_objects_by_type(nodes_objects_by_type)
     prop.set_prop_nodes_objects_valid_by_type(nodes_objects_valid_by_type)
     prop.set_prop_nodes_objects_invalid_by_type(nodes_objects_invalid_by_type)
@@ -233,23 +248,22 @@ def parse_xml(self):
     prop.set_prop_data_objects_enum_bundle_by_type(data_objects_enum_bundle_by_type)
 
     # Storage
-    tools.Log.storage_logger().info("Saving xml data")
+    tools.Log.info(__name__, "Saving xml data")
     from oe import storage
 
     storage.XMLData.purse()
     storage.XMLData.update(store.ParseXMLData)
 
-    tools.Log.gui_logger().info("Constructing dynamic ui group")
+    tools.Log.info(__name__, "Constructing dynamic ui group")
     construct_ui(self)
 
 
 def construct_ui(self):
     p = self.parse
-    tools.Log.parse_xml_logger().info(
-        "Notice: Current datasource is " + p.data_datasource
-    )
-    tools.Log.gui_logger().info(
-        "Notice: Some widgets may have some differences due to different datasource"
+    tools.Log.info(__name__, "Notice: Current datasource is " + p.data_datasource)
+    tools.Log.info(
+        __name__,
+        "Notice: Some widgets may have some differences due to different datasource",
     )
     self.groupvbox.add_group(id="點位物件統計", widget=qt.QtGroupVBoxCSWidget(text="點位物件統計"))
     self.groupvbox.add_widget(
@@ -582,4 +596,6 @@ def construct_ui(self):
                             status=qt.QtInfoBoxStatus.Warning,
                         ),
                     )
-    tools.Log.gui_logger().info("Completed constructing dynamic ui group manager")
+    storage.XMLData.done()
+    tools.UI.update()
+    tools.Log.info(__name__, "Completed parsing xml")

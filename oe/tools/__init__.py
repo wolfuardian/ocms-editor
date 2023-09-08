@@ -1,3 +1,4 @@
+from oe.tools.ui import UI
 from oe.tools.maya import Maya
 from oe.tools.registry import Registry
 from oe.tools.log import Log

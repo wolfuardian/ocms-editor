@@ -25,8 +25,8 @@ class Maya(core.Maya):
                 fileMode=file_mode, dir=default_dir, fileFilter=file_filter
             )[0]
         except TypeError:
-            tools.Log.maya_logger().warning(
-                "Maya browser failed, please check the input parameters."
+            tools.Log.warning(
+                __name__, "Maya browser failed, please check the input parameters."
             )
             return ""
 

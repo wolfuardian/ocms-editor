@@ -17,32 +17,35 @@ class SetProjectDirectoryCSWidget(qt.QtFrameLayoutCSWidget):
         self.project_dir_box = qt.QtGroupHBoxCSWidget()
         self.project_dir_box.set_text("專案目錄")
 
+        self.fetch_btn = qt.QtButtonCSWidget()
+        self.fetch_btn.set_width(4)
+        self.fetch_btn.set_height(16)
+        self.fetch_btn.set_tooltip("Fetch")
+
         self.project_dir_txt = qt.QtTextLineCSWidget()
         self.project_dir_txt.set_text("")
         self.project_dir_txt.lineedit.setReadOnly(True)
         self.project_dir_txt.set_force_visible(False)
 
-        self.init_project_dir_btn = qt.QtButtonCSWidget()
-        self.init_project_dir_btn.set_icon("open_folder.png")
-        self.init_project_dir_btn.set_text("  初始化")
-        self.init_project_dir_btn.set_height(32)
+        self.init_btn = qt.QtButtonCSWidget()
+        self.init_btn.set_icon("open_folder.png")
+        self.init_btn.set_text("  初始化")
+        self.init_btn.set_height(32)
 
-        self.browse_project_dir_btn = qt.QtButtonCSWidget()
-        self.browse_project_dir_btn.set_icon("open_folder.png")
-        self.browse_project_dir_btn.set_text("")
-        self.browse_project_dir_btn.set_height(32)
-        self.browse_project_dir_btn.set_force_visible(False)
+        self.browse_btn = qt.QtButtonCSWidget()
+        self.browse_btn.set_icon("open_folder.png")
+        self.browse_btn.set_text("")
+        self.browse_btn.set_height(32)
+        self.browse_btn.set_force_visible(False)
 
-        self.init_project_dir_btn.clicked.connect(
-            lambda: operator.op_init_project_dir(self)
-        )
-        self.browse_project_dir_btn.clicked.connect(
-            lambda: operator.op_browser_project_dir(self)
-        )
+        self.fetch_btn.clicked.connect(lambda: operator.op_fetch_project_dir(self))
+        self.init_btn.clicked.connect(lambda: operator.op_init_project_dir(self))
+        self.browse_btn.clicked.connect(lambda: operator.op_browser_project_dir(self))
 
+        self.project_dir_box.layout.addWidget(self.fetch_btn)
         self.project_dir_box.layout.addWidget(self.project_dir_txt)
-        self.project_dir_box.layout.addWidget(self.init_project_dir_btn)
-        self.project_dir_box.layout.addWidget(self.browse_project_dir_btn)
+        self.project_dir_box.layout.addWidget(self.init_btn)
+        self.project_dir_box.layout.addWidget(self.browse_btn)
 
         self.scrollarea.layout.addWidget(self.project_dir_box)
 
