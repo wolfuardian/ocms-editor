@@ -17,7 +17,7 @@ class ParseResourcesCSWidget(qt.QtFrameLayoutCSWidget):
             qt.QtWidgets.QSizePolicy.MinimumExpanding,
         )
 
-        self.dynamic_ui = storage.DynamicUIGroupManager()
+        self.groupbox = storage.QtGroupbox()
 
         self.resource_dir_box = qt.QtGroupHBoxCSWidget()
         self.resource_dir_box.set_text("來源模型檔目錄")
@@ -50,6 +50,6 @@ class ParseResourcesCSWidget(qt.QtFrameLayoutCSWidget):
         self.resource_dir_box.layout.addWidget(self.browse_resource_dir_btn)
 
         self.scrollarea.layout.addWidget(self.resource_dir_box)
-        self.scrollarea.layout.addWidget(self.dynamic_ui.get_groupbox())
+        self.scrollarea.layout.addWidget(self.groupbox.get_groupbox())
 
         self.frame_layout.addWidget(self.scrollarea)

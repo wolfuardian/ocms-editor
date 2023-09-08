@@ -16,7 +16,7 @@ class ImportResourcesCSWidget(qt.QtFrameLayoutCSWidget):
             qt.QtWidgets.QSizePolicy.Expanding, qt.QtWidgets.QSizePolicy.Expanding
         )
 
-        self.dynamic_ui = storage.DynamicUIGroupManager()
+        self.groupbox = storage.QtGroupbox()
 
         self.res_import_box = qt.QtGroupHBoxCSWidget()
         self.res_import_box.set_text("模型資源")
@@ -31,6 +31,6 @@ class ImportResourcesCSWidget(qt.QtFrameLayoutCSWidget):
         self.res_import_box.layout.addWidget(self.import_res_btn)
 
         self.scrollarea.layout.addWidget(self.res_import_box)
-        self.scrollarea.layout.addWidget(self.dynamic_ui.get_groupbox())
+        self.scrollarea.layout.addWidget(self.groupbox.get_groupbox())
 
         self.frame_layout.addWidget(self.scrollarea)
