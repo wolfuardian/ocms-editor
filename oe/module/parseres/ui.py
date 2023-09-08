@@ -50,6 +50,6 @@ class ParseResourcesCSWidget(qt.QtFrameLayoutCSWidget):
         self.resource_dir_box.layout.addWidget(self.browse_resource_dir_btn)
 
         self.scrollarea.layout.addWidget(self.resource_dir_box)
-        self.scrollarea.layout.addWidget(self.dynamic_ui.groupbox)
+        self.scrollarea.layout.addWidget(self.dynamic_ui.get_groupbox())
 
         self.frame_layout.addWidget(self.scrollarea)

@@ -31,6 +31,6 @@ class ImportResourcesCSWidget(qt.QtFrameLayoutCSWidget):
         self.res_import_box.layout.addWidget(self.import_res_btn)
 
         self.scrollarea.layout.addWidget(self.res_import_box)
-        self.scrollarea.layout.addWidget(self.dynamic_ui.groupbox)
+        self.scrollarea.layout.addWidget(self.dynamic_ui.get_groupbox())
 
         self.frame_layout.addWidget(self.scrollarea)

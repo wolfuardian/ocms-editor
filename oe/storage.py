@@ -196,51 +196,54 @@ class Widget:
 
 class DynamicUIGroupManager:
     def __init__(self):
-        self.groupbox = qt.QtGroupVBoxCSWidget(margin=(0, 0, 0, 0))
-        self.groupbox.set_status(qt.QtGroupBoxStatus.Border)
-        self.layout = self.groupbox.layout
-        self.context = {}
+        self.__groupbox = qt.QtGroupVBoxCSWidget(margin=(0, 0, 0, 0))
+        self.__groupbox.set_status(qt.QtGroupBoxStatus.Border)
+        self.__layout = self.__groupbox.layout
+        self.__context = {}
+
+    def get_groupbox(self):
+        return self.__groupbox
 
     def add_group(self, id, widget):
-        if id in self.context:
+        if id in self.__context:
             raise ValueError(f"Group ID {id} already exists.")
-        self.context[id] = {"widget": widget, "children": {}}
-        self.layout.addWidget(widget)
+        self.__context[id] = {"widget": widget, "children": {}}
+        self.__layout.addWidget(widget)
 
     def remove_group(self, id):
-        if id not in self.context:
+        if id not in self.__context:
             raise ValueError(f"Group ID {id} does not exist.")
-        widget = self.context[id]["widget"]
+        widget = self.__context[id]["widget"]
         widget.deleteLater()
-        del self.context[id]
+        del self.__context[id]
 
     def add_widget(self, parent_id, id, widget):
-        if parent_id not in self.context:
+        if parent_id not in self.__context:
             raise ValueError(f"Parent group ID {parent_id} does not exist.")
-        if id in self.context[parent_id]["children"]:
+        if id in self.__context[parent_id]["children"]:
             raise ValueError(f"Widget ID {id} already exists in group {parent_id}.")
-        self.context[parent_id]["children"][id] = widget
-        self.context[parent_id]["widget"].layout.addWidget(widget)
+        self.__context[parent_id]["children"][id] = widget
+        self.__context[parent_id]["widget"].__layout.addWidget(widget)
 
     def remove_widget(self, parent_id, id):
-        if parent_id not in self.context:
+        if parent_id not in self.__context:
             raise ValueError(f"Parent group ID {parent_id} does not exist.")
-        if id not in self.context[parent_id]["children"]:
+        if id not in self.__context[parent_id]["children"]:
             raise ValueError(f"Widget ID {id} does not exist in group {parent_id}.")
-        widget = self.context[parent_id]["children"][id]
+        widget = self.__context[parent_id]["children"][id]
         widget.deleteLater()
-        del self.context[parent_id]["children"][id]
+        del self.__context[parent_id]["children"][id]
 
     def clear_group(self, group_id):
-        if group_id not in self.context:
+        if group_id not in self.__context:
             raise ValueError(f"Group ID {group_id} does not exist.")
-        for id, widget in self.context[group_id]["children"].items():
+        for id, widget in self.__context[group_id]["children"].items():
             widget.deleteLater()
-        self.context[group_id]["children"].clear()
+        self.__context[group_id]["children"].clear()
 
     def clear_all(self):
-        for group_id, group_data in self.context.items():
+        for group_id, group_data in self.__context.items():
             for id, widget in group_data["children"].items():
                 widget.deleteLater()
             group_data["widget"].deleteLater()
-        self.context.clear()
+        self.__context.clear()

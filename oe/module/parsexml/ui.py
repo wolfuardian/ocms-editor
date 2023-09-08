@@ -49,7 +49,7 @@ class ParseXMLCSWidget(qt.QtFrameLayoutCSWidget):
         self.xml_path_box.layout.addWidget(self.parse_btn)
         self.xml_path_box.layout.addWidget(self.browse_btn)
         self.scrollarea.layout.addWidget(self.xml_path_box)
-        self.scrollarea.layout.addWidget(self.dynamic_ui.groupbox)
+        self.scrollarea.layout.addWidget(self.dynamic_ui.get_groupbox())
 
         self.init_btn.clicked.connect(lambda: operator.op_init_xml_path(self))
         self.parse_btn.clicked.connect(lambda: operator.op_parse_xml(self))

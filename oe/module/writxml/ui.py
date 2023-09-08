@@ -42,6 +42,6 @@ class WriteXMLCSWidget(qt.QtFrameLayoutCSWidget):
         self.xml_box.layout.addWidget(self.browse_btn)
 
         self.scrollarea.layout.addWidget(self.xml_box)
-        self.scrollarea.layout.addWidget(self.dynamic_ui.groupbox)
+        self.scrollarea.layout.addWidget(self.dynamic_ui.get_groupbox())
 
         self.frame_layout.addWidget(self.scrollarea)
