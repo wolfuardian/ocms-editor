@@ -223,7 +223,10 @@ class QtGroupVBox:
         if id in self.__context[parent_id]["children"]:
             raise ValueError(f"Widget ID {id} already exists in group {parent_id}.")
         self.__context[parent_id]["children"][id] = widget
-        self.__context[parent_id]["widget"].__layout.addWidget(widget)
+        print(f"parent_id: {parent_id}, id: {id}")
+        print(f"widget: {widget}")
+        print(f"self.__context: {self.__context}")
+        self.__context[parent_id]["widget"].layout.addWidget(widget)
 
     def remove_widget(self, parent_id, id):
         if parent_id not in self.__context:
