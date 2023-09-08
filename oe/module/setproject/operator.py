@@ -32,7 +32,7 @@ def validate_project_dir(self):
 
 
 def _setup_project_dir_ui(self, _project_dir):
-    storage.Widget(self.project_dir_txt).set_text(_project_dir)
+    storage.Widget(self.project_dir_txt.lineedit).set_text(_project_dir)
     storage.Widget(self.project_dir_txt).show()
     storage.Widget(self.init_project_dir_btn).hide()
     storage.Widget(self.browse_project_dir_btn).show()

@@ -47,7 +47,7 @@ def validate_xml_path(self):
 
 
 def _setup_xml_path_ui(self, _xml_path):
-    storage.Widget(self.xml_path_txt).set_text(_xml_path)
+    storage.Widget(self.xml_path_txt.lineedit).set_text(_xml_path)
     storage.Widget(self.xml_path_txt).show()
     storage.Widget(self.init_btn).hide()
     storage.Widget(self.parse_btn).show()
