@@ -1,4 +1,4 @@
-from ocmseditor import tool
+import ocmseditor.oe.helper as helper
 
 from ocmseditor.oe import ui
 
@@ -7,7 +7,7 @@ global instance
 
 def show():
     global instance
-    tool.Packages.reload(packages=["ocmseditor"])
+    helper.PackageReloader.reload(packages=["ocmseditor"])
 
     try:
         if instance:

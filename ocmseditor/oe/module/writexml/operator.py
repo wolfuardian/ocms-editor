@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
-from ocmseditor import tool
-
-from ocmseditor import tool
-from ocmseditor.oe import qt
-from ocmseditor.oe import ocms
-from ocmseditor.core import maya as core
-from ocmseditor.oe.data import const as c
+import ocmseditor.oe.qt as qt
+import ocmseditor.tool as tool
+import ocmseditor.oe.helper as helper
+import ocmseditor.oe.data.const as const
 
 # ---------------------------------------------------------------------
 # Licensed to NADI System Corp. under a Contributor Agreement.
@@ -446,7 +443,7 @@ class OCMSMAYAETWrite:
 
     def __prettyxml(self, _tostring):
         DOM_string = DOM.parseString(_tostring)
-        XML_string = DOM_string.toprettyxml(indent="\t", encoding="utf-8")
+        XML_string = DOM_string.toprettyxml(indent="    ", encoding="utf-8")
         self.root = ET.fromstring(XML_string)
         self.root.attrib = self.root_attr
         self.XML_TREE = ET.ElementTree(self.root)
@@ -457,7 +454,7 @@ class OCMSMAYAETWrite:
             self.et_initial(mode)
             XML_string = self.__tostring(self.root)
             self.__prettyxml(XML_string)
-            self.XML_TREE.write(_file)
+            self.XML_TREE.write(_file, encoding="utf-8")
             # ET.dump(self.XML_TREE)
             print("xml file writting done.")
         else:
@@ -475,80 +472,107 @@ def OCMSMAYAWritXML(_ver_int, _root, _file):
 # -------------------------------------------------------------------------------------------------------------------------------
 
 
-def op_fetch(self):
-    validate(self)
+def has_custom_attrs(node: str, custom_comp_attr: str = None) -> bool:
+    """
+    Check if a node has custom attributes.
+    :param node: The node to check.
+    :param custom_comp_attr: The compound attribute to check.
+    :return: True if the node has custom attributes.
+    """
+    custom_attrs = cmds.listAttr(node, userDefined=True)
+    if not custom_comp_attr:
+        return custom_attrs is not None and len(custom_attrs) > 0
+    return cmds.attributeQuery(custom_comp_attr, node=node, exists=True)
 
 
-def op_browser(self):
-    core.browser(ocms, tool, c.REG_XML_EXPORT_PATH, 0, "XML Files (*.xml)")
+def get_compound_attr_values(node: str, compound_attr: str) -> dict:
+    """
+    Get compound attribute values.
+    :param node: The node to get attributes from.
+    :param compound_attr: The compound attribute to get values from.
+    :return: The dictionary of compound attribute values.
+    """
+    children_attrs = None
+    if not cmds.objExists(node):
+        print(f"Node {node} does not exist.")
+    if cmds.attributeQuery(compound_attr, node=node, exists=True):
+        children_attrs = cmds.attributeQuery(
+            compound_attr, node=node, listChildren=True
+        )
+    else:
+        print(f"Attribute {compound_attr} does not exist in node {node}.")
+    if not children_attrs:
+        return {}
+    return {
+        child_attr: cmds.getAttr(f"{node}.{child_attr}")
+        for child_attr in children_attrs
+    }
 
-    validate(self)
+
+def op_fetch_write_xml_filepath(self):
+    helper.Logger.info(__name__, "Fetching write xml filepath")
+    # Operator: Fetch -> Validate
+    self._validate()
 
 
-def op_export_xml(self):
-    tool.Log.info(__name__, "Browsing writing xml path")
+def op_browser_write_xml_filepath(self):
+    helper.Logger.info(__name__, "Browsing write xml filepath")
+    # Operator: Browser -> Validate
+    default_path = tool.Registry.get_reg(const.REG_XML_EXPORT_FILEPATH)
+    filepath = tool.Maya.browser(0, default_path, "XML Files (*.xml)")
+    if not filepath:
+        return
+    tool.Registry.set_reg(const.REG_XML_EXPORT_FILEPATH, filepath)
+    self._validate()
 
-    export(self)
+
+def op_write_xml(self):
+    helper.Logger.info(__name__, "Browsing writing xml path")
+
+    write(self)
 
 
 def validate(self):
-    _xml_export_path = ocms.RegistryStore(c.REG_XML_EXPORT_PATH).get()
-    if not ocms.PathStore(_xml_export_path).is_xml():
-        tool.Widget.disable(self.export_btn)
-        ocms.XMLStore.close()
+    _xml_write_path = tool.Registry.get_reg(const.REG_XML_EXPORT_FILEPATH)
+    if not tool.File.is_xml(_xml_write_path):
+        tool.Widget.disable(self.write_btn)
     else:
-        tool.Widget.enable(self.export_btn)
-        ocms.XMLStore.open()
+        tool.Widget.enable(self.write_btn)
 
-    pre_construct(self, _xml_export_path)
-
-
-def pre_construct(self, xml_export_path):
-    tool.Widget.set_text(self.xml_export_path_txt.lineedit, xml_export_path)
-    tool.Widget.show(self.xml_export_path_txt)
-    tool.Widget.show(self.export_btn)
-    tool.Widget.show(self.browse_btn)
+    pre_construct(self, _xml_write_path)
 
 
-def export(self):
-    tool.Log.info(__name__, "Writing XML")
-    _project_dir = tool.Registry.get_value(c.REG_KEY, c.REG_SUB, c.REG_PROJ_DIR, "")
+def pre_construct(self, xml_write_path):
+    tool.Widget.set_text(self.xml_write_path_txt.lineedit, xml_write_path)
+    tool.Widget.show_hide(self.xml_write_path_txt, True)
+    tool.Widget.show_hide(self.write_btn, True)
+    tool.Widget.show_hide(self.browse_btn, True)
+
+
+def write(self):
+    helper.Logger.info(__name__, "Writing XML")
+    _project_dir = tool.Registry.get_reg(const.REG_PROJ_PATH)
 
     _top_level_node = None
     ls_transform = cmds.ls(type="transform")
-    from ..importres import operator as op
 
     for current, current_node in enumerate(ls_transform):
-        if not op.has_custom_attrs(current_node, "System"):
+        if not has_custom_attrs(current_node, "System"):
             continue
-        compound_attrs = op.get_compound_attr_values(current_node, "System")
+        compound_attrs = get_compound_attr_values(current_node, "System")
         parent_node = compound_attrs.get("System" + "parent")
         if parent_node == "":
             _top_level_node = current_node
             break
 
-    _xml_export_path = ocms.RegistryStore(c.REG_XML_EXPORT_PATH).get()
+    _xml_write_path = tool.Registry.get_reg(const.REG_XML_EXPORT_FILEPATH)
 
-    OCMSMAYAWritXML(0, _top_level_node, _xml_export_path)
+    OCMSMAYAWritXML(1, "OCMS_Building_inventec_smart_factory_0001", _xml_write_path)
 
-    tool.Log.info(
+    helper.Logger.info(
         __name__,
         "Completed writing XML, please check the script editor for more information.",
     )
-    construct(self)
+    tool.File.open_on_explorer(_xml_write_path)
 
-
-def construct(self):
-    # p = self.parse
-    self.groupvbox.add_group(
-        widget_id="匯出結果", widget=qt.QtGroupVBoxCSWidget(text="匯出結果")
-    )
-    self.groupvbox.add_widget(
-        parent_id="匯出結果",
-        widget_id="已完成匯出XML，點擊右側按鈕開啟檔案位置",
-        widget=qt.QtInfoBoxCSWidget(
-            text=f"已完成匯出XML，點擊右側按鈕開啟檔案位置。",
-            status=qt.QtInfoBoxStatus.Success,
-        ),
-    )
-    tool.Log.info(__name__, "Completed constructing dynamic ui group manager")
+    self._construct()

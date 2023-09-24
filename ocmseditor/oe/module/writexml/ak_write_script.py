@@ -450,7 +450,7 @@ class OCMSMAYAETWrite():
             self.et_initial(mode)
             XML_string=self.__tostring(self.root)
             self.__prettyxml(XML_string)
-            self.XML_TREE.write(_file)
+            self.XML_TREE.write(_file, encoding="utf-8")
             #ET.dump(self.XML_TREE)
             print('xml file writting done.')
         else:

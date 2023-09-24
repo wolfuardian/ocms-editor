@@ -1,8 +1,10 @@
 from PySide2 import QtWidgets, QtCore, QtGui
 
-from ocmseditor.oe.data import const as c
-
-from ocmseditor.tool.registry import Registry
+import ocmseditor.tool as tool
+from ocmseditor.oe.data.const import (
+    ICON_FOLDER_PATH,
+    MODULE_FOLDER_PATH,
+)
 
 
 class QtFonts:
@@ -30,7 +32,7 @@ class QtDefaultCSWidget(QtWidgets.QWidget):
 
     def __init__(self, parent=None, *args, **kwargs):
         super().__init__(parent=parent, *args, **kwargs)
-        self.is_cooling_down = False
+        self.cooling_down = False
         self.cool_down_timer = QtCore.QTimer(self)
         self.cool_down_timer.setSingleShot(True)
         self.cool_down_timer.timeout.connect(self.reset_cool_down)
@@ -45,7 +47,7 @@ class QtDefaultCSWidget(QtWidgets.QWidget):
         self.set_extra_stylesheet()
 
     def reset_cool_down(self):
-        self.is_cooling_down = False
+        self.cooling_down = False
 
     def set_wheel_up_event(self, up_action):
         self.wheel_up_action = up_action
@@ -70,7 +72,7 @@ class QtDefaultCSWidget(QtWidgets.QWidget):
         self.setStyleSheet(stylesheet)
 
     def wheelEvent(self, event):
-        if self.is_cooling_down:
+        if self.cooling_down:
             return
 
         modifiers = QtWidgets.QApplication.keyboardModifiers()
@@ -81,7 +83,7 @@ class QtDefaultCSWidget(QtWidgets.QWidget):
             elif angle < 0 and self.wheel_down_action:
                 self.wheel_down_action.trigger()
 
-            self.is_cooling_down = True
+            self.cooling_down = True
             self.cool_down_timer.start(50)
 
         else:
@@ -198,10 +200,8 @@ class QtButtonCSWidget(QtWidgets.QPushButton):
         self.setFont(font)
 
         if icon:
-            project_dir = Registry.get_value(
-                c.REG_KEY, c.REG_SUB, "Pref_ModuleProjectDirectory", ""
-            )
-            icon_filepath = project_dir + c.ICON_DIR + icon
+            icon_folder_path = MODULE_FOLDER_PATH + ICON_FOLDER_PATH
+            icon_filepath = icon_folder_path + icon
             try:
                 self.setIcon(QtGui.QIcon(icon_filepath))
             except Exception as e:
@@ -233,10 +233,8 @@ class QtButtonCSWidget(QtWidgets.QPushButton):
         if icon.startswith(":/"):
             self.setIcon(QtGui.QIcon(icon))
         else:
-            project_dir = Registry.get_value(
-                c.REG_KEY, c.REG_SUB, "Pref_ModuleProjectDirectory", ""
-            )
-            icon_filepath = project_dir + c.ICON_DIR + icon
+            icon_folder_path = MODULE_FOLDER_PATH + ICON_FOLDER_PATH
+            icon_filepath = icon_folder_path + icon
             try:
                 self.setIcon(QtGui.QIcon(icon_filepath))
             except Exception as e:
@@ -734,6 +732,9 @@ class QtGroupVBoxCSWidget(QtGroupBoxCSWidget):
         else:
             self.set_status(QtGroupBoxStatus.Default)
 
+    def set_text(self, text):
+        self.setTitle("  " + text + "  ")
+
     def add_to(self, parent):
         parent.addWidget(self)
         return self
@@ -793,10 +794,8 @@ class QtInfoBoxCSWidget(QtGroupBoxCSWidget):
         else:
             self.set_status(QtInfoBoxStatus.Default)
         if icon:
-            project_dir = Registry.get_value(
-                c.REG_KEY, c.REG_SUB, "Pref_ModuleProjectDirectory", ""
-            )
-            icon_filepath = project_dir + c.ICON_DIR + icon
+            icon_folder_path = MODULE_FOLDER_PATH + ICON_FOLDER_PATH
+            icon_filepath = icon_folder_path + icon
             try:
                 self.pixmap.setPixmap(QtGui.QPixmap(icon_filepath))
                 self.pixmap.setFixedSize(20, 20)
@@ -804,11 +803,7 @@ class QtInfoBoxCSWidget(QtGroupBoxCSWidget):
             except Exception as e:
                 print(e)
         else:
-            project_dir = Registry.get_value(
-                c.REG_KEY, c.REG_SUB, "Pref_ModuleProjectDirectory", ""
-            )
-            icon_dir = project_dir + c.ICON_DIR
-            icon_filepath = ""
+            icon_folder_path = MODULE_FOLDER_PATH + ICON_FOLDER_PATH
             if status == QtInfoBoxStatus.Info:
                 icon_filepath = ":/info.png"
             elif status == QtInfoBoxStatus.Help:
@@ -818,7 +813,7 @@ class QtInfoBoxCSWidget(QtGroupBoxCSWidget):
             elif status == QtInfoBoxStatus.Error:
                 icon_filepath = ":/error.png"
             elif status == QtInfoBoxStatus.Success:
-                icon_filepath = icon_dir + "success.png"
+                icon_filepath = icon_folder_path + "success.png"
             elif status == QtInfoBoxStatus.Disable:
                 icon_filepath = ":/RS_disable.png"
             else:
@@ -861,11 +856,7 @@ class QtInfoBoxCSWidget(QtGroupBoxCSWidget):
         self.setStyleSheet(stylesheet)
 
     def set_icon(self, status):
-        project_dir = Registry.get_value(
-            c.REG_KEY, c.REG_SUB, "Pref_ModuleProjectDirectory", ""
-        )
-        icon_dir = project_dir + c.ICON_DIR
-        icon_filepath = ""
+        icon_folder_path = MODULE_FOLDER_PATH + ICON_FOLDER_PATH
         if status == QtInfoBoxStatus.Info:
             icon_filepath = ":/info.png"
         elif status == QtInfoBoxStatus.Help:
@@ -875,7 +866,7 @@ class QtInfoBoxCSWidget(QtGroupBoxCSWidget):
         elif status == QtInfoBoxStatus.Error:
             icon_filepath = ":/error.png"
         elif status == QtInfoBoxStatus.Success:
-            icon_filepath = icon_dir + "success.png"
+            icon_filepath = icon_folder_path + "success.png"
         elif status == QtInfoBoxStatus.Disable:
             icon_filepath = ":/RS_disable.png"
         else:
@@ -1169,6 +1160,17 @@ class QtTreeCSWidget(QtWidgets.QTreeWidget):
         stylesheet = self.styleSheet() + "\n" + QtStylesheet.Tooltip
         self.setStyleSheet(stylesheet)
 
+    def mouseDoubleClickEvent(self, event):
+        item = self.itemAt(event.pos())
+        if item:
+            # 假設路徑存储在第二欄位
+            file_path = item.text(1)  # Column index 1
+            self.open_file_explorer_at_location(file_path)
+
+    @staticmethod
+    def open_file_explorer_at_location(path):
+        tool.File.open_on_explorer(path)
+
 
 class QtTreeItemCSWidget(QtWidgets.QTreeWidgetItem):
     """Custom QtTreeItem subclass"""
@@ -1245,6 +1247,68 @@ class QtLineCSWidget(QtWidgets.QFrame):
         parent.removeWidget(self)
 
 
+# Widget Manager
+
+
+class QtGroupboxManager:
+    def __init__(self):
+        self.__groupbox = QtGroupVBoxCSWidget(margin=(0, 0, 0, 0))
+        self.__groupbox.set_status(QtGroupBoxStatus.Transparent)
+        self.__layout = self.__groupbox.layout
+        self.__context = {}
+
+    def get_groupbox(self):
+        return self.__groupbox
+
+    def add_group(self, widget_id, widget):
+        if widget_id in self.__context:
+            raise ValueError(f"Group ID {widget_id} already exists.")
+        self.__context[widget_id] = {"widget": widget, "children": {}}
+        self.__layout.addWidget(widget)
+
+    def remove_group(self, widget_id):
+        if widget_id not in self.__context:
+            raise ValueError(f"Group ID {widget_id} does not exist.")
+        widget = self.__context[widget_id]["widget"]
+        widget.deleteLater()
+        del self.__context[widget_id]
+
+    def add_widget(self, parent_id, widget_id, widget):
+        if parent_id not in self.__context:
+            raise ValueError(f"Parent group ID {parent_id} does not exist.")
+        if widget_id in self.__context[parent_id]["children"]:
+            raise ValueError(
+                f"Widget ID {widget_id} already exists in group {parent_id}."
+            )
+        self.__context[parent_id]["children"][widget_id] = widget
+        self.__context[parent_id]["widget"].layout.addWidget(widget)
+
+    def remove_widget(self, parent_id, widget_id):
+        if parent_id not in self.__context:
+            raise ValueError(f"Parent group ID {parent_id} does not exist.")
+        if widget_id not in self.__context[parent_id]["children"]:
+            raise ValueError(
+                f"Widget ID {widget_id} does not exist in group {parent_id}."
+            )
+        widget = self.__context[parent_id]["children"][widget_id]
+        widget.deleteLater()
+        del self.__context[parent_id]["children"][widget_id]
+
+    def clear_group(self, group_id):
+        if group_id not in self.__context:
+            raise ValueError(f"Group ID {group_id} does not exist.")
+        for widget_id, widget in self.__context[group_id]["children"].items():
+            widget.deleteLater()
+        self.__context[group_id]["children"].clear()
+
+    def clear_all(self):
+        for group_id, group_data in self.__context.items():
+            for widget_id, widget in group_data["children"].items():
+                widget.deleteLater()
+            group_data["widget"].deleteLater()
+        self.__context.clear()
+
+
 # Widget Status
 
 
@@ -1315,18 +1379,17 @@ class QtLineEditStatus:
             border: 2px solid {_hex("606060")};
         }}
     """
-
     Info = f"""
         QLineEdit {{
-            background-color: {_hex("1d1d1d")};
-            border: 2px solid {_hex("1E90FF")};
-            color: {_hex("A6D8FF")};
+            background-color: {_hex("2d2d2d")};
+            border: 2px solid {_hex("808080")};
+            color: {_hex("E1E1E1")};
         }}
         QLineEdit:focus {{
-            border: 2px solid {_hex("A6D8FF")};
+            border: 2px solid {_hex("D0D0D0")};
         }}
         QLineEdit:hover {{
-            border: 2px solid {_hex("A6D8FF")};
+            border: 2px solid {_hex("D0D0D0")};
         }}
     """
     Warning = f"""
@@ -1387,10 +1450,8 @@ class QtLineEditStatus:
 
 
 class QtCheckBoxStatus:
-    project_dir = Registry.get_value(
-        c.REG_KEY, c.REG_SUB, "Pref_ModuleProjectDirectory", ""
-    )
-    icon_filepath = project_dir + c.ICON_DIR + "so-checkmark.svg"
+    icon_folder_path = MODULE_FOLDER_PATH + ICON_FOLDER_PATH
+    icon_filepath = icon_folder_path + "so-checkmark.svg"
 
     Default = f"""
         QCheckBox {{
@@ -1483,15 +1544,18 @@ class QtButtonStatus:
                 outline: none;
                 text-align: center;
             }}
-
             QPushButton:hover {{
                 background-color: {_hex("1E90FF")};
                 color: {_hex("333333")};
             }}
-
             QPushButton:pressed {{
                 background-color: {_hex("104E8B")};
                 color: {_hex("63b2ff")};
+            }}
+            QPushButton:disabled {{
+                color: {_hex("636363")};
+                border: 1px solid {_hex("3c3c3c")};
+                background-color: {_hex("2b2b2b")};
             }}
         """
     Info = f"""
@@ -1678,7 +1742,7 @@ class QtGroupBoxStatus:
                 background-color: {_hex("282828")};
             }}
         """
-    Border = f"""
+    Transparent = f"""
                 QGroupBox {{
                 background-color: None;
                 border: 0px;
