@@ -2253,11 +2253,11 @@ class ModelImporter:
             group_name = to_underscore(extract_filename(filepath)).lower()
             new_group = add_group(f"r_{group_name}")
             res_data[model].setdefault("maya", {})
-            res_data[model]["maya"]["instance"] = new_group
+            res_data[model]["maya"]["raw_model"] = new_group
 
     def add_model_to_scene(self):
         for model, data in res_data.items():
-            group_name = res_data[model]["maya"]["instance"]
+            group_name = res_data[model]["maya"]["raw_model"]
             new_objects = import_file(data["file"]["path"])
             children = cmds.parent(new_objects, group_name)
             res_data[model].setdefault("maya", {})
@@ -2265,7 +2265,7 @@ class ModelImporter:
 
     def hide_group(self):
         for model, data in res_data.items():
-            group_name = res_data[model]["maya"]["instance"]
+            group_name = res_data[model]["maya"]["raw_model"]
             cmds.hide(group_name)
 
 
@@ -2298,7 +2298,7 @@ class OCMSDataSyncHandler:
             model_name = data["resource"]["model"]
             if model_name in res_data.keys():
                 node_name = to_underscore(data["maya"]["uuid"])
-                instance_group = res_data[model_name]["maya"]["instance"]
+                instance_group = res_data[model_name]["maya"]["raw_model"]
                 # duplicate_group = cmds.duplicate(instance_group, rr=True)[0]
 
                 # cmds.setAttr(f"{duplicate_group}.scaleX", 1)

@@ -20,6 +20,16 @@ class UUID(core.UUID):
         返回:
             一個符合指定位數的格式化數字字符串。
         """
+        # digit_format = f"{{:0{num_digits}d}}"
+        # print(f"digit_format: {digit_format}")
+        # return digit_format.format(number)
+
+        if not isinstance(number, int):  # 確保是整數型別
+            try:
+                number = int(number)  # 嘗試將字串轉換為整數
+            except ValueError:
+                raise ValueError(f"Cannot format {number} because it's not an integer.")
+
         digit_format = f"{{:0{num_digits}d}}"
         return digit_format.format(number)
 

@@ -979,15 +979,14 @@ class QtTextLineCSWidget(QtDefaultCSWidget):
         self.layout = layout
         # --------------------------------------------
 
+        self.label = QtLabelCSWidget()
         if title:
-            self.label = QtLabelCSWidget()
             self.label.setFixedWidth(100)
-            if title:
-                self.label.setText(title)
-            font = QtGui.QFont(QtFonts.MicrosoftJhengHei, 8, QtGui.QFont.Bold)
-            font.setLetterSpacing(QtGui.QFont.PercentageSpacing, 100)
-            self.label.setFont(QtGui.QFont(font))
-            self.layout.addWidget(self.label)
+            self.label.setText(title)
+        font = QtGui.QFont(QtFonts.MicrosoftJhengHei, 8, QtGui.QFont.Bold)
+        font.setLetterSpacing(QtGui.QFont.PercentageSpacing, 100)
+        self.label.setFont(QtGui.QFont(font))
+        self.layout.addWidget(self.label)
         if spacing:
             self.layout.setSpacing(spacing)
         if text or text == "":
@@ -1008,8 +1007,18 @@ class QtTextLineCSWidget(QtDefaultCSWidget):
 
         self.set_extra_stylesheet()
 
+    def set_title(self, title):
+        self.label.setText(title)
+
     def set_text(self, text):
+        self.clean_line_edits()
         self.create_line_edits(text)
+
+    def clean_line_edits(self):
+        for le in self.real_lineedits:
+            self.layout.removeWidget(le)
+            le.setParent(None)
+        self.real_lineedits.clear()
 
     def create_line_edits(
         self,
@@ -1137,13 +1146,15 @@ class QtTreeCSWidget(QtWidgets.QTreeWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setSelectionMode(QtWidgets.QAbstractItemView.NoSelection)
+        # self.setSelectionMode(QtWidgets.QAbstractItemView.NoSelection)
         self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         font = QtGui.QFont("Microsoft JhengHei", 8)
         font.setLetterSpacing(QtGui.QFont.PercentageSpacing, 100)
         self.setFont(QtGui.QFont(font))
-
         self.current_item: QtTreeItemCSWidget = self.currentItem()
+        self.selectionChangedCallback = None
+        self.mouseClickedCallback = None
+        self.mouseDoubleClickedCallback = None
 
     def add_to(self, parent):
         parent.addWidget(self)
@@ -1160,12 +1171,36 @@ class QtTreeCSWidget(QtWidgets.QTreeWidget):
         stylesheet = self.styleSheet() + "\n" + QtStylesheet.Tooltip
         self.setStyleSheet(stylesheet)
 
+    def set_selection_changed_event(self, callback):
+        self.selectionChangedCallback = callback
+
+    def set_mouse_clicked_event(self, callback):
+        self.mouseClickedCallback = callback
+
+    def set_mouse_double_clicked_event(self, callback):
+        self.mouseDoubleClickedCallback = callback
+
+    def get_item(self):
+        return self.current_item
+
+    def mousePressEvent(self, event):
+        super().mousePressEvent(event)
+        if not self.mouseClickedCallback:
+            return
+        self.mouseClickedCallback()
+
     def mouseDoubleClickEvent(self, event):
-        item = self.itemAt(event.pos())
-        if item:
-            # 假設路徑存储在第二欄位
-            file_path = item.text(1)  # Column index 1
-            self.open_file_explorer_at_location(file_path)
+        super().mouseDoubleClickEvent(event)
+        if not self.mouseDoubleClickedCallback:
+            return
+        self.mouseDoubleClickedCallback()
+
+    def selectionChanged(self, selected, deselected):
+        super().selectionChanged(selected, deselected)
+        item = self.currentItem()
+        if not self.selectionChangedCallback:
+            return
+        self.selectionChangedCallback()
 
     @staticmethod
     def open_file_explorer_at_location(path):
@@ -1516,7 +1551,7 @@ class QtButtonStatus:
                 color: {_hex("bdbdbd")};
                 border: 1px solid transparent;
                 background-color: transparent;
-
+                border-bottom-right-radius: 0px;
             }}
 
             QPushButton:hover {{
@@ -1664,7 +1699,7 @@ class QtButtonStatus:
     Disable = f"""
             QPushButton {{
                 color: {_hex("bdbdbd")};
-                border: 1px solid {_hex("000000")};
+                border: 1px solid {_hex("060606")};
                 background-color: {_hex("2b2b2b")};
                 padding-left: 6px;
                 padding-right: 6px;
@@ -1675,10 +1710,16 @@ class QtButtonStatus:
             }}
 
             QPushButton:hover {{
-                border: 1px solid {_hex("B0B0B0")};
+                border: 1px solid {_hex("202020")};
+                background-color: {_hex("333333")};
             }}
             QPushButton:pressed {{
                 background-color: {_hex("707070")};
+            }}
+            QPushButton:disabled {{
+                color: {_hex("636363")};
+                border: 1px solid {_hex("3c3c3c")};
+                background-color: {_hex("2b2b2b")};
             }}
             """
     Invisible = f"""

@@ -49,6 +49,7 @@ class Maya:
     def import_file(cls, path, typ): pass
     def uuid(cls, obj_name): pass
     def get_selected(cls): pass
+    def get_top_level_transforms(cls): pass
     def obj_exists(cls, obj_name): pass
     def attr_exists(cls, attr_name, obj_name): pass
     def add_compound_attr(cls, attr_name, child_count, obj_name): pass
@@ -58,6 +59,9 @@ class Maya:
     def set_string_attr_to_obj(cls, attr_compound_name, attrs, obj_name): pass
     def setup_string_attr_to_obj(cls, prefix, attrs, obj_name): pass
     def add_group(cls, obj_name): pass
+    def select(cls, obj_name): pass
+    def parent(cls, obj_name, parent_obj_name): pass
+    def delete(cls, obj_name): pass
 @interface
 class Name:
     def to_underscore(cls, name): pass

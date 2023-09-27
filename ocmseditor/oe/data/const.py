@@ -33,6 +33,7 @@ REG_MAYA_JOB_IDS = "Pref_MayaJobIDs"
 NAME_MAPPING = {
     "ocmseditor.oe.helper": "OE.Helper",
     "ocmseditor.oe.ui": "OE.UI",
+    "ocmseditor.tool.file": "Tool.File",
     "ocmseditor.tool.maya": "Tool.Maya",
     "ocmseditor.oe.module.setproject.ui": "OE.SetProject.UI",
     "ocmseditor.oe.module.setproject.operator": "OE.SetProject.Operator",
@@ -42,6 +43,7 @@ NAME_MAPPING = {
     "ocmseditor.oe.module.parseres.operator": "OE.ParseResource.Operator",
     "ocmseditor.oe.module.toolbox.ui": "OE.ToolBox.UI",
     "ocmseditor.oe.module.toolbox.operator": "OE.ToolBox.Operator",
+    "ocmseditor.oe.module.editattr.operator": "OE.EditAttribute.Operator",
 }
 
 #

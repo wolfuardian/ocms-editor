@@ -18,4 +18,5 @@ class Name(core.Name):
         返回:
             經過替換後的字符串。
         """
-        return re.sub(r"\W+", "_", name)
+        # return re.sub(r"\W+", "_", name)
+        return re.sub(r"(\W+)", lambda m: "_" * len(m.group(1)), name)

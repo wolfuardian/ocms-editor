@@ -95,14 +95,14 @@ class ModelImporter:
             ).lower()
             new_group = tool.Maya.add_group(f"r_{group_name}")
             res_pdata[model].setdefault("maya", {})
-            res_pdata[model]["maya"]["instance"] = new_group
+            res_pdata[model]["maya"]["raw_model"] = new_group
 
     @staticmethod
     def add_model_to_scene():
         ocms = tool.OCMS.get_ocms()
         res_pdata = ocms.res.parse_data
         for model, data in res_pdata.items():
-            group_name = res_pdata[model]["maya"]["instance"]
+            group_name = res_pdata[model]["maya"]["raw_model"]
             new_objects = tool.Maya.import_file(data["file"]["path"])
             children = cmds.parent(new_objects, group_name)
             res_pdata[model].setdefault("maya", {})
@@ -113,7 +113,7 @@ class ModelImporter:
         ocms = tool.OCMS.get_ocms()
         res_pdata = ocms.res.parse_data
         for model, data in res_pdata.items():
-            group_name = res_pdata[model]["maya"]["instance"]
+            group_name = res_pdata[model]["maya"]["raw_model"]
             cmds.hide(group_name)
 
 
@@ -129,7 +129,7 @@ class OCMSDataSyncHandler:
     def add_groups():
         ocms = tool.OCMS.get_ocms()
         xml_pdata = ocms.xml.parse_data
-        for xpath, data in xml_pdata.items():
+        for _, data in xml_pdata.items():
             object_name = data["maya"]["uuid"]
             group_name = tool.Name.to_underscore(object_name)
             new_group = tool.Maya.add_group(group_name)
@@ -138,7 +138,7 @@ class OCMSDataSyncHandler:
     def set_parent():
         ocms = tool.OCMS.get_ocms()
         xml_pdata = ocms.xml.parse_data
-        for xpath, data in xml_pdata.items():
+        for _, data in xml_pdata.items():
             object_unique_name = data["maya"]["uuid"]
             object_parent_name = data["maya"]["parent"]
             group_name = tool.Name.to_underscore(object_unique_name)
@@ -152,16 +152,17 @@ class OCMSDataSyncHandler:
         ocms = tool.OCMS.get_ocms()
         xml_pdata = ocms.xml.parse_data
         res_pdata = ocms.res.parse_data
-        for xpath, data in xml_pdata.items():
+        for _, data in xml_pdata.items():
             model_name = data["resource"]["model"]
             if model_name in res_pdata.keys():
                 node_name = tool.Name.to_underscore(data["maya"]["uuid"])
-                instance_group = res_pdata[model_name]["maya"]["instance"]
-                duplicate_group = cmds.duplicate(instance_group, rr=True)[0]
-
-                cmds.setAttr(f"{duplicate_group}.scaleX", 1)
-                cmds.setAttr(f"{duplicate_group}.scaleY", 1)
-                cmds.setAttr(f"{duplicate_group}.scaleZ", 1)
+                raw_model_group = res_pdata[model_name]["maya"]["raw_model"]
+                # duplicate_group = cmds.duplicate(raw_model_group, rr=True)[0]
+                duplicate_group = cmds.spaceLocator()
+                # cmds.scaleConstraint(raw_model_group, duplicate_group, offset=[1, 1, 1])
+                # cmds.setAttr(f"{duplicate_group}.scaleX", 1)
+                # cmds.setAttr(f"{duplicate_group}.scaleY", 1)
+                # cmds.setAttr(f"{duplicate_group}.scaleZ", 1)
 
                 # duplicate_group = cmds.spaceLocator()
                 cmds.showHidden(duplicate_group)
@@ -178,7 +179,7 @@ class OCMSDataSyncHandler:
 
         xml_pdata = ocms.xml.parse_data
         _system_attributes = []
-        for xpath, data in xml_pdata.items():
+        for _, data in xml_pdata.items():
             node_name = tool.Name.to_underscore(data["maya"]["uuid"])
 
             # Object
@@ -195,16 +196,16 @@ class OCMSDataSyncHandler:
 
             compound_name = "Object"
             attrs = {
-                compound_name + "type": typ,
-                compound_name + "category": category,
-                compound_name + "name": name,
-                compound_name + "alias": alias,
-                compound_name + "model": model,
-                compound_name + "bundle": bundle,
-                compound_name + "time": time,
-                compound_name + "noted": noted,
-                compound_name + "remark": remark,
-                compound_name + "id": id,
+                "type": typ,
+                "category": category,
+                "name": name,
+                "alias": alias,
+                "model": model,
+                "bundle": bundle,
+                "time": time,
+                "noted": noted,
+                "remark": remark,
+                "id": id,
             }
 
             tool.Maya.setup_string_attr_to_obj(compound_name, attrs, node_name)
@@ -232,7 +233,7 @@ class OCMSDataSyncHandler:
     def apply_transform():
         ocms = tool.OCMS.get_ocms()
         xml_pdata = ocms.xml.parse_data
-        for xpath, data in xml_pdata.items():
+        for _, data in xml_pdata.items():
             object_name = tool.Name.to_underscore(data["maya"]["uuid"])
             transform = data["transform"]
             position = transform["position"]

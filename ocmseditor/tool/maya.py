@@ -128,6 +128,24 @@ class Maya(core.Maya):
         return cmds.ls(selection=True)
 
     @classmethod
+    def get_top_level_transforms(cls):
+        """
+        獲取Maya場景中的根節點。
+
+        範例:
+            root_node = YourClass.get_root_node()
+
+        返回:
+            根節點的名稱。
+        """
+        top_level_transforms = [
+            node
+            for node in cmds.ls(type="transform")
+            if not cmds.listRelatives(node, parent=True)
+        ]
+        return top_level_transforms
+
+    @classmethod
     def obj_exists(cls, obj_name):
         """
         檢查指定的對象是否存在。
@@ -332,3 +350,48 @@ class Maya(core.Maya):
             cmds.delete(group_name)
             group_name = cmds.rename(group_name, obj_name)
         return group_name
+
+    @classmethod
+    def select(cls, obj_name):
+        """
+        選擇Maya場景中的指定對象。
+
+        參數:
+            obj_name: 要選擇的對象的名稱。
+
+        範例:
+            YourClass.select("objName")
+
+        返回:
+            無。
+        """
+        cmds.select(obj_name, replace=True)
+
+    @classmethod
+    def parent(cls, obj_name, parent_obj_name):
+        """
+        獲取Maya場景中選擇對象的父對象。
+
+        範例:
+            parent = YourClass.parent()
+
+        返回:
+            父對象的名稱。
+        """
+        cmds.parent(obj_name, parent_obj_name)
+
+    @classmethod
+    def delete(cls, obj_name):
+        """
+        從Maya場景中刪除指定的對象。
+
+        參數:
+            obj_name: 要刪除的對象的名稱。
+
+        範例:
+            YourClass.remove("objName")
+
+        返回:
+            無。
+        """
+        cmds.delete(obj_name)

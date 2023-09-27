@@ -417,7 +417,11 @@ class OCMSMAYAETWrite:
     def __create_component(self, name, dict):
         component = self.__component_element(name)
         for key, value in dict.items():
-            property = self.__property_element(key, value)
+            # EOS: 2023.09.25 START -----------------------
+            repr_name = name.replace(".", "")
+            nice_name = key.replace(repr_name, "") if repr_name in key else key
+            # EOS: 2023.09.25 END -------------------------
+            property = self.__property_element(nice_name, value)
             component.append(property)
         return component
 
@@ -454,7 +458,7 @@ class OCMSMAYAETWrite:
             self.et_initial(mode)
             XML_string = self.__tostring(self.root)
             self.__prettyxml(XML_string)
-            self.XML_TREE.write(_file, encoding="utf-8")
+            self.XML_TREE.write(_file, encoding="utf-16", xml_declaration=False)
             # ET.dump(self.XML_TREE)
             print("xml file writting done.")
         else:
@@ -566,8 +570,16 @@ def write(self):
             break
 
     _xml_write_path = tool.Registry.get_reg(const.REG_XML_EXPORT_FILEPATH)
-
-    OCMSMAYAWritXML(1, "OCMS_Building_inventec_smart_factory_0001", _xml_write_path)
+    top_level_transforms = tool.Maya.get_top_level_transforms()
+    for transform in top_level_transforms:
+        if tool.Maya.attr_exists("Object", transform):
+            ocms = tool.OCMS.get_ocms()
+            product = ocms.xml.product_type
+            if product == "OCMS":
+                OCMSMAYAWritXML(0, transform, _xml_write_path)
+            elif product == "OCMS2_0":
+                OCMSMAYAWritXML(1, transform, _xml_write_path)
+            break
 
     helper.Logger.info(
         __name__,

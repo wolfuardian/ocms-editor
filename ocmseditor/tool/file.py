@@ -251,6 +251,7 @@ class File(core.File):
         異常:
             ValueError: 如果指定的路徑不存在。
         """
+        helper.Logger.info(__name__, f"Opening {path} on explorer")
         if not os.path.exists(path):
             raise ValueError(f"{path} does not exist.")
 

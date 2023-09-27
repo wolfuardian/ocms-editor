@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 import ocmseditor.tool as tool
 import ocmseditor.oe.data.const as const
 
@@ -16,6 +18,7 @@ class OCMSStore:
             cls._instance.xml = XMLStore()
             cls._instance.res = ResourceStore()
             cls._instance.maya = MayaContextStore()
+            cls._instance.met = MayaElementTree()
         return cls._instance
 
     @classmethod
@@ -302,18 +305,12 @@ class XMLStore:
             "object": {
                 "tags": tool.XML.enum_tags(cls.root),
                 "attributes": tool.XML.enum_attrs(cls.root),
-                "types": tool.Collect.collect_attr_values(
-                    cls.parse_data, "type"
-                ),
+                "types": tool.Collect.collect_attr_values(cls.parse_data, "type"),
                 "category": tool.Collect.collect_attr_values(
                     cls.parse_data, "category"
                 ),
-                "remarks": tool.Collect.collect_attr_values(
-                    cls.parse_data, "remark"
-                ),
-                "noted": tool.Collect.collect_attr_values(
-                    cls.parse_data, "noted"
-                ),
+                "remarks": tool.Collect.collect_attr_values(cls.parse_data, "remark"),
+                "noted": tool.Collect.collect_attr_values(cls.parse_data, "noted"),
                 "non_devices": [
                     data.get("ElementTree").get("element")
                     for _, data in cls.parse_data.items()
@@ -541,3 +538,65 @@ class UIStore:
 
 class MayaContextStore:
     active_object = None
+
+
+class MayaElementTree:
+    __product_type = None
+    __data = {}
+
+    @classmethod
+    def purse(cls):
+        cls.__product_type = None
+        cls.__data = {}
+
+    @classmethod
+    def update_data(cls):
+        cls.purse()
+        ocms = tool.OCMS.get_ocms()
+
+        cls.__product_type = ocms.xml.product_type
+
+        if not ocms.xml.parse_data:
+            return
+        for xpath, data in ocms.xml.parse_data.items():
+            uuid = data["maya"]["uuid"]
+            cls.__data.update({uuid: data})
+
+    @classmethod
+    def get_data(cls):
+        return cls.__data
+
+    @classmethod
+    def add_element(cls, uuid, parent_uuid=None):
+        if cls.__data.get(uuid, None):
+            return False
+        if not tool.Maya.obj_exists(tool.Name.to_underscore(parent_uuid)):
+            return False
+        index = int(uuid.split("-")[-1])
+        data = {
+            "global": {
+                "index": index,
+                "product_type": cls.__product_type,
+            },
+            "maya": {
+                "uuid": uuid,
+                "parent": parent_uuid,
+            },
+        }
+
+        cls.__data.update({uuid: data})
+        cls.__data = OrderedDict(
+            sorted(cls.__data.items(), key=lambda x: x[1]["global"]["index"])
+        )
+        return True
+
+    @classmethod
+    def del_element(cls, uuid, parent_uuid):
+        if not cls.__data.get(uuid, None):
+            return False
+        if not tool.Maya.obj_exists(tool.Name.to_underscore(uuid)):
+            return False
+        if parent_uuid == "":
+            return False
+        del cls.__data[uuid]
+        return True

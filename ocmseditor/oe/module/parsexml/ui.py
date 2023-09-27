@@ -24,7 +24,7 @@ class ParseXMLCSWidget(qt.QtFrameLayoutCSWidget):
         self.xml_path_box.set_text("XML 路徑")
 
         self.xml_log_box = qt.QtGroupHBoxCSWidget()
-        self.xml_log_box.set_text("XML 處理紀錄")
+        self.xml_log_box.set_text("LOG 紀錄保存")
 
         self.fetch_btn = qt.QtButtonCSWidget()
         self.fetch_btn.set_width(4)
@@ -49,11 +49,13 @@ class ParseXMLCSWidget(qt.QtFrameLayoutCSWidget):
         self.write_log_btn = qt.QtButtonCSWidget()
         self.write_log_btn.set_icon(":/fileSave.png")
         self.write_log_btn.set_text("  匯出所有")
+        self.write_log_btn.set_status(qt.QtButtonStatus.Disable)
         self.write_log_btn.set_height(20)
 
         self.write_single_log_btn = qt.QtButtonCSWidget()
         self.write_single_log_btn.set_icon(":/fileSave.png")
         self.write_single_log_btn.set_text("  匯出單個")
+        self.write_single_log_btn.set_status(qt.QtButtonStatus.Disable)
         self.write_single_log_btn.set_height(20)
         self.write_single_log_btn.set_width(110)
 

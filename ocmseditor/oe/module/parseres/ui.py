@@ -53,11 +53,13 @@ class ParseResourceCSWidget(qt.QtFrameLayoutCSWidget):
         self.write_log_btn = qt.QtButtonCSWidget()
         self.write_log_btn.set_icon(":/fileSave.png")
         self.write_log_btn.set_text("  匯出所有")
+        self.write_log_btn.set_status(qt.QtButtonStatus.Disable)
         self.write_log_btn.set_height(20)
 
         self.write_single_log_btn = qt.QtButtonCSWidget()
         self.write_single_log_btn.set_icon(":/fileSave.png")
         self.write_single_log_btn.set_text("  匯出單個")
+        self.write_single_log_btn.set_status(qt.QtButtonStatus.Disable)
         self.write_single_log_btn.set_height(20)
         self.write_single_log_btn.set_width(110)
 
@@ -176,6 +178,9 @@ class ParseResourceCSWidget(qt.QtFrameLayoutCSWidget):
         _tree = qt.QtTreeCSWidget()
         _tree.setToolTip("🖱️ 雙擊滑鼠左鍵開啟模型所在目錄（LMB + LMB）")
         _tree.setHeaderLabels(["模型", "檔案路徑"])
+        _tree.set_mouse_double_clicked_event(
+            lambda: tool.File.open_on_explorer(_tree.currentItem().text(1))
+        )
         header = _tree.header()
         header.setSectionResizeMode(1, qt.QtWidgets.QHeaderView.Stretch)
         _tree.setIndentation(2)

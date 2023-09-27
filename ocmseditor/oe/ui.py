@@ -34,7 +34,6 @@ class MainUI(
         layout.setSpacing(0)
 
         menubar = qt.QtWidgets.QMenuBar()
-        menubar.setToolTip("💡 此功能列僅供開發者使用")
 
         action_wheel_up = qt.QtWidgets.QAction()
         action_wheel_down = qt.QtWidgets.QAction()
@@ -43,17 +42,19 @@ class MainUI(
         action_collapse_all = qt.QtWidgets.QAction()
         action_resize_win = qt.QtWidgets.QAction()
         action_sync_maya_operator = qt.QtWidgets.QAction()
+        action_sync_maya_operator_label = qt.QtWidgets.QAction()
 
         action_reset.setIcon(qt.QtGui.QIcon(":/reloadReference.png"))
         action_expand_all.setIcon(qt.QtGui.QIcon(":/expandInfluenceList.png"))
         action_collapse_all.setIcon(qt.QtGui.QIcon(":/retractInfluenceList.png"))
         action_resize_win.setIcon(qt.QtGui.QIcon(":/nodeGrapherToggleView.png"))
         action_sync_maya_operator.setIcon(qt.QtGui.QIcon(":/recording.png"))
-        # action_sync_maya_operator.setIcon(qt.QtGui.QIcon(":/recording.png"))
-        # action_sync_maya_operator.setIcon(qt.QtGui.QIcon(":/recordStandby.png"))
+        action_sync_maya_operator_label.setText("")
+        action_sync_maya_operator_label.setEnabled(False)
 
         tab = qt.QtTabCSWidget()
         tab_load = qt.QtTabItemCSWidget()
+        tab_res = qt.QtTabItemCSWidget()
         tab_edit = qt.QtTabItemCSWidget()
         tab_save = qt.QtTabItemCSWidget()
 
@@ -66,13 +67,14 @@ class MainUI(
 
         tab_load.layout.addWidget(frame_set_project)
         tab_load.layout.addWidget(frame_parse_xml)
-        tab_load.layout.addWidget(frame_parse_res)
+        tab_res.layout.addWidget(frame_parse_res)
         tab_edit.layout.addWidget(frame_edit_attr)
         tab_save.layout.addWidget(frame_write_xml)
 
-        tab.addTab(tab_load, "讀取")
-        tab.addTab(tab_edit, "編輯")
-        tab.addTab(tab_save, "儲存")
+        tab.addTab(tab_load, "   專案 / 初始化   ")
+        tab.addTab(tab_edit, "   編輯   ")
+        tab.addTab(tab_res, "   資源工具   ")
+        tab.addTab(tab_save, "   輸出   ")
         layout.addWidget(tab)
         layout.addWidget(frame_tool_box)
         menubar.addAction(action_reset)
@@ -83,6 +85,7 @@ class MainUI(
         menubar.addAction(action_collapse_all)
         menubar.addAction(action_resize_win)
         menubar.addAction(action_sync_maya_operator)
+        menubar.addAction(action_sync_maya_operator_label)
         self.setLayout(layout)
         self.layout().setMenuBar(menubar)
 
@@ -98,6 +101,7 @@ class MainUI(
         self.action_collapse_all = action_collapse_all
         self.action_resize_win = action_resize_win
         self.action_sync_maya_operator = action_sync_maya_operator
+        self.action_sync_maya_operator_label = action_sync_maya_operator_label
 
         self.frame_widgets = [
             frame_set_project,
@@ -157,13 +161,17 @@ class Tweak(MainUI):
     def tab_changed_event(self, index):
         if index == 1:
             self.sync_maya_operator = True
+            self.action_sync_maya_operator.setText("")
             self.action_sync_maya_operator.setIcon(
                 qt.QtGui.QIcon(":/recordStandby.png")
             )
+            self.action_sync_maya_operator_label.setText("同步中")
             handler.create_script_job()
         else:
             self.sync_maya_operator = False
+            # self.action_sync_maya_operator.setText("同步中")
             self.action_sync_maya_operator.setIcon(qt.QtGui.QIcon(":/recording.png"))
+            self.action_sync_maya_operator_label.setText("")
             handler.delete_script_job()
 
     def toggle_next_frame(self):
