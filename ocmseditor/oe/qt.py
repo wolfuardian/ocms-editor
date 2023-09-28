@@ -945,6 +945,41 @@ class LineEditProxy:
             le.setStyleSheet(stylesheet)
 
 
+class QtStringPropertyCSWidget(QtDefaultCSWidget):
+    propertySetter = QtCore.Signal(str, str, str)
+
+    def __init__(self, parent=None, long_name=None, nice_name=None, value=""):
+        super().__init__(parent)
+        self.long_name = long_name
+        self.nice_name = nice_name
+
+        self.layout = QtWidgets.QHBoxLayout()
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+
+        self.label = QtLabelCSWidget()
+        self.label.setFixedWidth(80)
+        self.label.setText(self.long_name)
+        if self.nice_name:
+            self.label.setText(self.nice_name)
+
+        self.lineedit = QtLineEditCSWidget()
+        self.lineedit.setText(value)
+        self.lineedit.textChanged.connect(self.update_prop)
+
+        font = QtGui.QFont(QtFonts.MicrosoftJhengHei, 8, QtGui.QFont.Bold)
+        font.setLetterSpacing(QtGui.QFont.PercentageSpacing, 100)
+        self.label.setFont(QtGui.QFont(font))
+        self.layout.addWidget(self.label)
+        self.layout.addWidget(self.lineedit)
+
+        self.setLayout(self.layout)
+
+    def update_prop(self, value):
+        if self.long_name:
+            self.propertySetter.emit(self.long_name, self.nice_name, value)
+
+
 class QtTextLineCSWidget(QtDefaultCSWidget):
     """Custom QtTextLine subclass, contains a label and a read-only text box arranged in a horizontal layout"""
 

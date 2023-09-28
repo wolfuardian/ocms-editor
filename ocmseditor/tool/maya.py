@@ -352,6 +352,55 @@ class Maya(core.Maya):
         return group_name
 
     @classmethod
+    def get_compound_attrs(cls, obj_name):
+        attr = cmds.listAttr(obj_name, userDefined=True, write=True) or []
+        tags = [
+            at
+            for at in attr
+            if cmds.attributeQuery(at, node=obj_name, numberOfChildren=True) is not None
+        ]
+        return tags
+
+    @classmethod
+    def get_attrs(cls, obj_name):
+        """
+        獲取指定對象的所有屬性。
+
+        參數:
+            obj_name: 要獲取屬性的對象的名稱。
+
+        範例:
+            attrs = YourClass.get_attrs("objName")
+
+        返回:
+            包含所有屬性名稱的列表。
+        """
+        # TODO: 需重構
+        all_attrs = {}
+        user_attrs = cmds.listAttr(obj_name, userDefined=True, write=True) or []
+
+        for attr in user_attrs:
+            if cmds.attributeQuery(attr, node=obj_name, numberOfChildren=True):
+                attr_dict = {}
+                ch_attrs = (
+                    cmds.attributeQuery(attr, node=obj_name, listChildren=True) or []
+                )
+
+                for ch in ch_attrs:
+                    val = cmds.getAttr(f"{obj_name}.{ch}")
+                    if val is not None:
+                        key = ch.replace("_", "")
+                        attr_dict[key] = str(val) if isinstance(val, float) else val
+
+                all_attrs[attr] = attr_dict
+            elif not any(attr in sub_attr_dict for sub_attr_dict in all_attrs.values()):
+                val = cmds.getAttr(f"{obj_name}.{attr}")
+                if val is not None:
+                    key = attr.replace("_", "")
+                    all_attrs[key] = str(val) if isinstance(val, float) else val
+        return all_attrs
+
+    @classmethod
     def select(cls, obj_name):
         """
         選擇Maya場景中的指定對象。

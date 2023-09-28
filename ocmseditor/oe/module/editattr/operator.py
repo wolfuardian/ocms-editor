@@ -1,4 +1,3 @@
-import ocmseditor.oe.qt as qt
 import ocmseditor.tool as tool
 import ocmseditor.oe.handler as handler
 
@@ -22,35 +21,21 @@ def op_add_element(self):
     ocms = tool.OCMS.get_ocms()
     parent_uuid = self.tree.currentItem().text(0)
     parent_type = parent_uuid.split("-")[1]
-
     if parent_type == "Device":
         helper.Logger.warning(__name__, "Cannot add Device under Device!")
         return
-
-    _available_index = 1
-    for uuid, data in ocms.met.get_data().items():
-        if data["global"]["index"] == _available_index:
-            _available_index += 1
-            continue
-        else:
-            break
-    process_index = tool.UUID.format_number_with_digits(_available_index, 4)
-    uuid = tool.UUID.generate_ocms_uuid(
-        type_str="Device",
-        model="",
-        number=process_index,
-    )
+    uuid = ocms.met.get_uuid()
     ocms.met.add_element(uuid, parent_uuid)
-    TreeItemsData.add_tree_element(uuid, parent_uuid)
-    MayaNodesData.add_maya_group(uuid, parent_uuid)
+    TreeItemsData.add_tree_item(uuid, parent_uuid)
+    MayaNodesData.add_maya_node(uuid, parent_uuid)
 
 
 def op_del_element(self):
     ocms = tool.OCMS.get_ocms()
     uuid = self.tree.currentItem().text(0)
     parent_uuid = ocms.met.get_data()[uuid]["maya"]["parent"]
-    TreeItemsData.del_tree_element(uuid, parent_uuid)
-    MayaNodesData.del_maya_group(uuid, parent_uuid)
+    TreeItemsData.del_tree_item(uuid, parent_uuid)
+    MayaNodesData.del_maya_node(uuid, parent_uuid)
     ocms.met.del_element(uuid, parent_uuid)
 
 
@@ -65,15 +50,18 @@ def op_add_comp_attr_to_sel_single_obj(self):
 def op_add_attr_to_sel_single_obj(self):
     sel_obj = tool.Maya.get_selected()[0]
 
+def op_set_attr(obj_name, long_name, value):
+    # tool.Maya.set_attr(obj_name, long_name, value)
+    tool.Maya.set_string_attr(long_name, value, obj_name)
 
 def subscribe_event(self):
     handler.EventHub.subscribe(
-        "on_maya_selection_changed", lambda: on_maya_selection_changed(self)
+        "on_maya_selection_changed", lambda: show_selected_obj_name(self)
     )
-    handler.EventHub.subscribe("on_maya_selection_changed", on_maya_update_met_panel)
+    handler.EventHub.subscribe("on_maya_selection_changed", update_attrs)
 
 
-def on_maya_selection_changed(self):
+def show_selected_obj_name(self):
     ocms = tool.OCMS.get_ocms()
     maya = ocms.maya
     if len(tool.Maya.get_selected()) == 0:
@@ -82,11 +70,14 @@ def on_maya_selection_changed(self):
     self.select_obj_name_txt.set_text(maya.active_object)
 
 
-def on_maya_update_met_panel():
+def update_attrs():
+    context = {}
     ocms = tool.OCMS.get_ocms()
+    attrs = tool.Maya.get_attrs(ocms.maya.active_object)
+    context.update({"attrs": attrs})
     __ui = ocms.ui.context.get("frame_edit_attr")
     if __ui:
-        __ui.redraw_met_edit_panel()
+        __ui.redraw_met_edit_panel(context)
 
 
 def op_treeitem_selection_changed(self):

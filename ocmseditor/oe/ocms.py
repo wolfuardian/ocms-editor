@@ -542,11 +542,13 @@ class MayaContextStore:
 
 class MayaElementTree:
     __product_type = None
+    __config = {}
     __data = {}
 
     @classmethod
     def purse(cls):
         cls.__product_type = None
+        cls.__config = {}
         cls.__data = {}
 
     @classmethod
@@ -555,6 +557,7 @@ class MayaElementTree:
         ocms = tool.OCMS.get_ocms()
 
         cls.__product_type = ocms.xml.product_type
+        cls.__config = ocms.xml.config
 
         if not ocms.xml.parse_data:
             return
@@ -563,8 +566,32 @@ class MayaElementTree:
             cls.__data.update({uuid: data})
 
     @classmethod
+    def get_product_type(cls):
+        return cls.__product_type
+
+    @classmethod
+    def get_config(cls):
+        return cls.__config
+
+    @classmethod
     def get_data(cls):
         return cls.__data
+
+    @classmethod
+    def get_uuid(cls):
+        _available_index = 1
+        for uuid, data in cls.__data.items():
+            if data["global"]["index"] == _available_index:
+                _available_index += 1
+                continue
+            else:
+                break
+        process_index = tool.UUID.format_number_with_digits(_available_index, 4)
+        return tool.UUID.generate_ocms_uuid(
+            type_str="Device",
+            model="",
+            number=process_index,
+        )
 
     @classmethod
     def add_element(cls, uuid, parent_uuid=None):

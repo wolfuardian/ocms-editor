@@ -123,7 +123,7 @@ class OCMSDataSyncHandler:
         self.set_parent()
         self.copy_model_to_node()
         self.apply_transform()
-        self.add_system_attributes()
+        self.add_attributes()
 
     @staticmethod
     def add_groups():
@@ -171,7 +171,7 @@ class OCMSDataSyncHandler:
                 cmds.rename(duplicate_group, f"inst_{node_name}")
 
     @staticmethod
-    def add_system_attributes():
+    def add_attributes():
         ocms = tool.OCMS.get_ocms()
 
         config = ocms.xml.config
