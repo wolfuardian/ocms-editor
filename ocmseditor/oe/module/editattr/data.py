@@ -1,3 +1,5 @@
+import maya.cmds as cmds
+
 import ocmseditor.oe.qt as qt
 import ocmseditor.tool as tool
 
@@ -112,12 +114,23 @@ class MayaNodesData:
     @classmethod
     def construct_maya_groups(cls):
         ocms = tool.OCMS.get_ocms()
+        rdat = ocms.res.parse_data
         for uuid, data in ocms.met.get_data().items():
             if tool.Maya.obj_exists(tool.Name.to_underscore(uuid)):
                 print("Maya node already exist")
                 continue
             parent_uuid = data["maya"]["parent"]
             cls.add_maya_node(uuid, parent_uuid)
+
+            model_name = data["resource"]["model"]
+            if model_name in rdat.keys():
+                raw_model_group = rdat[model_name]["maya"]["raw_model"]
+                duplicate_group = cmds.duplicate(raw_model_group, rr=True)[0]
+                cmds.showHidden(duplicate_group)
+                target_group = tool.Name.to_underscore(uuid)
+                cmds.parent(duplicate_group, target_group)
+                cmds.rename(duplicate_group, f"rr_{tool.Name.to_underscore(uuid)}")
+                # tool.Maya.duplicate(model_group, tool.Name.to_underscore(uuid))
 
             # node = tool.Maya.add_group(tool.Name.to_underscore(uuid))
             # cls.__maya_nodes.update({uuid: node})
