@@ -34,7 +34,7 @@ def import_resource(self):
     model_importer = helper.ModelImporter()
     model_importer.execute()
 
-    ocms_sync_handler = helper.OCMSDataSyncHandler()
-    ocms_sync_handler.execute()
+    # ocms_sync_handler = helper.OCMSDataSyncHandler()
+    # ocms_sync_handler.execute()
 
     helper.Logger.info(__name__, "Finished importing resource")

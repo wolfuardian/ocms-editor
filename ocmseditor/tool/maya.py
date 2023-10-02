@@ -248,7 +248,11 @@ class Maya(core.Maya):
         """
         if attr_value is None:
             attr_value = ""
-        cmds.setAttr((obj_name + "." + attr_name), attr_value, type="string")
+        cmds.setAttr(f"{obj_name}.{attr_name}", attr_value, type="string")
+
+    @classmethod
+    def set_attr(cls, obj_name, attr_name, attr_value):
+        cmds.setAttr(f"{obj_name}.{attr_name}", attr_value)
 
     @classmethod
     def add_string_attr_to_obj(cls, attr_compound_name, attrs, obj_name):
@@ -345,11 +349,30 @@ class Maya(core.Maya):
         返回:
             創建的組的名稱。
         """
-        group_name = cmds.group(empty=True, name=obj_name)
-        if group_name != obj_name:
-            cmds.delete(group_name)
-            group_name = cmds.rename(group_name, obj_name)
-        return group_name
+        if cls.obj_exists(obj_name):
+            helper.Logger.warning(__name__, f"{obj_name} Object already exists.")
+            return obj_name
+        return cmds.group(empty=True, name=obj_name)
+
+    @classmethod
+    def add_locator(cls, obj_name):
+        """
+        在Maya場景中添加一個定位器。
+
+        參數:
+            obj_name: str
+                期望創建的定位器名稱。
+
+        範例:
+            locator = YourClass.add_locator("my_new_locator")  # 創建名為 "my_new_locator" 的定位器
+
+        返回:
+            創建的定位器的名稱。
+        """
+        if cls.obj_exists(obj_name):
+            helper.Logger.warning(__name__, f"{obj_name} Object already exists.")
+            return obj_name
+        return cmds.spaceLocator(name=obj_name)
 
     @classmethod
     def get_compound_attrs(cls, obj_name):

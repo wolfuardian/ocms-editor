@@ -129,7 +129,6 @@ class EditAttributeCSWidget(qt.QtFrameLayoutCSWidget):
         self._construct_met_edit_panel(context)
 
     def _destroy_met_edit_panel(self, context):
-        helper.Logger.info(__name__, "Destroying met edit panel...")
         self.attr_prop_container.clear_all()
 
     def prop_setter(self, long_name, nice_name, value):
@@ -138,8 +137,6 @@ class EditAttributeCSWidget(qt.QtFrameLayoutCSWidget):
         operator.op_set_attr(obj_name, long_name, value)
 
     def _construct_met_edit_panel(self, context):
-        helper.Logger.info(__name__, "Constructing met edit panel...")
-
         for attr_name, attr_value in context["attrs"].items():
             if isinstance(attr_value, str):
                 continue

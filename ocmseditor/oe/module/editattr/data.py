@@ -124,8 +124,9 @@ class MayaNodesData:
 
     @classmethod
     def add_maya_node(cls, uuid, parent_uuid):
+        obj_name = tool.Name.to_underscore(uuid)
         if not cls.is_exist(uuid):
-            node = tool.Maya.add_group(tool.Name.to_underscore(uuid))
+            node = tool.Maya.add_locator(obj_name)
             cls.__maya_nodes.update({uuid: node})
         if cls.is_exist(parent_uuid):
             cls.set_parent(uuid, parent_uuid)
@@ -161,9 +162,7 @@ class MayaNodesData:
             "remark": remark,
             "id": id,
         }
-        tool.Maya.setup_string_attr_to_obj(
-            compound_name, attrs, tool.Name.to_underscore(uuid)
-        )
+        tool.Maya.setup_string_attr_to_obj(compound_name, attrs, obj_name)
 
         # Component
         components = data["component"][conf_component]
@@ -173,18 +172,26 @@ class MayaNodesData:
             properties = __component["property"]
             attrs = {}
             for __property in properties:
-                attrs.update(
-                    {
-                        compound_name
-                        + tool.Name.to_underscore(__property["name"]): __property[
-                            "text"
-                        ]
-                    }
-                )
+                property_name = tool.Name.to_underscore(__property["name"])
+                attrs.update({compound_name + property_name: __property["text"]})
 
-            tool.Maya.setup_string_attr_to_obj(
-                compound_name, attrs, tool.Name.to_underscore(uuid)
-            )
+            tool.Maya.setup_string_attr_to_obj(compound_name, attrs, obj_name)
+
+        # Transform
+        transform = data["transform"]
+        position = transform["position"]
+        rotation = transform["rotation"]
+        scale = transform["scale"]
+
+        for xyz in position:
+            number = float(position[xyz]) if position[xyz] != "" else 0.0
+            tool.Maya.set_attr(obj_name, f"translate{xyz.upper()}", number)
+        for xyz in rotation:
+            number = float(rotation[xyz]) if rotation[xyz] != "" else 0.0
+            tool.Maya.set_attr(obj_name, f"rotate{xyz.upper()}", number)
+        for xyz in scale:
+            number = float(scale[xyz]) if scale[xyz] != "" else 1.0
+            tool.Maya.set_attr(obj_name, f"scale{xyz.upper()}", number)
 
     @classmethod
     def del_maya_node(cls, uuid, parent_uuid):
