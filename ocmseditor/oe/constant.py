@@ -5,6 +5,30 @@ from pathlib import Path
 
 LOGGER_NAME = "ocmseditor"
 
+OCMSEDITOR_ROOT = Path(__file__) / "../.."
+
+
+VERSION_PATH = Path(__file__) / "../../../version.txt"
+
+
+class Fonts:
+    Fixedsys = "Fixedsys"
+    SegoeUI = "Segoe UI"
+    SimSun = "SimSun"
+    SimHei = "SimHei"
+    MicrosoftYaHei = "Microsoft YaHei"
+    MicrosoftJhengHei = "Microsoft JhengHei"
+    NSimSun = "NSimSun"
+    PMingLiU = "PMingLiU"
+    MingLiU = "MingLiU"
+    DFKaiSB = "DFKai-SB"
+    FangSong = "FangSong"
+    KaiTi = "KaiTi"
+    FangSong_GB2312 = "FangSong_GB2312"
+    KaiTi_GB2312 = "KaiTi_GB2312"
+    MSShellDlg2 = "MS Shell Dlg 2"
+    HeitiTC = "Heiti TC"
+
 
 #
 # SYSTEM
@@ -51,10 +75,13 @@ NAME_MAPPING = {
     "ocmseditor.oe.module.editattr.operator": "OE.EditAttribute.Operator",
 }
 
+
+# RESOURCES_DIR =
+
+
 #
 # PATH
 #
-MODULE_FOLDER_PATH = os.path.dirname(os.path.dirname(__file__))
 ICON_FOLDER_PATH = "/data/icons/"
 
 
