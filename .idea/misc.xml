@@ -3,7 +3,7 @@
   <component name="Black">
     <option name="enabledOnReformat" value="true" />
     <option name="executionMode" value="BINARY" />
-    <option name="pathToExecutable" value="C:\Users\eos\AppData\Local\Programs\Python\Python311\Scripts\black.exe" />
+    <option name="pathToExecutable" value="C:\Users\eos\AppData\Local\Programs\Python\Python310\Scripts\black.exe" />
     <option name="sdkName" value="Maya Python 3.9" />
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="Maya Python 3.9" project-jdk-type="Python SDK" />
