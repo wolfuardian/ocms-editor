@@ -1,9 +1,11 @@
 from ocmseditor.oe.constant import OCMSEDITOR_ROOT
+
+
 def _hex(h):
     return "#" + h
 
 
-class QtStylesheet:
+class QtStyle:
     Tooltip = f"""
         QToolTip {{
             background-color: {_hex("282828")};
@@ -11,6 +13,20 @@ class QtStylesheet:
             border: 1px solid {_hex("1E90FF")};
             padding: 2px;
         }}
+    """
+
+    Frame = f"""
+    QWidget {{
+        border: 1px solid {_hex("272727")};
+        border-bottom-right-radius: 12px;
+        background-color: {_hex("363636")};
+    }}
+    """
+
+    Scrollarea = f"""
+    QScrollArea {{
+        border: None;
+    }}
     """
 
 
@@ -171,7 +187,7 @@ class QtCheckBoxStatus:
     """
 
 
-class QtButtonStatus:
+class QtButtonStyle:
     Default = f"""
             QPushButton {{
                 color: {_hex("bdbdbd")};

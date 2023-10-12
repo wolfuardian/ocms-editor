@@ -5,10 +5,13 @@ from pathlib import Path
 
 LOGGER_NAME = "ocmseditor"
 
+#
+# PATH
+#
+
 OCMSEDITOR_ROOT = Path(__file__) / "../.."
-
-
-VERSION_PATH = Path(__file__) / "../../../version.txt"
+VERSION_PATH = OCMSEDITOR_ROOT / "version.txt"
+ICON_DIR = OCMSEDITOR_ROOT / "oe" / "utils" / "icons"
 
 
 class Fonts:
@@ -74,16 +77,6 @@ NAME_MAPPING = {
     "ocmseditor.oe.module.toolbox.operator": "OE.ToolBox.Operator",
     "ocmseditor.oe.module.editattr.operator": "OE.EditAttribute.Operator",
 }
-
-
-# RESOURCES_DIR =
-
-
-#
-# PATH
-#
-ICON_FOLDER_PATH = "/data/icons/"
-
 
 #
 # STRING
