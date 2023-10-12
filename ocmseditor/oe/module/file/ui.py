@@ -8,3 +8,4 @@ class FileWidget(QtFrameLayoutCSWidget):
         self.set_text("檔案")
 
         self.scrollarea = QtScrollareaCSWidget()
+

@@ -54,6 +54,7 @@ class QtTabCSWidget(QtWidgets.QTabWidget):
     def __init__(self):
         super().__init__()
 
+
     def add_to(self, parent):
         parent.addWidget(self)
         return self

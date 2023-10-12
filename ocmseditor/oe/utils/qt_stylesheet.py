@@ -29,6 +29,25 @@ class QtStyle:
     }}
     """
 
+    Tab = f"""
+    QTabBar::tab {{
+        background: {_hex("1F1F1F")};
+        color: {_hex("555555")};
+        border: none;
+        height: 40px;
+        width: 120px;
+        margin: 1px;
+        font-weight: bold;
+    }}
+    QTabBar::tab:selected {{
+        color: {_hex("1F1F1F")};
+        background-color: {_hex("CCCCCC")};
+    }}
+    QTabBar::tab:!selected {{
+        background-color: {_hex("1F1F1F")};
+    }}
+    """
+
 
 class QtLabelStatus:
     Default = f"""

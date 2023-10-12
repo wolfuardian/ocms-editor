@@ -1,15 +1,5 @@
 from maya.app.general import mayaMixin
 
-from ocmseditor.oe.utils.qt import (
-    QtWidgets,
-    QtCore,
-    QtGui,
-    QtDefaultCSWidget,
-    QtTabCSWidget,
-    QtTabItemCSWidget,
-    get_main_window,
-)
-
 from ocmseditor.oe.module import (
     file,
     parse,
@@ -20,6 +10,18 @@ from ocmseditor.oe.module import (
     visualize,
     log,
 )
+from ocmseditor.oe.utils.qt import (
+    QtWidgets,
+    QtCore,
+    QtGui,
+    QtDefaultCSWidget,
+    QtButtonCSWidget,
+    QtTabCSWidget,
+    QtTabItemCSWidget,
+    get_main_window,
+)
+from ocmseditor.oe.utils.qt_stylesheet import QtStyle, QtButtonStyle
+from ocmseditor.oe.repository import Repository
 from ocmseditor.oe.constant import VERSION_PATH
 
 
@@ -36,108 +38,92 @@ class UIMain(
     def __init__(self, parent=get_main_window()):
         super(UIMain, self).__init__(parent)
 
-        self.setWindowTitle(version())
-        self.window_size_factor = 1.0
+        self.setWindowTitle(version().split("-")[0])
+        self.window_size_factor = 0
 
-        layout = QtWidgets.QVBoxLayout()
-        layout.setAlignment(QtCore.Qt.AlignTop)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
+        self.__layout = QtWidgets.QVBoxLayout()
+        self.__layout.setAlignment(QtCore.Qt.AlignTop)
+        self.__layout.setContentsMargins(0, 0, 0, 0)
+        self.__layout.setSpacing(0)
 
-        menubar = QtWidgets.QMenuBar()
+        self.__menubar = QtWidgets.QMenuBar()
 
-        action_wheel_up = QtWidgets.QAction()
-        action_wheel_down = QtWidgets.QAction()
-        action_reset = QtWidgets.QAction()
-        action_expand_all = QtWidgets.QAction()
-        action_collapse_all = QtWidgets.QAction()
-        action_resize_win = QtWidgets.QAction()
-        action_sync_maya_operator = QtWidgets.QAction()
-        action_sync_maya_operator_label = QtWidgets.QAction()
+        self.action_wheel_up = QtWidgets.QAction()
+        self.action_wheel_down = QtWidgets.QAction()
+        self.action_reset = QtWidgets.QAction()
+        self.action_expand_all = QtWidgets.QAction()
+        self.action_collapse_all = QtWidgets.QAction()
+        self.action_resize_win = QtWidgets.QAction()
+        self.action_sync_maya_operator = QtWidgets.QAction()
+        self.action_sync_maya_operator_label = QtWidgets.QAction()
 
-        # action_reset.setIcon(QtGui.QIcon(":/reloadReference.png"))
-        action_expand_all.setText("")
-        action_collapse_all.setText("")
-        action_resize_win.setText("")
-        action_sync_maya_operator.setText("")
-        # action_expand_all.setIcon(QtGui.QIcon(":/expandInfluenceList.png"))
-        # action_collapse_all.setIcon(QtGui.QIcon(":/retractInfluenceList.png"))
-        # action_resize_win.setIcon(QtGui.QIcon(":/nodeGrapherToggleView.png"))
-        # action_sync_maya_operator.setIcon(QtGui.QIcon(":/recording.png"))
-        action_sync_maya_operator_label.setText("")
-        action_sync_maya_operator_label.setEnabled(False)
+        self.action_expand_all.setText("")
+        self.action_collapse_all.setText("")
+        self.action_resize_win.setText("")
+        self.action_sync_maya_operator.setText("")
+        self.action_sync_maya_operator_label.setText("")
+        self.action_sync_maya_operator_label.setEnabled(False)
 
-        tab = QtTabCSWidget()
-        # tab_load = QtTabItemCSWidget()
-        # tab_res = QtTabItemCSWidget()
-        tab_file = QtTabItemCSWidget()
-        tab_edit = QtTabItemCSWidget()
-        tab_display = QtTabItemCSWidget()
-        tab_inspector = QtTabItemCSWidget()
-        tab_debug = QtTabItemCSWidget()
-        # tab_save = QtTabItemCSWidget()
-        #
-        frm_edit_attribute = attribute.EditAttributeWidget()
-        frm_file = file.FileWidget()
-        frm_log = log.LogWidget()
-        frm_manage = manage.ManageWidget()
-        frm_node = node.NodeWidget()
-        frm_parse = parse.ParseWidget()
-        frm_scene = scene.SceneWidget()
-        frm_visualize = visualize.VisualizeWidget()
+        self.__tab = QtTabCSWidget()
+        self.__tab_import = QtTabItemCSWidget()
+        self.__tab_edit = QtTabItemCSWidget()
+        self.__tab_display = QtTabItemCSWidget()
+        self.__tab_inspector = QtTabItemCSWidget()
+        self.__tab_debug = QtTabItemCSWidget()
 
-        tab_file.scrollarea.layout.addWidget(frm_file)
-        tab_file.scrollarea.layout.addWidget(frm_parse)
-        tab_edit.scrollarea.layout.addWidget(frm_scene)
-        tab_edit.scrollarea.layout.addWidget(frm_manage)
-        tab_edit.scrollarea.layout.addWidget(frm_node)
-        tab_inspector.scrollarea.layout.addWidget(frm_edit_attribute)
-        tab_display.scrollarea.layout.addWidget(frm_visualize)
-        tab_debug.scrollarea.layout.addWidget(frm_log)
-        # tab_load.layout.addWidget(frame_parse_xml)
-        # tab_res.layout.addWidget(frame_parse_res)
-        # tab_edit.layout.addWidget(frame_edit_attr)
-        # tab_save.layout.addWidget(frame_write_xml)
-        #
-        tab.addTab(tab_file, "檔案")
-        tab.addTab(tab_edit, "編輯")
-        tab.addTab(tab_display, "顯示")
-        tab.addTab(tab_inspector, "Inspector")
-        tab.addTab(tab_debug, "偵錯")
-        layout.addWidget(tab)
-        # layout.addWidget(frame_tool_box)
-        menubar.addAction(action_reset)
+        self.__frame_edit_attribute = attribute.EditAttributeWidget()
+        self.__frame_file = file.FileWidget()
+        self.__frame_log = log.LogWidget()
+        self.__frame_manage = manage.ManageWidget()
+        self.__frame_node = node.NodeWidget()
+        self.__frame_parse = parse.ParseWidget()
+        self.__frame_scene = scene.SceneWidget()
+        self.__frame_visualize = visualize.VisualizeWidget()
 
-        self.set_wheel_up_event(action_wheel_up)
-        self.set_wheel_down_event(action_wheel_down)
-        menubar.addAction(action_expand_all)
-        menubar.addAction(action_collapse_all)
-        menubar.addAction(action_resize_win)
-        menubar.addAction(action_sync_maya_operator)
-        menubar.addAction(action_sync_maya_operator_label)
-        self.setLayout(layout)
-        self.layout().setMenuBar(menubar)
+        self.__tab_import.scrollarea.layout.addWidget(self.__frame_file)
+        self.__tab_import.scrollarea.layout.addWidget(self.__frame_parse)
+        self.__tab_edit.scrollarea.layout.addWidget(self.__frame_scene)
+        self.__tab_edit.scrollarea.layout.addWidget(self.__frame_manage)
+        self.__tab_edit.scrollarea.layout.addWidget(self.__frame_node)
+        self.__tab_inspector.scrollarea.layout.addWidget(self.__frame_edit_attribute)
+        self.__tab_display.scrollarea.layout.addWidget(self.__frame_visualize)
+        self.__tab_debug.scrollarea.layout.addWidget(self.__frame_log)
 
-        self.layout = layout
-        self.bar = menubar
-        self.tab = tab
-        # self.tab_tool = tab_load
 
-        self.action_reset = action_reset
-        self.action_wheel_up = action_wheel_up
-        self.action_wheel_down = action_wheel_down
-        self.action_expand_all = action_expand_all
-        self.action_collapse_all = action_collapse_all
-        self.action_resize_win = action_resize_win
-        self.action_sync_maya_operator = action_sync_maya_operator
-        self.action_sync_maya_operator_label = action_sync_maya_operator_label
 
-        self.frame_widgets = [
-            # frame_set_project,
-            # frame_parse_xml,
-            # frame_parse_res,
-            # frame_write_xml,
-        ]
+
+        self.__tab.setStyleSheet(QtStyle.Tab)
+        self.tab_bar = QtWidgets.QTabBar()
+        self.tab_button = QtButtonCSWidget()
+        self.tab_button.set_style(QtButtonStyle.Transparent)
+        self.tab_bar.setTabButton(0, QtWidgets.QTabBar.LeftSide, self.tab_button)
+        self.__tab.setTabBar(self.tab_bar)
+
+
+
+        self.__tab.addTab(self.__tab_import, "Imports")
+        self.__tab.addTab(self.__tab_edit, "編輯")
+        self.__tab.addTab(self.__tab_display, "顯示")
+        self.__tab.addTab(self.__tab_inspector, "Inspector")
+        self.__tab.addTab(self.__tab_debug, "偵錯")
+
+
+
+        self.__layout.addWidget(self.__tab)
+        self.__menubar.addAction(self.action_reset)
+
+        self.set_wheel_up_event(self.action_wheel_up)
+        self.set_wheel_down_event(self.action_wheel_down)
+        self.__menubar.addAction(self.action_expand_all)
+        self.__menubar.addAction(self.action_collapse_all)
+        self.__menubar.addAction(self.action_resize_win)
+        self.__menubar.addAction(self.action_sync_maya_operator)
+        self.__menubar.addAction(self.action_sync_maya_operator_label)
+        self.setLayout(self.__layout)
+        self.layout().setMenuBar(self.__menubar)
+
+        frame_widgets = Repository().ui.frame_widgets
+        frame_widgets.append(self.__frame_edit_attribute)
 
         # ocms = tool.OCMS.get_ocms()
         # ocms.ui.context.setdefault("global", self)

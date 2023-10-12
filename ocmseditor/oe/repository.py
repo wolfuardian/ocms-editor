@@ -1,44 +1,30 @@
-class OCMSRepository:
-    """
-    Singleton (單例)
-    """
+class Repository:
+    """Singleton"""
 
-    _instance = None
+    __instance = None
 
     def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(OCMSRepository, cls).__new__(cls)
-            cls._instance.et = OCMSElementTree()
-            cls._instance.rm = OCMSResourceModel()
-            cls._instance.inf = OCMSInformation()
-        return cls._instance
+        if cls.__instance is None:
+            cls.__instance = super(Repository, cls).__new__(cls)
+            cls.__instance.ui = _UIWidgetDB()
+            cls.__instance.ma = _MASceneDB()
+            cls.__instance.et = _OCMSElementTreeDB()
+            cls.__instance.rs = _OCMSResourceDB()
+        return cls.__instance
 
 
-class OCMSElementTree:
+class _UIWidgetDB:
+    frame_widgets = []
+
+
+
+class _MASceneDB:
     pass
 
 
-class OCMSResourceModel:
+class _OCMSElementTreeDB:
     pass
 
 
-class OCMSInformation:
-    pass
-
-
-class MayaSceneRepository:
-    """
-    Singleton (單例)
-    """
-
-    _instance = None
-
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(MayaSceneRepository, cls).__new__(cls)
-            cls._instance.ctx = MayaSceneContext()
-        return cls._instance
-
-
-class MayaSceneContext:
+class _OCMSResourceDB:
     pass
