@@ -14,6 +14,8 @@ def interface(cls):
     attrs = {n: classmethod(abc.abstractmethod(f)) for n, f in inspect.getmembers(cls, predicate=inspect.isfunction)}
     return type(cls.__name__, (Interface, cls), attrs)
 
-
+@interface
+class Maya:
+    pass
 
 # fmt: on

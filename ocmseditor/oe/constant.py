@@ -89,3 +89,10 @@ INVALID_CHARS_PATTERN = re.compile(r"[^a-zA-Z0-9_]")
 #
 INFO__NOT_YET_RESOLVED = "<Not yet resolved>"
 INFO__RESOLVED_FAILED = "<Resolved failed>"
+
+
+#
+# STATUS
+#
+
+BROWSER_CANCELED = "Browser canceled"

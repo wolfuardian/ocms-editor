@@ -11,8 +11,11 @@ from ocmseditor.oe.utils.qt import (
     QtScrollareaCSWidget,
 )
 from ocmseditor.oe.utils.qt_stylesheet import QtGroupBoxStyle, QtButtonStyle
+from ocmseditor.oe.constant import BROWSER_CANCELED
 
 from ocmseditor.oe.repository import Repository
+
+import ocmseditor.tool as tool
 
 
 class ImportsWidget(QtFramelessLayoutCSWidget):
@@ -92,8 +95,13 @@ class ImportsWidget(QtFramelessLayoutCSWidget):
 
     @staticmethod
     def on_file_btn_clicked(context):
-        # IDE
         from ocmseditor.oe.ui.main import UIMain
+
+        browser_dir = tool.Maya.browser(1)
+        if browser_dir == BROWSER_CANCELED:
+            return
+
+        print(f"browser_dir = {browser_dir}")
 
         context: UIMain
         context.tab_bar.setTabEnabled(0, False)
@@ -101,7 +109,6 @@ class ImportsWidget(QtFramelessLayoutCSWidget):
 
     @staticmethod
     def on_scene_btn_clicked(context):
-        # IDE
         from ocmseditor.oe.ui.main import UIMain
 
         context: UIMain
