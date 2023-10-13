@@ -5,7 +5,12 @@ from PySide2 import QtWidgets, QtCore, QtGui
 
 
 from ocmseditor.oe.constant import ICON_DIR, Fonts
-from ocmseditor.oe.utils.qt_stylesheet import QtStyle, QtButtonStyle
+from ocmseditor.oe.utils.qt_stylesheet import (
+    QtStyle,
+    QtLabelStyle,
+    QtButtonStyle,
+    QtGroupBoxStyle,
+)
 
 
 def get_main_window():
@@ -54,7 +59,6 @@ class QtTabCSWidget(QtWidgets.QTabWidget):
     def __init__(self):
         super().__init__()
 
-
     def add_to(self, parent):
         parent.addWidget(self)
         return self
@@ -62,6 +66,21 @@ class QtTabCSWidget(QtWidgets.QTabWidget):
     def remove_from(self, parent):
         self.setParent(None)
         parent.removeWidget(self)
+
+
+class QtTabBarCSWidget(QtWidgets.QTabBar):
+    def __init__(self):
+        super().__init__()
+
+    def set_icon(self, index, icon):
+        if icon.startswith(":/"):
+            self.setTabIcon(index, QtGui.QIcon(icon))
+        else:
+            __icon = (ICON_DIR / icon).resolve().__str__()
+            try:
+                self.setTabIcon(index, QtGui.QIcon(__icon))
+            except Exception as e:
+                print(e)
 
 
 class QtTabItemCSWidget(QtDefaultCSWidget):
@@ -192,6 +211,27 @@ class QtFrameLayoutCSWidget(QtDefaultCSWidget):
         self.__frame_btn.isolated.add(action)
 
 
+class QtFramelessLayoutCSWidget(QtDefaultCSWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+
+        self.__layout = QtWidgets.QVBoxLayout()
+        self.__layout.setContentsMargins(0, 0, 0, 0)
+        self.__layout.setSpacing(0)
+        self.__layout.setAlignment(QtCore.Qt.AlignTop)
+        self.setLayout(self.__layout)
+
+    def add_to(self, parent):
+        parent.addWidget(self)
+        return self
+
+    def remove_from(self, parent):
+        self.setParent(None)
+        parent.removeWidget(self)
+
+
 class QtFrameButtonCSWidget(QtDefaultCSWidget):
     def __init__(self, label=""):
         super().__init__()
@@ -222,9 +262,9 @@ class QtFrameButtonCSWidget(QtDefaultCSWidget):
 
         self.__isolate_btn = QtButtonCSWidget()
         self.__isolate_btn.set_icon(":/scale_M.png")
-        self.__isolate_btn.set_width(20)
-        self.__isolate_btn.set_height(20)
-        self.__isolate_btn.set_style(QtButtonStyle.Transparent)
+        self.__isolate_btn.setFixedWidth(20)
+        self.__isolate_btn.setFixedHeight(20)
+        self.__isolate_btn.setStyleSheet(QtButtonStyle.Transparent)
         self.__isolate_btn.clicked.connect(lambda: self.__isolated.emit())
         self.__layout.addStretch()
         self.__layout.addWidget(self.__isolate_btn)
@@ -308,12 +348,17 @@ class QtFrameButtonCSWidget(QtDefaultCSWidget):
         self.setBackgroundColor(self.__color_default)
 
 
-class QtButtonCSWidget(QtWidgets.QPushButton):
+class QtGroupBoxCSWidget(QtWidgets.QGroupBox):
     def __init__(self):
         super().__init__()
         self.__visible_immediate = True
-        self.setFont(QtGui.QFont(Fonts.SegoeUI, 8, QtGui.QFont.Normal))
-        self.set_style(QtButtonStyle.Default)
+        self.__font = QtGui.QFont(Fonts.MicrosoftJhengHei, 8, QtGui.QFont.Bold)
+        self.__font.setLetterSpacing(QtGui.QFont.PercentageSpacing, 110)
+        self.setFont(QtGui.QFont(self.__font))
+
+    def set_visible_immediate(self, visible):
+        self.__visible_immediate = visible
+        self.setVisible(visible)
 
     def add_to(self, parent):
         parent.addWidget(self)
@@ -323,37 +368,162 @@ class QtButtonCSWidget(QtWidgets.QPushButton):
         self.setParent(None)
         parent.removeWidget(self)
 
-    def set_text(self, text):
-        self.setText(text)
 
-    def set_icon(self, icon):
-        if icon.startswith(":/"):
-            self.setIcon(QtGui.QIcon(icon))
-        else:
-            try:
-                self.setIcon(QtGui.QIcon(ICON_DIR + icon))
-            except Exception as e:
-                print(e)
-
-    def set_spacing(self, spacing):
-        text = " " * spacing + self.text() + " " * spacing
-        self.setText(text)
-
-    def set_width(self, width):
-        self.setFixedWidth(width)
-
-    def set_height(self, height):
-        self.setFixedHeight(height)
+class QtGroupHBoxCSWidget(QtGroupBoxCSWidget):
+    def __init__(self):
+        super().__init__()
+        self.__visible_immediate = True
+        self.__layout = QtWidgets.QHBoxLayout()
+        self.__layout.setAlignment(QtCore.Qt.AlignTop)
+        self.__layout.setContentsMargins(0, 0, 0, 0)
+        self.__layout.setSpacing(0)
+        self.setLayout(self.__layout)
+        self.layout = self.__layout
+        self.layout_content: list[QtWidgets] = []
+        self.setStyleSheet(QtGroupBoxStyle.Default)
 
     def set_visible_immediate(self, visible):
         self.__visible_immediate = visible
         self.setVisible(visible)
 
-    def set_style(self, style):
-        self.setStyleSheet(style)
-
-    def set_style_additional(self, style):
+    def set_stylesheet_additional(self, style):
         self.setStyleSheet(self.styleSheet() + "\n" + style)
 
-    def set_tooltip(self, text):
-        self.setToolTip(text)
+    def add_to(self, parent):
+        parent.addWidget(self)
+        return self
+
+    def remove_from(self, parent):
+        self.setParent(None)
+        parent.removeWidget(self)
+
+
+class QtGroupVBoxCSWidget(QtGroupBoxCSWidget):
+    def __init__(self):
+        super().__init__()
+        self.__visible_immediate = True
+        self.__layout = QtWidgets.QVBoxLayout()
+        self.__layout.setAlignment(QtCore.Qt.AlignTop)
+        self.__layout.setContentsMargins(0, 0, 0, 0)
+        self.__layout.setSpacing(0)
+        self.setLayout(self.__layout)
+        self.layout = self.__layout
+        self.layout_content: list[QtWidgets] = []
+        self.setStyleSheet(QtGroupBoxStyle.Default)
+
+    def set_visible_immediate(self, visible):
+        self.__visible_immediate = visible
+        self.setVisible(visible)
+
+    def set_stylesheet_additional(self, style):
+        self.setStyleSheet(self.styleSheet() + "\n" + style)
+
+    def add_to(self, parent):
+        parent.addWidget(self)
+        return self
+
+    def remove_from(self, parent):
+        self.setParent(None)
+        parent.removeWidget(self)
+
+
+class QtButtonCSWidget(QtWidgets.QPushButton):
+    def __init__(self):
+        super().__init__()
+        self.__visible_immediate = True
+        self.setFont(QtGui.QFont(Fonts.SegoeUI, 8, QtGui.QFont.Normal))
+        self.setStyleSheet(QtButtonStyle.Default)
+
+    def set_icon(self, icon):
+        if icon.startswith(":/"):
+            self.setIcon(QtGui.QIcon(icon))
+        else:
+            __icon = (ICON_DIR / icon).resolve().__str__()
+            try:
+                self.setTabIcon(QtGui.QIcon(__icon))
+            except Exception as e:
+                print(e)
+
+    def set_visible_immediate(self, visible):
+        self.__visible_immediate = visible
+        self.setVisible(visible)
+
+    def set_stylesheet_additional(self, style):
+        self.setStyleSheet(self.styleSheet() + "\n" + style)
+
+    def add_to(self, parent):
+        parent.addWidget(self)
+        return self
+
+    def remove_from(self, parent):
+        self.setParent(None)
+        parent.removeWidget(self)
+
+
+class QtBigButtonCSWidget(QtButtonCSWidget):
+    def __init__(self):
+        super().__init__()
+        self.__layout = QtWidgets.QVBoxLayout()
+        self.__icon = QtWidgets.QLabel(self)
+        self.__icon.setAlignment(QtCore.Qt.AlignCenter)
+
+        self.__label = QtWidgets.QLabel()
+        self.__label.setAlignment(QtCore.Qt.AlignCenter)
+        self.__layout.addWidget(self.__icon)
+        self.__layout.addWidget(self.__label)
+        self.setLayout(self.__layout)
+
+    def set_icon(self, icon):
+        __size = (32, 32)
+        if icon.startswith(":/"):
+            pixmap = QtGui.QPixmap(icon)
+            scaled_pixmap = pixmap.scaled(
+                *__size, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation
+            )
+            self.__icon.setPixmap(scaled_pixmap)
+        else:
+            __icon = (ICON_DIR / icon).resolve().__str__()
+            try:
+                pixmap = QtGui.QPixmap(__icon)
+                scaled_pixmap = pixmap.scaled(
+                    *__size, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation
+                )
+                self.__icon.setPixmap(scaled_pixmap)
+            except Exception as e:
+                print(e)
+
+    def setText(self, text):
+        self.__label.setText(text)
+
+
+class QtHeadingLabelCSWidget(QtWidgets.QLabel):
+    def __init__(self):
+        super().__init__()
+        self.__visible_immediate = True
+        # self.setFont(QtGui.QFont(Fonts.SegoeUI, 8, QtGui.QFont.Normal))
+        self.setStyleSheet(QtButtonStyle.Default)
+
+    def set_heading(self, level):
+        if level == 0:
+            self.setStyleSheet(QtLabelStyle.Heading_0)
+        elif level == 1:
+            self.setStyleSheet(QtLabelStyle.Heading_1)
+        elif level == 2:
+            self.setStyleSheet(QtLabelStyle.Heading_2)
+        elif level == 3:
+            self.setStyleSheet(QtLabelStyle.Heading_3)
+        elif level == 4:
+            self.setStyleSheet(QtLabelStyle.Heading_4)
+        elif level == 5:
+            self.setStyleSheet(QtLabelStyle.Heading_5)
+        else:
+            print("Error: Heading level out of range.")
+            return
+
+    def add_to(self, parent):
+        parent.addWidget(self)
+        return self
+
+    def remove_from(self, parent):
+        self.setParent(None)
+        parent.removeWidget(self)

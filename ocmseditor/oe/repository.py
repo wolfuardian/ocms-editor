@@ -1,3 +1,7 @@
+from dataclasses import dataclass, field
+from ocmseditor.oe.utils.qt import QtWidgets
+
+
 class Repository:
     """Singleton"""
 
@@ -13,9 +17,15 @@ class Repository:
         return cls.__instance
 
 
-class _UIWidgetDB:
-    frame_widgets = []
+# class _UIWidgetDB:
+#     frame_widgets = []
 
+
+@dataclass
+class _UIWidgetDB:
+    main: QtWidgets.QWidget = field(default=None)
+    # frame_edit_attribute: QtWidgets.QWidget = field(default=None)
+    # frame_other_attribute: QtWidgets.QWidget = field(default=None)
 
 
 class _MASceneDB:

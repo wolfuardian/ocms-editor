@@ -13,8 +13,8 @@ class EditAttributeWidget(QtFrameLayoutCSWidget):
         # self.project_dir_box.set_text("專案路徑")
         #
         # self.fetch_btn = qt.QtButtonCSWidget()
-        # self.fetch_btn.set_width(4)
-        # self.fetch_btn.set_height(16)
+        # self.fetch_btn.setFixedWidth(4)
+        # self.fetch_btn.setFixedHeight(16)
         # self.fetch_btn.set_tooltip("Fetch")
         #
         # self.project_dir_txt = qt.QtTextLineCSWidget()
@@ -24,7 +24,7 @@ class EditAttributeWidget(QtFrameLayoutCSWidget):
         # self.browse_btn = qt.QtButtonCSWidget()
         # self.browse_btn.set_icon("open_folder.png")
         # self.browse_btn.set_text("")
-        # self.browse_btn.set_height(32)
+        # self.browse_btn.setFixedHeight(32)
         #
         # self.fetch_btn.clicked.connect(lambda: operator.op_fetch_project_path(self))
         # self.browse_btn.clicked.connect(lambda: operator.op_browser_project_path(self))

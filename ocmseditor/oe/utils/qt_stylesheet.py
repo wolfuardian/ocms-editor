@@ -44,9 +44,22 @@ class QtStyle:
         background-color: {_hex("CCCCCC")};
     }}
     QTabBar::tab:!selected {{
+        background-color: {_hex("2B2B2B")};
+    }}
+    QTabBar::tab:disabled {{
+        color: {_hex("333333")};
         background-color: {_hex("1F1F1F")};
     }}
     """
+
+
+class QtLabelStyle:
+    Heading_0 = "font-size: 36px; font-weight: bold;"
+    Heading_1 = "font-size: 30px; font-weight: bold;"
+    Heading_2 = "font-size: 24px; font-weight: bold;"
+    Heading_3 = "font-size: 20px; font-weight: bold;"
+    Heading_4 = "font-size: 16px; font-weight: bold;"
+    Heading_5 = "font-size: 14px; font-weight: bold;"
 
 
 class QtLabelStatus:
@@ -207,6 +220,30 @@ class QtCheckBoxStatus:
 
 
 class QtButtonStyle:
+    icon_filepath = OCMSEDITOR_ROOT / "so-checkmark.svg"
+
+    Big = f"""
+            QPushButton {{
+                color: {_hex("bdbdbd")};
+                border: 1px solid transparent;
+                background-color: {_hex("444444")};
+                border-bottom-right-radius: 0px;
+                
+            }}
+
+            QPushButton:hover {{
+                background-color: {_hex("404040")};
+            }}
+            QPushButton:pressed {{
+                background-color: {_hex("707070")};
+            }}
+            QPushButton:disabled {{
+                color: {_hex("636363")};
+                border: 1px solid {_hex("3c3c3c")};
+                background-color: {_hex("2b2b2b")};
+            }}
+        """
+
     Default = f"""
             QPushButton {{
                 color: {_hex("bdbdbd")};
@@ -423,7 +460,18 @@ class QtButtonStyle:
         """
 
 
-class QtGroupBoxStatus:
+class QtGroupBoxStyle:
+    Transparent = f"""
+                QGroupBox {{
+                background-color: None;
+                border: 0px;
+            }}
+
+            QGroupBox::title {{
+                color: None;
+                background-color: None;
+            }}
+    """
     Default = f"""
             QGroupBox {{
                 background-color: {_hex("3c3c3c")};
@@ -469,17 +517,7 @@ class QtGroupBoxStatus:
                 background-color: {_hex("282828")};
             }}
         """
-    Transparent = f"""
-                QGroupBox {{
-                background-color: None;
-                border: 0px;
-            }}
 
-            QGroupBox::title {{
-                color: None;
-                background-color: None;
-            }}
-    """
     Disabled = f"""
             QGroupBox {{
                 background-color: {_hex("3c3c3c")};
