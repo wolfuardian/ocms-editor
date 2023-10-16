@@ -15,10 +15,7 @@ from ocmseditor.oe.utils.qt_stylesheet import (
 
 def get_main_window():
     maya_main_ptr = omui.MQtUtil.mainWindow()
-    if sys.version_info.major >= 3:
-        return wrapInstance(int(maya_main_ptr), QtWidgets.QWidget)
-    else:
-        return wrapInstance(long(maya_main_ptr), QtWidgets.QWidget)
+    return wrapInstance(int(maya_main_ptr), QtWidgets.QWidget)
 
 
 class QtDefaultCSWidget(QtWidgets.QWidget):
@@ -53,6 +50,46 @@ class QtDefaultCSWidget(QtWidgets.QWidget):
 
     def set_extra_stylesheet(self):
         self.setStyleSheet(self.styleSheet() + "\n" + QtStyle.Tooltip)
+
+
+class QtFloatCSWidget(QtDefaultCSWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent=parent)
+
+        # 設置視窗屬性
+        # self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(
+            QtCore.Qt.FramelessWindowHint
+            | QtCore.Qt.WindowStaysOnTopHint
+            | QtCore.Qt.Tool
+        )
+        self.setAttribute(QtCore.Qt.WA_TranslucentBackground, True)
+        self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
+
+        self.__visible_immediate = True
+        self.__layout = QtWidgets.QVBoxLayout()
+        self.__layout.setAlignment(QtCore.Qt.AlignTop)
+        self.__layout.setContentsMargins(0, 0, 0, 0)
+        self.__layout.setSpacing(0)
+        self.setLayout(self.__layout)
+        self.layout = self.__layout
+        self.layout_content: list[QtWidgets] = []
+        self.setStyleSheet(QtGroupBoxStyle.Default)
+
+    def set_visible_immediate(self, visible):
+        self.__visible_immediate = visible
+        self.setVisible(visible)
+
+    def set_stylesheet_additional(self, style):
+        self.setStyleSheet(self.styleSheet() + "\n" + style)
+
+    def add_to(self, parent):
+        parent.addWidget(self)
+        return self
+
+    def remove_from(self, parent):
+        self.setParent(None)
+        parent.removeWidget(self)
 
 
 class QtTabCSWidget(QtWidgets.QTabWidget):

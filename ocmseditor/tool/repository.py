@@ -7,3 +7,4 @@ class Repository(core.Repository):
     @classmethod
     def get(cls):
         return RepositoryFacade()
+

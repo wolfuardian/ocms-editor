@@ -1,5 +1,7 @@
 from ocmseditor.oe.ui.main import UIMain
 from ocmseditor.oe.utils.qt import QtGui
+from ocmseditor.oe.handler import subscribe_events
+
 
 def show_gui():
     from ocmseditor.oe.gui import show
@@ -10,6 +12,7 @@ def show_gui():
 class UIMainDecorator(UIMain):
     def __init__(self):
         super(UIMainDecorator, self).__init__()
+        subscribe_events()
 
         self.__frames_toggle = True
         self.__cur_frame_index = 0
@@ -29,7 +32,6 @@ class UIMainDecorator(UIMain):
 
         self.action_resize_win.triggered.connect(self.toggle_resize_win)
         self.action_resize_win.setShortcut("Shift+2")
-
 
     def toggle_next_frame(self):
         self._increment_frame_index()
@@ -66,10 +68,14 @@ class UIMainDecorator(UIMain):
         self.__frame_widgets[index].set_toggle(True)
 
     def _increment_frame_index(self):
-        self.__cur_frame_index = (self.__cur_frame_index + 1) % len(self.__frame_widgets)
+        self.__cur_frame_index = (self.__cur_frame_index + 1) % len(
+            self.__frame_widgets
+        )
 
     def _decrement_frame_index(self):
-        self.__cur_frame_index = (self.__cur_frame_index - 1) % len(self.__frame_widgets)
+        self.__cur_frame_index = (self.__cur_frame_index - 1) % len(
+            self.__frame_widgets
+        )
 
     def _update_window_size_factor(self):
         self.window_size_factor += 1

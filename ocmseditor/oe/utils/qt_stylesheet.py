@@ -472,6 +472,17 @@ class QtGroupBoxStyle:
                 background-color: None;
             }}
     """
+    White = f"""
+                QGroupBox {{
+                background-color: {_hex("cccccc")};
+                border: 0px;
+            }}
+
+            QGroupBox::title {{
+                color: {_hex("1f1f1f")};
+                background-color: None;
+            }}
+    """
     Default = f"""
             QGroupBox {{
                 background-color: {_hex("3c3c3c")};
@@ -541,6 +552,14 @@ class QtGroupBoxStyle:
             }}
         """
 
+
+class QtTitleLabelStyle:
+    Black = f"""
+                QLabel {{
+                color: {_hex("1f1f1f")};
+                font-weight: bold;
+            }}
+    """
 
 class QtInfoBoxStatus:
     Default = f"""

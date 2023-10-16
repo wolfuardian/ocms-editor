@@ -24,13 +24,13 @@ class RepositoryFacade:
 @dataclass
 class _UIWidgetDB:
     main: QtWidgets.QWidget = field(default=None)
-    # frame_edit_attribute: QtWidgets.QWidget = field(default=None)
-    # frame_other_attribute: QtWidgets.QWidget = field(default=None)
+    edit_attribute: QtWidgets.QWidget = field(default=None)
 
 
 @dataclass
 class _MASceneDB:
-    active_object: str = field(default=None)
+    active_object: str = field(default="")
+    active_viewport: QtWidgets.QWidget = field(default=None)
 
 
 class _OCMSElementTreeDB:

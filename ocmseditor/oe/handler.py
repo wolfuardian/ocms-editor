@@ -4,6 +4,7 @@ from ocmseditor.tool.maya import Maya
 from ocmseditor.tool.registry import Registry
 from ocmseditor.tool.repository import Repository
 from ocmseditor.oe.constant import REG_MAYA_JOB_IDS
+from ocmseditor.oe.utils.qt import QtCore, QtGui
 
 
 class EventHandler:
@@ -39,14 +40,39 @@ class SelectionChangedEvent:
 
 
 def subscribe_events():
-    EventHandler.subscribe("on_selection_changed", lambda: handle_selected_obj_name())
+    EventHandler.subscribe("on_selection_changed", lambda: fetch_active_object())
+    EventHandler.subscribe(
+        "on_selection_changed", lambda: update_attribute_panel_delay()
+    )
 
 
-def handle_selected_obj_name():
-    repo = Repository.get()
-    maya = repo.maya
-    if len(Maya.get_selected()) != 0:
-        maya.active_object = Maya.get_selected()[0]
+def fetch_active_object():
+    maya = Repository.get().maya
+    if len(Maya.get_active_object()) != 0:
+        maya.active_object = Maya.get_active_object()[0]
+
+
+def fetch_active_viewport():
+    maya = Repository.get().maya
+    maya.active_viewport = Maya.get_active_viewport()
+
+
+def update_attribute_panel():
+    from ocmseditor.oe.module.attribute.ui import EditAttributeWidget
+
+    fetch_active_viewport()
+    maya = Repository.get().maya
+    maya.active_viewport_geom = maya.active_viewport.geometry()
+    geom = maya.active_viewport.geometry()
+    global_point = maya.active_viewport.mapToGlobal(geom.topLeft())
+    modified_point = QtCore.QPoint(global_point.x() + 2, global_point.y() + 40)
+    edit_attribute = Repository.get().ui.edit_attribute
+    edit_attribute: EditAttributeWidget
+    edit_attribute.attribute_panel.move(modified_point)
+
+
+def update_attribute_panel_delay():
+    QtCore.QTimer.singleShot(100, update_attribute_panel)
 
 
 def add_maya_selection_changed_script_job():

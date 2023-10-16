@@ -29,7 +29,9 @@ from ocmseditor.oe.handler import (
     SelectionChangedEvent,
     add_maya_selection_changed_script_job,
     del_maya_selection_changed_script_job,
+    update_attribute_panel_delay,
 )
+from ocmseditor.tool.repository import Repository
 
 
 def version():
@@ -44,6 +46,7 @@ class UIMain(
 ):
     def __init__(self, parent=get_main_window()):
         super(UIMain, self).__init__(parent)
+        print("EditAttributeWidget")
         self.setWindowTitle(version().split("-")[0])
         self.window_size_factor = 0
 
@@ -98,7 +101,9 @@ class UIMain(
         self.__tab_edit.scrollarea.layout.addWidget(self.__frame_scene)
         self.__tab_edit.scrollarea.layout.addWidget(self.__frame_manage)
         self.__tab_edit.scrollarea.layout.addWidget(self.__frame_node)
+
         self.__tab_inspector.scrollarea.layout.addWidget(self.__frame_edit_attribute)
+
         self.__tab_display.scrollarea.layout.addWidget(self.__frame_visualize)
         self.__tab_debug.scrollarea.layout.addWidget(self.__frame_log)
 
@@ -126,6 +131,7 @@ class UIMain(
         self.layout().setMenuBar(self.__menubar)
 
         RepositoryFacade().ui.main = self
+        RepositoryFacade().ui.edit_attribute = self.__frame_edit_attribute
 
         # ocms = tool.OCMS.get_ocms()
         # ocms.ui.context.setdefault("global", self)
@@ -162,3 +168,9 @@ class UIMain(
         else:
             del_maya_selection_changed_script_job()
             SelectionChangedEvent.is_fired = False
+
+    def resizeEvent(self, event):
+        update_attribute_panel_delay()
+
+    def dragMoveEvent(self, event):
+        update_attribute_panel_delay()

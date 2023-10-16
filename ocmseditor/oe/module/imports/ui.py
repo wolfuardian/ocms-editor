@@ -1,6 +1,7 @@
 from ocmseditor.oe.constant import ICON_DIR
 from ocmseditor.oe.utils.qt import (
     QtGui,
+    QtScrollareaCSWidget,
     QtFramelessLayoutCSWidget,
     QtGroupVBoxCSWidget,
     QtGroupHBoxCSWidget,
@@ -8,7 +9,6 @@ from ocmseditor.oe.utils.qt import (
     QtButtonCSWidget,
     QtBigButtonCSWidget,
     QtDefaultCSWidget,
-    QtScrollareaCSWidget,
 )
 from ocmseditor.oe.utils.qt_stylesheet import QtGroupBoxStyle, QtButtonStyle
 from ocmseditor.oe.constant import INFO__BROWSER_CANCELED
@@ -83,12 +83,9 @@ class ImportsWidget(QtFramelessLayoutCSWidget):
         #
         self.imports_btn_h_box.layout.addWidget(self.file_btn)
         self.imports_btn_h_box.layout.addWidget(self.scene_btn)
-        #
         self.imports_v_box.layout.addWidget(self.title_h)
         self.imports_v_box.layout.addWidget(self.imports_btn_h_box)
-
         self.scrollarea.layout.addWidget(self.imports_v_box)
-
         self.layout().addWidget(self.scrollarea)
 
         # self._validate()
