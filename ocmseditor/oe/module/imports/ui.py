@@ -54,10 +54,10 @@ class ImportsWidget(QtFramelessLayoutCSWidget):
         self.scene_btn.setStyleSheet(QtButtonStyle.Big)
 
         self.file_btn.clicked.connect(
-            lambda: self.on_file_btn_clicked(context=RepositoryFacade().ui.main)
+            lambda: self.on_file_btn_clicked(ui=RepositoryFacade().ui.main)
         )
         self.scene_btn.clicked.connect(
-            lambda: self.on_scene_btn_clicked(context=RepositoryFacade().ui.main)
+            lambda: self.on_scene_btn_clicked(ui=RepositoryFacade().ui.main)
         )
 
         # main_ui = Repository().ui.main
@@ -91,23 +91,21 @@ class ImportsWidget(QtFramelessLayoutCSWidget):
         # self._validate()
 
     @staticmethod
-    def on_file_btn_clicked(context):
+    def on_file_btn_clicked(ui):
         from ocmseditor.oe.ui.main import UIMain
 
         browser_dir = tool.Maya.browser(1)
         if browser_dir == INFO__BROWSER_CANCELED:
-            return
+            return False
 
-        print(f"browser_dir = {browser_dir}")
-
-        context: UIMain
-        context.tab_bar.setTabEnabled(0, False)
-        context.switch_to_file_mode()
+        ui: UIMain
+        ui.tab_bar.setTabEnabled(0, False)
+        ui.switch_to_file_mode()
 
     @staticmethod
-    def on_scene_btn_clicked(context):
+    def on_scene_btn_clicked(ui):
         from ocmseditor.oe.ui.main import UIMain
 
-        context: UIMain
-        context.tab_bar.setTabEnabled(0, False)
-        context.switch_to_scene_mode()
+        ui: UIMain
+        ui.tab_bar.setTabEnabled(0, False)
+        ui.switch_to_scene_mode()

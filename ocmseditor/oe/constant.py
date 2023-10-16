@@ -19,6 +19,10 @@ class Mode:
     FileMode = "File Mode"
     SceneMode = "Scene Mode"
 
+class AttributePanel:
+    Collapsed = "Collapsed"
+    Expanded = "Expanded"
+
 
 class Fonts:
     Fixedsys = "Fixedsys"

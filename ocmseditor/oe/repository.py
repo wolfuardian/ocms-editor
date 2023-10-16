@@ -17,10 +17,6 @@ class RepositoryFacade:
         return cls.__instance
 
 
-# class _UIWidgetDB:
-#     frame_widgets = []
-
-
 @dataclass
 class _UIWidgetDB:
     main: QtWidgets.QWidget = field(default=None)

@@ -7,7 +7,9 @@ from PySide2 import QtWidgets, QtCore, QtGui
 from ocmseditor.oe.constant import ICON_DIR, Fonts
 from ocmseditor.oe.utils.qt_stylesheet import (
     QtStyle,
+    QtLineEditStyle,
     QtLabelStyle,
+    QtHeadingLabelStyle,
     QtButtonStyle,
     QtGroupBoxStyle,
 )
@@ -58,11 +60,7 @@ class QtFloatCSWidget(QtDefaultCSWidget):
 
         # 設置視窗屬性
         # self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
-        self.setWindowFlags(
-            QtCore.Qt.FramelessWindowHint
-            | QtCore.Qt.WindowStaysOnTopHint
-            | QtCore.Qt.Tool
-        )
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.Tool)
         self.setAttribute(QtCore.Qt.WA_TranslucentBackground, True)
         self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
 
@@ -533,6 +531,41 @@ class QtBigButtonCSWidget(QtButtonCSWidget):
         self.__label.setText(text)
 
 
+class QtLabelCSWidget(QtWidgets.QLabel):
+    def __init__(self, parent=None, text=None, status=None):
+        super().__init__(parent)
+        self.setStyleSheet(QtLabelStyle.Default)
+
+    def set_stylesheet_additional(self, style):
+        self.setStyleSheet(self.styleSheet() + "\n" + style)
+
+    def add_to(self, parent):
+        parent.addWidget(self)
+        return self
+
+    def remove_from(self, parent):
+        self.setParent(None)
+        parent.removeWidget(self)
+
+
+class QtLineEditCSWidget(QtWidgets.QLineEdit):
+    def __init__(self, status=None):
+        super().__init__()
+
+        self.setStyleSheet(QtLabelStyle.Default)
+
+    def set_stylesheet_additional(self, style):
+        self.setStyleSheet(self.styleSheet() + "\n" + style)
+
+    def add_to(self, parent):
+        parent.addWidget(self)
+        return self
+
+    def remove_from(self, parent):
+        self.setParent(None)
+        parent.removeWidget(self)
+
+
 class QtHeadingLabelCSWidget(QtWidgets.QLabel):
     def __init__(self):
         super().__init__()
@@ -542,17 +575,17 @@ class QtHeadingLabelCSWidget(QtWidgets.QLabel):
 
     def set_heading(self, level):
         if level == 0:
-            self.setStyleSheet(QtLabelStyle.Heading_0)
+            self.setStyleSheet(QtHeadingLabelStyle.Heading_0)
         elif level == 1:
-            self.setStyleSheet(QtLabelStyle.Heading_1)
+            self.setStyleSheet(QtHeadingLabelStyle.Heading_1)
         elif level == 2:
-            self.setStyleSheet(QtLabelStyle.Heading_2)
+            self.setStyleSheet(QtHeadingLabelStyle.Heading_2)
         elif level == 3:
-            self.setStyleSheet(QtLabelStyle.Heading_3)
+            self.setStyleSheet(QtHeadingLabelStyle.Heading_3)
         elif level == 4:
-            self.setStyleSheet(QtLabelStyle.Heading_4)
+            self.setStyleSheet(QtHeadingLabelStyle.Heading_4)
         elif level == 5:
-            self.setStyleSheet(QtLabelStyle.Heading_5)
+            self.setStyleSheet(QtHeadingLabelStyle.Heading_5)
         else:
             print("Error: Heading level out of range.")
             return
@@ -564,3 +597,38 @@ class QtHeadingLabelCSWidget(QtWidgets.QLabel):
     def remove_from(self, parent):
         self.setParent(None)
         parent.removeWidget(self)
+
+
+class QtStringPropertyCSWidget(QtDefaultCSWidget):
+    propertySetter = QtCore.Signal(str, str, str)
+
+    def __init__(self, parent=None, long_name=None, nice_name=None, value=""):
+        super().__init__(parent)
+        self.long_name = long_name
+        self.nice_name = nice_name
+
+        self.layout = QtWidgets.QHBoxLayout()
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+
+        self.label = QtLabelCSWidget()
+        self.label.setFixedWidth(80)
+        self.label.setText(self.long_name)
+        if self.nice_name:
+            self.label.setText(self.nice_name)
+
+        self.lineedit = QtLineEditCSWidget()
+        self.lineedit.setText(value)
+        self.lineedit.textChanged.connect(self.update_prop)
+
+        font = QtGui.QFont(Fonts.MicrosoftJhengHei, 8, QtGui.QFont.Bold)
+        font.setLetterSpacing(QtGui.QFont.PercentageSpacing, 100)
+        self.label.setFont(QtGui.QFont(font))
+        self.layout.addWidget(self.label)
+        self.layout.addWidget(self.lineedit)
+
+        self.setLayout(self.layout)
+
+    def update_prop(self, value):
+        if self.long_name:
+            self.propertySetter.emit(self.long_name, self.nice_name, value)

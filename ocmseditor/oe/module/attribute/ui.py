@@ -1,4 +1,6 @@
 from ocmseditor.oe.utils.qt import (
+    QtCore,
+    QtWidgets,
     QtFloatCSWidget,
     QtScrollareaCSWidget,
     QtFramelessLayoutCSWidget,
@@ -7,6 +9,7 @@ from ocmseditor.oe.utils.qt import (
     QtGroupHBoxCSWidget,
     QtHeadingLabelCSWidget,
     QtButtonCSWidget,
+    QtStringPropertyCSWidget,
     get_main_window,
 )
 from ocmseditor.oe.utils.qt_stylesheet import (
@@ -14,19 +17,41 @@ from ocmseditor.oe.utils.qt_stylesheet import (
     QtButtonStyle,
     QtTitleLabelStyle,
 )
+from ocmseditor.oe.constant import AttributePanel
+from ocmseditor.oe.repository import RepositoryFacade
+from .operator import op_set_attr
 
-global instance_attribute_panel
+global instance_edit_attribute
 
 
 class EditAttributeWidget(QtFramelessLayoutCSWidget):
     def __init__(self):
         super().__init__()
+        self.panel_status = AttributePanel.Expanded
+
+        self.container_h_box = QtGroupHBoxCSWidget()
+        self.container_h_box.layout.setContentsMargins(0, 0, 0, 0)
+        self.container_h_box.layout.setSpacing(0)
+        self.container_h_box.setStyleSheet(QtGroupBoxStyle.Transparent)
+        self.container_h_box.setFixedHeight(200)
+
+        self.container_collapse_btn = QtButtonCSWidget()
+        self.container_collapse_btn.setSizePolicy(
+            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding
+        )
+        self.container_collapse_btn.setFixedWidth(8)
+        self.container_collapse_btn.set_icon(":/nodeGrapherPrevious.png")
+        self.container_collapse_btn.setStyleSheet(QtButtonStyle.Dark)
+
         self.scrollarea = QtScrollareaCSWidget()
+        self.scrollarea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
 
         self.imports_v_box = QtGroupVBoxCSWidget()
         self.imports_v_box.layout.setContentsMargins(0, 0, 0, 0)
         self.imports_v_box.layout.setSpacing(0)
         self.imports_v_box.setStyleSheet(QtGroupBoxStyle.Transparent)
+        self.imports_v_box.setFixedWidth(200)
+        self.imports_v_box.setFixedHeight(400)
 
         self.inspector_title_h_box = QtGroupHBoxCSWidget()
         self.inspector_title_h_box.layout.setContentsMargins(0, 0, 0, 0)
@@ -48,11 +73,12 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
         self.title_h.setText("Import From")
         self.title_h.set_heading(5)
 
-        self.attribute_panel = self.create_attribute_panel()
-        self.attribute_panel.layout.setContentsMargins(0, 0, 0, 0)
-        self.attribute_panel.layout.setSpacing(0)
-        self.attribute_panel.setFixedWidth(150)
-        self.attribute_panel.setFixedHeight(600)
+        self.edit_attribute = self.create_window()
+
+        self.container_collapse_btn.clicked.connect(self.toggle_panel)
+
+        # self.edit_attribute.layout.setContentsMargins(0, 0, 0, 0)
+        # self.edit_attribute.layout.setSpacing(0)
 
         #
         # self.project_dir_box = QtGroupHBoxCSWidget()
@@ -87,33 +113,84 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
         # self.imports_btn_h_box.layout.addWidget(self.file_btn)
         # self.imports_btn_h_box.layout.addWidget(self.scene_btn)
         #
+
         self.inspector_title_h_box.layout.addWidget(self.inspector_title)
         self.imports_v_box.layout.addWidget(self.inspector_title_h_box)
         self.scrollarea.layout.addWidget(self.imports_v_box)
-        self.layout().addWidget(self.scrollarea)
+        # self.layout().addWidget(self.scrollarea)
 
-        self.attribute_panel.layout.addWidget(self.scrollarea)
+        self.container_h_box.layout.addWidget(self.scrollarea)
+        self.container_h_box.layout.addWidget(self.container_collapse_btn)
+
+        self.edit_attribute.layout.addWidget(self.container_h_box)
+
+    def toggle_panel(self):
+        if self.panel_status == AttributePanel.Expanded:
+            self.container_collapse_btn.set_icon(":/nodeGrapherNext.png")
+            self.scrollarea.setVisible(False)
+            self.panel_status = AttributePanel.Collapsed
+        elif self.panel_status == AttributePanel.Collapsed:
+            self.container_collapse_btn.set_icon(":/nodeGrapherPrevious.png")
+            self.scrollarea.setVisible(True)
+            self.panel_status = AttributePanel.Expanded
+
+    def redraw_met_edit_panel(self, context):
+        self._destroy_met_edit_panel(context)
+        self._construct_met_edit_panel(context)
+
+    def _destroy_met_edit_panel(self, context):
+        self.attr_prop_container.clear_all()
 
     @staticmethod
-    def create_attribute_panel():
-        global instance_attribute_panel
+    def prop_setter(long_name, nice_name, value):
+        maya = RepositoryFacade().maya
+        op_set_attr(maya.active_object, long_name, value)
+
+    def _construct_met_edit_panel(self, ui):
+        for attr_name, attr_value in ui["attrs"].items():
+            if isinstance(attr_value, str):
+                continue
+            elif isinstance(attr_value, dict):
+                compound_name = attr_name
+                widget = QtGroupVBoxCSWidget()
+                widget.setTitle(compound_name)
+                self.attr_prop_container.add_group(
+                    widget_id=compound_name,
+                    widget=widget,
+                )
+                for _attr_nm, _attr_val in attr_value.items():
+                    _prop = QtStringPropertyCSWidget(
+                        long_name=compound_name + "." + _attr_nm,
+                        nice_name=_attr_nm.capitalize(),
+                        value=_attr_val,
+                    )
+                    self.attr_prop_container.add_widget(
+                        parent_id=compound_name,
+                        widget_id=_attr_nm,
+                        widget=_prop,
+                    )
+                    _prop.lineedit.setCursorPosition(0)
+                    _prop.propertySetter.connect(self.prop_setter)
+
+    @staticmethod
+    def create_window():
+        global instance_edit_attribute
+        parent = get_main_window()
         try:
-            if instance_attribute_panel:
-                instance_attribute_panel.close()
-                instance_attribute_panel.deleteLater()
-                instance_attribute_panel = QtFloatCSWidget(parent=get_main_window())
-                instance_attribute_panel.update()
-                instance_attribute_panel.show()
+            if instance_edit_attribute:
+                instance_edit_attribute.close()
+                instance_edit_attribute.deleteLater()
+                instance_edit_attribute = QtFloatCSWidget(parent=parent)
+                instance_edit_attribute.update()
+                instance_edit_attribute.show()
 
         except NameError:
-            print(f"NameError: {NameError}")
-            instance_attribute_panel = QtFloatCSWidget(parent=get_main_window())
-            instance_attribute_panel.update()
-            instance_attribute_panel.show()
+            instance_edit_attribute = QtFloatCSWidget(parent=parent)
+            instance_edit_attribute.update()
+            instance_edit_attribute.show()
 
         except RuntimeError:
-            print(f"RuntimeError: {RuntimeError}")
-            instance_attribute_panel = QtFloatCSWidget(parent=get_main_window())
-            instance_attribute_panel.update()
-            instance_attribute_panel.show()
-        return instance_attribute_panel
+            instance_edit_attribute = QtFloatCSWidget(parent=parent)
+            instance_edit_attribute.update()
+            instance_edit_attribute.show()
+        return instance_edit_attribute

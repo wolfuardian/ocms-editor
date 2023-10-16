@@ -1,6 +1,7 @@
 from ocmseditor.oe.ui.main import UIMain
 from ocmseditor.oe.utils.qt import QtGui
 from ocmseditor.oe.handler import subscribe_events
+from ocmseditor.oe.repository import RepositoryFacade
 
 
 def show_gui():
@@ -30,6 +31,9 @@ class UIMainDecorator(UIMain):
         self.action_collapse_all.triggered.connect(self.collapse_frame_widgets)
         self.action_collapse_all.setShortcut("Ctrl+Shift+-")
 
+        self.action_toggle_panel.triggered.connect(self.toggle_panel)
+        self.action_toggle_panel.setShortcut("Shift+1")
+
         self.action_resize_win.triggered.connect(self.toggle_resize_win)
         self.action_resize_win.setShortcut("Shift+2")
 
@@ -41,9 +45,18 @@ class UIMainDecorator(UIMain):
         self._decrement_frame_index()
         self.toggle_frame_by_index(self.__cur_frame_index)
 
+    @staticmethod
+    def toggle_panel():
+        from ocmseditor.oe.module.attribute.ui import EditAttributeWidget
+
+        edit_attribute = RepositoryFacade().ui.edit_attribute
+        edit_attribute: EditAttributeWidget
+        edit_attribute.toggle_panel()
+
     def toggle_resize_win(self):
         self._update_window_size_factor()
         self._resize_window()
+        self.setVisible(True)
 
     def expand_frame_widgets(self):
         for frame_btn in self.__frame_widgets:
@@ -82,5 +95,5 @@ class UIMainDecorator(UIMain):
         self.window_size_factor = self.window_size_factor % 2
 
     def _resize_window(self):
-        self.__fixed_width = QtGui.QGuiApplication.primaryScreen().size().width() / 4
+        self.__fixed_width = QtGui.QGuiApplication.primaryScreen().size().width() / 8
         self.setMinimumWidth(self.__fixed_width * (self.window_size_factor + 1))

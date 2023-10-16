@@ -53,7 +53,7 @@ class QtStyle:
     """
 
 
-class QtLabelStyle:
+class QtHeadingLabelStyle:
     Heading_0 = "font-size: 36px; font-weight: bold;"
     Heading_1 = "font-size: 30px; font-weight: bold;"
     Heading_2 = "font-size: 24px; font-weight: bold;"
@@ -62,7 +62,7 @@ class QtLabelStyle:
     Heading_5 = "font-size: 14px; font-weight: bold;"
 
 
-class QtLabelStatus:
+class QtLabelStyle:
     Default = f"""
         QLabel {{
             color: {_hex("B0B0B0")};
@@ -100,7 +100,7 @@ class QtLabelStatus:
     """
 
 
-class QtLineEditStatus:
+class QtLineEditStyle:
     Default = f"""
         QLineEdit {{
             background-color: {_hex("1d1d1d")};
@@ -228,7 +228,6 @@ class QtButtonStyle:
                 border: 1px solid transparent;
                 background-color: {_hex("444444")};
                 border-bottom-right-radius: 0px;
-                
             }}
 
             QPushButton:hover {{
@@ -243,6 +242,27 @@ class QtButtonStyle:
                 background-color: {_hex("2b2b2b")};
             }}
         """
+    Dark = f"""
+            QPushButton {{
+                color: {_hex("bdbdbd")};
+                background-color: {_hex("2b2b2b")};
+            }}
+
+            QPushButton:hover {{
+                background-color: {_hex("333333")};
+            }}
+            QPushButton:pressed {{
+                background-color: {_hex("707070")};
+            }}
+            QPushButton:disabled {{
+                color: {_hex("636363")};
+                border: 1px solid {_hex("3c3c3c")};
+                background-color: {_hex("2b2b2b")};
+            }}
+            """
+
+
+
 
     Default = f"""
             QPushButton {{

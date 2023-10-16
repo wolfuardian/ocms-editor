@@ -29,10 +29,8 @@ from ocmseditor.oe.handler import (
     SelectionChangedEvent,
     add_maya_selection_changed_script_job,
     del_maya_selection_changed_script_job,
-    update_attribute_panel_delay,
+    update_edit_attribute_delay,
 )
-from ocmseditor.tool.repository import Repository
-
 
 def version():
     with open(VERSION_PATH, "r") as f:
@@ -46,7 +44,6 @@ class UIMain(
 ):
     def __init__(self, parent=get_main_window()):
         super(UIMain, self).__init__(parent)
-        print("EditAttributeWidget")
         self.setWindowTitle(version().split("-")[0])
         self.window_size_factor = 0
 
@@ -66,12 +63,16 @@ class UIMain(
         self.action_reset = QtWidgets.QAction()
         self.action_expand_all = QtWidgets.QAction()
         self.action_collapse_all = QtWidgets.QAction()
+        self.action_collapse_win = QtWidgets.QAction()
+        self.action_toggle_panel = QtWidgets.QAction()
         self.action_resize_win = QtWidgets.QAction()
         self.action_sync_maya_operator = QtWidgets.QAction()
         self.action_sync_maya_operator_label = QtWidgets.QAction()
 
         self.action_expand_all.setText("")
         self.action_collapse_all.setText("")
+        self.action_collapse_win.setText("")
+        self.action_toggle_panel.setText("")
         self.action_resize_win.setText("")
         self.action_sync_maya_operator.setText("")
         self.action_sync_maya_operator_label.setText("")
@@ -124,6 +125,8 @@ class UIMain(
         self.set_wheel_down_event(self.action_wheel_down)
         self.__menubar.addAction(self.action_expand_all)
         self.__menubar.addAction(self.action_collapse_all)
+        self.__menubar.addAction(self.action_collapse_win)
+        self.__menubar.addAction(self.action_toggle_panel)
         self.__menubar.addAction(self.action_resize_win)
         self.__menubar.addAction(self.action_sync_maya_operator)
         self.__menubar.addAction(self.action_sync_maya_operator_label)
@@ -170,7 +173,7 @@ class UIMain(
             SelectionChangedEvent.is_fired = False
 
     def resizeEvent(self, event):
-        update_attribute_panel_delay()
+        update_edit_attribute_delay()
 
     def dragMoveEvent(self, event):
-        update_attribute_panel_delay()
+        update_edit_attribute_delay()

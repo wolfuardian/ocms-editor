@@ -17,13 +17,11 @@ def show():
             instance.show(dockable=True, area="left")
 
     except NameError:
-        print(f"NameError: {NameError}")
         instance = UIMainDecorator()
         instance.update()
         instance.show(dockable=True, area="left")
 
     except RuntimeError:
-        print(f"RuntimeError: {RuntimeError}")
         instance = UIMainDecorator()
         instance.update()
         instance.show(dockable=True, area="left")

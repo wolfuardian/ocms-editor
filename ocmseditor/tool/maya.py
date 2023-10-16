@@ -68,38 +68,24 @@ class Maya(core.Maya):
     @classmethod
     def get_active_viewport(cls):
         panels = cmds.getPanel(type="modelPanel")
-        print(f"panels: {panels}")
         if not panels:
             return None
-
         panel = panels[0]
-
         ptr = omui.MQtUtil.findControl(panel)
-        print(f"ptr: {ptr}")
         if ptr is None:
             return None
-
-        inst = wrapInstance(int(ptr), QtWidgets.QWidget)
-        print(f"inst: {inst}")
-        geom = inst.geometry()
-        # print(f"geom: {geom}")
-        # QtCore.QCoreApplication.processEvents()
-        # aaa = QtCore.QTimer.singleShot(1000, lambda: inst.mapToGlobal(geom.topLeft()))
-        # print(f"aaa: {aaa}")
-        #
-        # global_point = inst.mapToGlobal(geom.topLeft())
-        # print(f"global_point: {global_point}")
-        return wrapInstance(int(ptr), QtWidgets.QWidget)
+        try:
+            return wrapInstance(int(ptr), QtWidgets.QWidget)
+        except Exception as e:
+            print("Failed to wrap instance: {}".format(e))
+            return None
 
     @classmethod
     def get_global_point(cls, inst):
         geom = inst.geometry()
         global_point = inst.mapToGlobal(geom.topLeft())
-        print(f"global_point: {global_point}")
         return global_point
 
     @classmethod
     def get_global_point_delay(cls, inst):
-        return QtCore.QTimer.singleShot(
-            500, lambda: cls.get_global_point(inst)
-        )
+        return QtCore.QTimer.singleShot(500, lambda: cls.get_global_point(inst))
