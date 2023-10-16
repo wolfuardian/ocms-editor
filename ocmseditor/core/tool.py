@@ -18,4 +18,11 @@ def interface(cls):
 class Maya:
     pass
 
+@interface
+class Registry:
+    pass
+
+@interface
+class Repository:
+    pass
 # fmt: on

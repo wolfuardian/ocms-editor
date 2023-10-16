@@ -11,9 +11,9 @@ from ocmseditor.oe.utils.qt import (
     QtScrollareaCSWidget,
 )
 from ocmseditor.oe.utils.qt_stylesheet import QtGroupBoxStyle, QtButtonStyle
-from ocmseditor.oe.constant import BROWSER_CANCELED
+from ocmseditor.oe.constant import INFO__BROWSER_CANCELED
 
-from ocmseditor.oe.repository import Repository
+from ocmseditor.oe.repository import RepositoryFacade
 
 import ocmseditor.tool as tool
 
@@ -54,10 +54,10 @@ class ImportsWidget(QtFramelessLayoutCSWidget):
         self.scene_btn.setStyleSheet(QtButtonStyle.Big)
 
         self.file_btn.clicked.connect(
-            lambda: self.on_file_btn_clicked(context=Repository().ui.main)
+            lambda: self.on_file_btn_clicked(context=RepositoryFacade().ui.main)
         )
         self.scene_btn.clicked.connect(
-            lambda: self.on_scene_btn_clicked(context=Repository().ui.main)
+            lambda: self.on_scene_btn_clicked(context=RepositoryFacade().ui.main)
         )
 
         # main_ui = Repository().ui.main
@@ -98,14 +98,14 @@ class ImportsWidget(QtFramelessLayoutCSWidget):
         from ocmseditor.oe.ui.main import UIMain
 
         browser_dir = tool.Maya.browser(1)
-        if browser_dir == BROWSER_CANCELED:
+        if browser_dir == INFO__BROWSER_CANCELED:
             return
 
         print(f"browser_dir = {browser_dir}")
 
         context: UIMain
         context.tab_bar.setTabEnabled(0, False)
-        context.init_tabs_on_file_mode()
+        context.switch_to_file_mode()
 
     @staticmethod
     def on_scene_btn_clicked(context):
@@ -113,4 +113,4 @@ class ImportsWidget(QtFramelessLayoutCSWidget):
 
         context: UIMain
         context.tab_bar.setTabEnabled(0, False)
-        context.init_tabs_on_scene_mode()
+        context.switch_to_scene_mode()

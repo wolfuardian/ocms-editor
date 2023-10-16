@@ -14,6 +14,12 @@ VERSION_PATH = OCMSEDITOR_ROOT / "version.txt"
 ICON_DIR = OCMSEDITOR_ROOT / "oe" / "utils" / "icons"
 
 
+class Mode:
+    ImportsMode = "Imports Mode"
+    FileMode = "File Mode"
+    SceneMode = "Scene Mode"
+
+
 class Fonts:
     Fixedsys = "Fixedsys"
     SegoeUI = "Segoe UI"
@@ -95,4 +101,4 @@ INFO__RESOLVED_FAILED = "<Resolved failed>"
 # STATUS
 #
 
-BROWSER_CANCELED = "Browser canceled"
+INFO__BROWSER_CANCELED = "Browser canceled"

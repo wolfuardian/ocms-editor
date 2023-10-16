@@ -8,7 +8,8 @@ from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
 
 from ocmseditor.oe.utils.logger import Logger
-from ocmseditor.oe.constant import BROWSER_CANCELED
+from ocmseditor.oe.constant import INFO__BROWSER_CANCELED
+
 
 import ocmseditor.core.tool as core
 
@@ -37,7 +38,7 @@ class Maya(core.Maya):
             4 現有文件的名稱。
 
         範例:
-            path = YourClass.browser(1, default_dir='/some/dir', file_filter="Maya Files (*.ma *.mb)")
+            path = YourClass.browser(1, default_dir='/some/dir', file_filter="Maya Files (*.maya *.mb)")
 
         返回:
             選擇的文件或文件夾的路徑，或者如果用戶取消操作，則返回False。
@@ -48,5 +49,17 @@ class Maya(core.Maya):
                 fileMode=file_mode, dir=default_dir, fileFilter=file_filter
             )[0]
         except TypeError:
-            Logger.info(__name__, BROWSER_CANCELED)
-            return BROWSER_CANCELED
+            Logger.info(__name__, INFO__BROWSER_CANCELED)
+            return INFO__BROWSER_CANCELED
+
+    @classmethod
+    def add_script_job(cls, event):
+        return cmds.scriptJob(event=event)
+
+    @classmethod
+    def del_script_job(cls, kill, force):
+        return cmds.scriptJob(kill=kill, force=force)
+
+    @classmethod
+    def get_selected(cls):
+        return cmds.ls(selection=True)

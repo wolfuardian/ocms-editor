@@ -23,8 +23,13 @@ from ocmseditor.oe.utils.qt import (
     get_main_window,
 )
 from ocmseditor.oe.utils.qt_stylesheet import QtStyle, QtButtonStyle
-from ocmseditor.oe.repository import Repository
-from ocmseditor.oe.constant import VERSION_PATH
+from ocmseditor.oe.repository import RepositoryFacade
+from ocmseditor.oe.constant import VERSION_PATH, Mode
+from ocmseditor.oe.handler import (
+    SelectionChangedEvent,
+    add_maya_selection_changed_script_job,
+    del_maya_selection_changed_script_job,
+)
 
 
 def version():
@@ -39,10 +44,13 @@ class UIMain(
 ):
     def __init__(self, parent=get_main_window()):
         super(UIMain, self).__init__(parent)
-
         self.setWindowTitle(version().split("-")[0])
         self.window_size_factor = 0
 
+        # Public Variables
+        self.mode = Mode.ImportsMode
+
+        # Private Variables
         self.__layout = QtWidgets.QVBoxLayout()
         self.__layout.setAlignment(QtCore.Qt.AlignTop)
         self.__layout.setContentsMargins(0, 0, 0, 0)
@@ -95,6 +103,7 @@ class UIMain(
         self.__tab_debug.scrollarea.layout.addWidget(self.__frame_log)
 
         self.__tab.setStyleSheet(QtStyle.Tab)
+        self.__tab.currentChanged.connect(self.tab_current_changed_event)
         self.tab_bar = QtTabBarCSWidget()
         # self.tab_button = QtButtonCSWidget()
         # self.tab_button.setStyleSheet(QtButtonStyle.Transparent)
@@ -116,7 +125,7 @@ class UIMain(
         self.setLayout(self.__layout)
         self.layout().setMenuBar(self.__menubar)
 
-        Repository().ui.main = self
+        RepositoryFacade().ui.main = self
 
         # ocms = tool.OCMS.get_ocms()
         # ocms.ui.context.setdefault("global", self)
@@ -129,13 +138,27 @@ class UIMain(
         #
         # self.toggle_resize_win()
 
-    def init_tabs_on_file_mode(self):
+    def switch_to_file_mode(self):
+        self.mode = Mode.FileMode
         self.__tab.removeTab(0)
         self.__tab.addTab(self.__tab_file, "File")
 
-    def init_tabs_on_scene_mode(self):
+    def switch_to_scene_mode(self):
+        self.mode = Mode.SceneMode
         self.__tab.removeTab(0)
         self.__tab.addTab(self.__tab_edit, "Edit")
         self.__tab.addTab(self.__tab_display, "Display")
         self.__tab.addTab(self.__tab_inspector, "Inspector")
         self.__tab.addTab(self.__tab_debug, "Debug")
+
+    def tab_current_changed_event(self, index):
+        self.handle_selection_changed_script_job(self.mode)
+
+    def handle_selection_changed_script_job(self, mode):
+        if self.mode == Mode.SceneMode:
+            if not SelectionChangedEvent.is_fired:
+                add_maya_selection_changed_script_job()
+                SelectionChangedEvent.is_fired = True
+        else:
+            del_maya_selection_changed_script_job()
+            SelectionChangedEvent.is_fired = False
