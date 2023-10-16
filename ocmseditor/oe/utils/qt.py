@@ -462,6 +462,65 @@ class QtGroupVBoxCSWidget(QtGroupBoxCSWidget):
         parent.removeWidget(self)
 
 
+class QtGroupboxManager:
+    def __init__(self):
+        self.__groupbox = QtGroupVBoxCSWidget()
+        self.__groupbox.setStyleSheet(QtGroupBoxStyle.Transparent)
+        self.__layout = self.__groupbox.layout
+        self.__context = {}
+
+    def get_groupbox(self):
+        return self.__groupbox
+
+    def add_group(self, widget_id, widget):
+        if widget_id in self.__context:
+            raise ValueError(f"Group ID {widget_id} already exists.")
+        self.__context[widget_id] = {"widget": widget, "children": {}}
+        self.__layout.addWidget(widget)
+
+    def remove_group(self, widget_id):
+        if widget_id not in self.__context:
+            raise ValueError(f"Group ID {widget_id} does not exist.")
+        widget = self.__context[widget_id]["widget"]
+        widget.deleteLater()
+        del self.__context[widget_id]
+
+    def add_widget(self, parent_id, widget_id, widget):
+        if parent_id not in self.__context:
+            raise ValueError(f"Parent group ID {parent_id} does not exist.")
+        if widget_id in self.__context[parent_id]["children"]:
+            raise ValueError(
+                f"Widget ID {widget_id} already exists in group {parent_id}."
+            )
+        self.__context[parent_id]["children"][widget_id] = widget
+        self.__context[parent_id]["widget"].layout.addWidget(widget)
+
+    def remove_widget(self, parent_id, widget_id):
+        if parent_id not in self.__context:
+            raise ValueError(f"Parent group ID {parent_id} does not exist.")
+        if widget_id not in self.__context[parent_id]["children"]:
+            raise ValueError(
+                f"Widget ID {widget_id} does not exist in group {parent_id}."
+            )
+        widget = self.__context[parent_id]["children"][widget_id]
+        widget.deleteLater()
+        del self.__context[parent_id]["children"][widget_id]
+
+    def clear_group(self, group_id):
+        if group_id not in self.__context:
+            raise ValueError(f"Group ID {group_id} does not exist.")
+        for widget_id, widget in self.__context[group_id]["children"].items():
+            widget.deleteLater()
+        self.__context[group_id]["children"].clear()
+
+    def clear_all(self):
+        for group_id, group_data in self.__context.items():
+            for widget_id, widget in group_data["children"].items():
+                widget.deleteLater()
+            group_data["widget"].deleteLater()
+        self.__context.clear()
+
+
 class QtButtonCSWidget(QtWidgets.QPushButton):
     def __init__(self):
         super().__init__()
