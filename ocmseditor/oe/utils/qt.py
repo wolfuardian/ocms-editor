@@ -443,7 +443,6 @@ class QtGroupVBoxCSWidget(QtGroupBoxCSWidget):
         self.__layout.setSpacing(0)
         self.setLayout(self.__layout)
         self.layout = self.__layout
-        self.layout_content: list[QtWidgets] = []
         self.setStyleSheet(QtGroupBoxStyle.Default)
 
     def set_visible_immediate(self, visible):
@@ -461,11 +460,92 @@ class QtGroupVBoxCSWidget(QtGroupBoxCSWidget):
         self.setParent(None)
         parent.removeWidget(self)
 
+    def setTitle(self, *args, **kwargs):
+        super().setTitle(*args, **kwargs)
+        self.layout.setContentsMargins(0, 14, 0, 0)
+
+
+class QtGroupVContainerCSWidget(QtGroupVBoxCSWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.container: dict[str, QtWidgets] = {}
+
+        """
+        container = {
+            "group_id_1": {
+                "widget": group_1,
+                "children": {
+                    "widget_id_11": widget_11,
+                    "widget_id_12": widget_12,
+                    "widget_id_13": widget_13,
+                }
+            },
+            "group_id_2": {
+                "widget": group_2,
+                "children": {
+                    "widget_id_21": widget_21,
+                    "widget_id_22": widget_22,
+                }
+            },
+        }
+        """
+
+        """
+        compond_attr: Object
+        attr_key, attr_value: type: Device
+        attr_key, attr_value: category: 
+        attr_key, attr_value: name: CameraB4-1
+        attr_key, attr_value: alias: CameraB4-1
+        attr_key, attr_value: model: Camera_01
+        attr_key, attr_value: bundle: device/cam
+        attr_key, attr_value: time: 2022/12/23 07:43
+        attr_key, attr_value: noted: 
+        attr_key, attr_value: remark: 
+        attr_key, attr_value: id: CameraB4-1
+        compond_attr: NADISystemEditor_ObjectInfo
+        attr_key, attr_value: NADISystemEditor_ObjectInfoset: False
+        attr_key, attr_value: NADISystemEditor_ObjectInfoSystemTypeId: 4
+        attr_key, attr_value: NADISystemEditor_ObjectInfohideInTreeview: False
+        """
+
+    def add_group(self, group_id, widget):
+        self.container[group_id] = {
+            "widget": widget,
+            "children": {},
+        }
+        self.layout.addWidget(widget)
+
+    def del_group(self, group_id):
+        self.container[group_id]["widget"].deleteLater()
+        del self.container[group_id]
+
+    def add_widget(self, group_id, widget_id, widget):
+        self.container[group_id]["children"][widget_id] = widget
+        self.container[group_id]["widget"].layout.addWidget(widget)
+
+    def del_widget(self, group_id, widget_id):
+        self.container[group_id]["children"][widget_id].deleteLater()
+        del self.container[group_id]["children"][widget_id]
+
+    def clear_group(self, group_id):
+        for widget_id, _ in self.container[group_id]["children"].items():
+            self.del_widget(group_id, widget_id)
+
+    def clear_all(self):
+        for group_id, group_data in self.container.items():
+            print(f"clearing group {group_id}, {group_data}")
+            for widget_id, widget in group_data["children"].items():
+                widget.deleteLater()
+            group_data["widget"].deleteLater()
+        self.container.clear()
+
 
 class QtGroupboxManager:
     def __init__(self):
         self.__groupbox = QtGroupVBoxCSWidget()
-        self.__groupbox.setStyleSheet(QtGroupBoxStyle.Transparent)
+        self.__groupbox.layout.setContentsMargins(0, 0, 0, 0)
+        # self.__groupbox.setStyleSheet(QtGroupBoxStyle.Transparent)
         self.__layout = self.__groupbox.layout
         self.__context = {}
 

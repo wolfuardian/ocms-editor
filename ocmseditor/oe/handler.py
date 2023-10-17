@@ -68,6 +68,10 @@ def update_edit_attribute():
     edit_attribute = RepositoryFacade().ui.edit_attribute
     edit_attribute: EditAttributeWidget
     edit_attribute.edit_attribute.move(modified_point)
+    context = {}
+    maya = RepositoryFacade().maya
+    attrs = Maya.get_attrs(maya.active_object)
+    edit_attribute.redraw_met_edit_panel(attrs)
 
 
 def update_edit_attribute_delay():

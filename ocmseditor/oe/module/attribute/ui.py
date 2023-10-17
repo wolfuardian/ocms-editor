@@ -5,6 +5,7 @@ from ocmseditor.oe.utils.qt import (
     QtScrollareaCSWidget,
     QtFramelessLayoutCSWidget,
     QtGroupVBoxCSWidget,
+    QtGroupVContainerCSWidget,
     QtGroupHBoxCSWidget,
     QtGroupHBoxCSWidget,
     QtGroupboxManager,
@@ -34,6 +35,7 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
         self.__container_h_box.layout.setContentsMargins(0, 0, 0, 0)
         self.__container_h_box.layout.setSpacing(0)
         self.__container_h_box.setStyleSheet(QtGroupBoxStyle.Transparent)
+        self.__container_h_box.setFixedWidth(300)
         self.__container_h_box.setFixedHeight(200)
 
         self.__container_collapse_btn = QtButtonCSWidget()
@@ -45,16 +47,45 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
         self.__container_collapse_btn.setStyleSheet(QtButtonStyle.Dark)
 
         self.__scrollarea = QtScrollareaCSWidget()
-        self.__scrollarea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
 
         self.__attributes_v_box = QtGroupVBoxCSWidget()
         self.__attributes_v_box.layout.setContentsMargins(0, 0, 0, 0)
         self.__attributes_v_box.layout.setSpacing(0)
         self.__attributes_v_box.setStyleSheet(QtGroupBoxStyle.Transparent)
-        self.__attributes_v_box.setFixedWidth(200)
-        self.__attributes_v_box.setFixedHeight(400)
 
         self.__attr_prop_container = QtGroupboxManager()
+        self.__attributes_props_v_container = QtGroupVContainerCSWidget()
+
+        # gp_object.layout.setSpacing(30)
+        w_prop_type = QtStringPropertyCSWidget(
+            long_name="compound_name" + "." + "_attr_nm",
+            nice_name="_attr_nm".capitalize(),
+            value="_attr_val",
+        )
+        # __prop2 = QtStringPropertyCSWidget(
+        #     long_name="compound_name" + "." + "_attr_nm",
+        #     nice_name="_attr_nm".capitalize(),
+        #     value="_asasasda",
+        # )
+        # __group2 = QtGroupVBoxCSWidget()
+        # __group2.setTitle("NADISystem")
+        # w_prop_type.propertySetter.connect(self.prop_setter)
+        # __group2.layout.addWidget(__prop2)
+        # self.__attributes_props_v_container.layout.addWidget(gp_object)
+        #
+        #
+        # self.__attributes_props_v_container.layout.addWidget(__group2)
+
+        gp_object = QtGroupVBoxCSWidget()
+        gp_object.setTitle("Object")
+        # gp_object.layout.addWidget(w_prop_type)
+        self.__attributes_props_v_container.add_group("Object", gp_object)
+        self.__attributes_props_v_container.add_widget("Object", "type", w_prop_type)
+        # self.__attributes_props_v_container.add_widget("widget_11", gp_object)
+        self.__attributes_props_v_container.clear_all()
+
+        # self.__attr_prop_container.setContentsMargins(0, 0, 0, 0)
+        # self.__attr_prop_container.setSpacing(0)
 
         self.__inspector_title_h_box = QtGroupHBoxCSWidget()
         self.__inspector_title_h_box.layout.setContentsMargins(0, 0, 0, 0)
@@ -119,9 +150,10 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
 
         self.__inspector_title_h_box.layout.addWidget(self.__inspector_title)
         self.__attributes_v_box.layout.addWidget(self.__inspector_title_h_box)
-        self.__attributes_v_box.layout.addWidget(
-            self.__attr_prop_container.get_groupbox()
-        )
+        # self.__attributes_v_box.layout.addWidget(
+        #     self.__attr_prop_container.get_groupbox()
+        # )
+        self.__attributes_v_box.layout.addWidget(self.__attributes_props_v_container)
 
         self.__scrollarea.layout.addWidget(self.__attributes_v_box)
         # self.layout().addWidget(self.scrollarea)
@@ -148,37 +180,51 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
 
     def _destroy_met_edit_panel(self, context):
         self.__attr_prop_container.clear_all()
+        # self.__attributes_props_v_container
 
     @staticmethod
     def prop_setter(long_name, nice_name, value):
         maya = RepositoryFacade().maya
         op_set_attr(maya.active_object, long_name, value)
 
-    def _construct_met_edit_panel(self, ui):
-        for attr_name, attr_value in ui["attrs"].items():
-            if isinstance(attr_value, str):
-                continue
-            elif isinstance(attr_value, dict):
-                compound_name = attr_name
-                widget = QtGroupVBoxCSWidget()
-                widget.setTitle(compound_name)
-                self.__attr_prop_container.add_group(
-                    widget_id=compound_name,
-                    widget=widget,
-                )
-                for _attr_nm, _attr_val in attr_value.items():
-                    __prop = QtStringPropertyCSWidget(
-                        long_name=compound_name + "." + _attr_nm,
-                        nice_name=_attr_nm.capitalize(),
-                        value=_attr_val,
-                    )
-                    self.__attr_prop_container.add_widget(
-                        parent_id=compound_name,
-                        widget_id=_attr_nm,
-                        widget=__prop,
-                    )
-                    __prop.lineedit.setCursorPosition(0)
-                    __prop.propertySetter.connect(self.prop_setter)
+    def _construct_met_edit_panel(self, attrs: dict):
+        for compound_attr, children_attrs in attrs.items():
+            for attr_key, attr_value in children_attrs.items():
+                print(f"{attr_key}: {attr_value}")
+                pass
+            pass
+
+
+        # for attr_name, attr_value in attrs["attrs"].items():
+        #     if isinstance(attr_value, str):
+        #         continue
+        #     elif isinstance(attr_value, dict):
+        #         compound_name = attr_name
+        #         widget = QtGroupVBoxCSWidget()
+        #         w = QtStringPropertyCSWidget(
+        #             long_name=compound_name + ".",
+        #             nice_name=compound_name.capitalize(),
+        #             value=compound_name,
+        #         )
+        #         # widget.setTitle(compound_name)
+        #         self.__attributes_props_v_container.layout.addWidget(w)
+        #         self.__attr_prop_container.add_group(
+        #             widget_id=compound_name,
+        #             widget=widget,
+        #         )
+        #         for _attr_nm, _attr_val in attr_value.items():
+        #             __prop = QtStringPropertyCSWidget(
+        #                 long_name=compound_name + "." + _attr_nm,
+        #                 nice_name=_attr_nm.capitalize(),
+        #                 value=_attr_val,
+        #             )
+        #             self.__attr_prop_container.add_widget(
+        #                 parent_id=compound_name,
+        #                 widget_id=_attr_nm,
+        #                 widget=__prop,
+        #             )
+        #             __prop.lineedit.setCursorPosition(0)
+        #             __prop.propertySetter.connect(self.prop_setter)
 
     @staticmethod
     def __create_edit_attribute():

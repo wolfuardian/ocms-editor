@@ -6,6 +6,7 @@ import maya.OpenMayaUI as omui
 
 from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
+from collections import defaultdict
 
 from ocmseditor.oe.utils.logger import Logger
 from ocmseditor.oe.constant import INFO__BROWSER_CANCELED
@@ -81,11 +82,15 @@ class Maya(core.Maya):
             return None
 
     @classmethod
-    def get_global_point(cls, inst):
-        geom = inst.geometry()
-        global_point = inst.mapToGlobal(geom.topLeft())
-        return global_point
-
-    @classmethod
-    def get_global_point_delay(cls, inst):
-        return QtCore.QTimer.singleShot(500, lambda: cls.get_global_point(inst))
+    def get_attrs(cls, obj_name):
+        collect_attrs = {}
+        for attr in cmds.listAttr(obj_name, userDefined=True, write=True) or []:
+            children_attrs = cmds.attributeQuery(attr, node=obj_name, listChildren=True)
+            if not children_attrs:
+                continue
+            attrs = {}
+            for child_attr in children_attrs:
+                val = cmds.getAttr(f"{obj_name}.{child_attr}")
+                attrs[child_attr] = val
+            collect_attrs[attr] = attrs
+        return collect_attrs
