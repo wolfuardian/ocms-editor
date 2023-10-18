@@ -94,3 +94,7 @@ class Maya(core.Maya):
                 attrs[child_attr] = val
             collect_attrs[attr] = attrs
         return collect_attrs
+
+    @classmethod
+    def set_attr(cls, obj_name, attr, attr_value):
+        cmds.setAttr(f"{obj_name}.{attr}", attr_value, type="string")

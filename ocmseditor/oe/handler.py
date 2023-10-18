@@ -71,7 +71,7 @@ def update_edit_attribute():
     context = {}
     maya = RepositoryFacade().maya
     attrs = Maya.get_attrs(maya.active_object)
-    edit_attribute.redraw_met_edit_panel(attrs)
+    edit_attribute.redraw_edit_attributes(attrs)
 
 
 def update_edit_attribute_delay():

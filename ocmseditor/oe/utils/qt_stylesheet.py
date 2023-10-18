@@ -184,6 +184,47 @@ class QtLineEditStyle:
     """
 
 
+class QtPropertyStyle:
+    Default = f"""
+        QLabel {{
+            color: {_hex("B0B0B0")};
+            border: None;
+            background-color: None;
+        }}
+        QLineEdit {{
+            background-color: {_hex("1d1d1d")};
+            border: 2px solid {_hex("444444")};
+            color: {_hex("B0B0B0")};
+        }}
+        QLineEdit:focus {{
+            border: 2px solid {_hex("606060")};
+        }}
+        QLineEdit:hover {{
+            border: 2px solid {_hex("606060")};
+        }}
+    """
+    Minimal = f"""
+        QLabel {{
+            font-size: 10px;
+            color: {_hex("B0B0B0")};
+            border: None;
+            background-color: None;
+        }}
+        QLineEdit {{
+            font-size: 10px;
+            background-color: {_hex("1d1d1d")};
+            border: 1px solid {_hex("444444")};
+            color: {_hex("B0B0B0")};
+        }}
+        QLineEdit:focus {{
+            border: 1px solid {_hex("606060")};
+        }}
+        QLineEdit:hover {{
+            border: 1px solid {_hex("606060")};
+        }}
+    """
+
+
 class QtCheckBoxStatus:
     icon_filepath = OCMSEDITOR_ROOT / "so-checkmark.svg"
 
@@ -260,9 +301,6 @@ class QtButtonStyle:
                 background-color: {_hex("2b2b2b")};
             }}
             """
-
-
-
 
     Default = f"""
             QPushButton {{
@@ -492,6 +530,18 @@ class QtGroupBoxStyle:
                 background-color: None;
             }}
     """
+    Minimal = f"""
+        QGroupBox {{
+            font-size: 10px;
+            background-color: None;
+            border: 0px;
+        }}
+    
+        QGroupBox::title {{
+            font-size: 10px;
+            color: None;
+        }}
+    """
     White = f"""
                 QGroupBox {{
                 background-color: {_hex("cccccc")};
@@ -580,6 +630,7 @@ class QtTitleLabelStyle:
                 font-weight: bold;
             }}
     """
+
 
 class QtInfoBoxStatus:
     Default = f"""

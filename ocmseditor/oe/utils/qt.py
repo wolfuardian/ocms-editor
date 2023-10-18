@@ -434,7 +434,7 @@ class QtGroupHBoxCSWidget(QtGroupBoxCSWidget):
 
 
 class QtGroupVBoxCSWidget(QtGroupBoxCSWidget):
-    def __init__(self):
+    def __init__(self, title=None):
         super().__init__()
         self.__visible_immediate = True
         self.__layout = QtWidgets.QVBoxLayout()
@@ -444,6 +444,44 @@ class QtGroupVBoxCSWidget(QtGroupBoxCSWidget):
         self.setLayout(self.__layout)
         self.layout = self.__layout
         self.setStyleSheet(QtGroupBoxStyle.Default)
+
+        self.is_resizing = False
+        self.mouse_press_pos = None
+
+        if title:
+            self.setTitle(title)
+
+    def mousePressEvent(self, event):
+        super().mousePressEvent(event)
+        if event.button() == QtCore.Qt.LeftButton:
+            edge_distance = 10  # 設定邊緣大小
+            mouse_x, mouse_y = event.pos().x(), event.pos().y()
+            self_width, self_height = self.width(), self.height()
+
+            if (
+                self_width - mouse_x <= edge_distance
+                or self_height - mouse_y <= edge_distance
+            ):
+                self.is_resizing = True
+                self.mouse_press_pos = event.pos()
+                self.setCursor(QtCore.Qt.SizeFDiagCursor)
+
+    def mouseMoveEvent(self, event):
+        super().mouseMoveEvent(event)
+        if self.is_resizing:
+            rel_move = event.pos() - self.mouse_press_pos
+            new_size = self.size() + rel_move
+            self.resize(new_size)
+            self.mouse_press_pos = event.pos()
+        else:
+            self.unsetCursor()
+
+    def mouseReleaseEvent(self, event):
+        super().mouseReleaseEvent(event)
+        if event.button() == QtCore.Qt.LeftButton:
+            self.is_resizing = False
+            self.mouse_press_pos = None
+            self.unsetCursor()
 
     def set_visible_immediate(self, visible):
         self.__visible_immediate = visible
@@ -470,44 +508,6 @@ class QtGroupVContainerCSWidget(QtGroupVBoxCSWidget):
         super().__init__()
 
         self.container: dict[str, QtWidgets] = {}
-
-        """
-        container = {
-            "group_id_1": {
-                "widget": group_1,
-                "children": {
-                    "widget_id_11": widget_11,
-                    "widget_id_12": widget_12,
-                    "widget_id_13": widget_13,
-                }
-            },
-            "group_id_2": {
-                "widget": group_2,
-                "children": {
-                    "widget_id_21": widget_21,
-                    "widget_id_22": widget_22,
-                }
-            },
-        }
-        """
-
-        """
-        compond_attr: Object
-        attr_key, attr_value: type: Device
-        attr_key, attr_value: category: 
-        attr_key, attr_value: name: CameraB4-1
-        attr_key, attr_value: alias: CameraB4-1
-        attr_key, attr_value: model: Camera_01
-        attr_key, attr_value: bundle: device/cam
-        attr_key, attr_value: time: 2022/12/23 07:43
-        attr_key, attr_value: noted: 
-        attr_key, attr_value: remark: 
-        attr_key, attr_value: id: CameraB4-1
-        compond_attr: NADISystemEditor_ObjectInfo
-        attr_key, attr_value: NADISystemEditor_ObjectInfoset: False
-        attr_key, attr_value: NADISystemEditor_ObjectInfoSystemTypeId: 4
-        attr_key, attr_value: NADISystemEditor_ObjectInfohideInTreeview: False
-        """
 
     def add_group(self, group_id, widget):
         self.container[group_id] = {
