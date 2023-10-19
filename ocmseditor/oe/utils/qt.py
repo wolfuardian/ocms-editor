@@ -20,6 +20,9 @@ def get_main_window():
     return wrapInstance(int(maya_main_ptr), QtWidgets.QWidget)
 
 
+from PySide2 import QtWidgets, QtCore, QtGui
+
+
 class QtDefaultCSWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -384,12 +387,59 @@ class QtFrameButtonCSWidget(QtDefaultCSWidget):
 
 
 class QtGroupBoxCSWidget(QtWidgets.QGroupBox):
+    sizeSetter = QtCore.Signal(QtCore.QSize)
+
     def __init__(self):
         super().__init__()
+        self.__is_resizeable = False
+        self.__is_resizing = False
         self.__visible_immediate = True
         self.__font = QtGui.QFont(Fonts.MicrosoftJhengHei, 8, QtGui.QFont.Bold)
         self.__font.setLetterSpacing(QtGui.QFont.PercentageSpacing, 110)
         self.setFont(QtGui.QFont(self.__font))
+        self.setStyleSheet(QtGroupBoxStyle.Default)
+
+        self.mouse_press_pos = None
+
+    def set_resizeable(self, condition):
+        self.__is_resizeable = condition
+
+    def mousePressEvent(self, event):
+        super().mousePressEvent(event)
+        if event.button() == QtCore.Qt.LeftButton:
+            edge_distance = 15
+            mouse_x, mouse_y = event.pos().x(), event.pos().y()
+            self_width, self_height = self.width(), self.height()
+
+            if (
+                self_width - mouse_x <= edge_distance
+                or self_height - mouse_y <= edge_distance
+            ):
+                self.__is_resizing = True
+                self.mouse_press_pos = event.pos()
+                self.setCursor(QtCore.Qt.SizeVerCursor)
+
+    def mouseMoveEvent(self, event):
+        super().mouseMoveEvent(event)
+        if self.__is_resizing:
+            rel_move = event.pos() - self.mouse_press_pos
+            new_size = self.size() + QtCore.QSize(rel_move.x(), rel_move.y())
+            new_size: QtCore.QSize
+            if new_size.height() <= 30:
+                new_size.setHeight(30)
+            elif new_size.height() > 600:
+                new_size.setHeight(600)
+            self.mouse_press_pos = event.pos()
+            self.sizeSetter.emit(new_size)
+        else:
+            self.unsetCursor()
+
+    def mouseReleaseEvent(self, event):
+        super().mouseReleaseEvent(event)
+        if event.button() == QtCore.Qt.LeftButton:
+            self.__is_resizing = False
+            self.mouse_press_pos = None
+            self.unsetCursor()
 
     def set_visible_immediate(self, visible):
         self.__visible_immediate = visible
@@ -405,98 +455,38 @@ class QtGroupBoxCSWidget(QtWidgets.QGroupBox):
 
 
 class QtGroupHBoxCSWidget(QtGroupBoxCSWidget):
-    def __init__(self):
+    def __init__(self, title=None):
         super().__init__()
-        self.__visible_immediate = True
+
         self.__layout = QtWidgets.QHBoxLayout()
         self.__layout.setAlignment(QtCore.Qt.AlignTop)
         self.__layout.setContentsMargins(0, 0, 0, 0)
         self.__layout.setSpacing(0)
+
         self.setLayout(self.__layout)
         self.layout = self.__layout
-        self.layout_content: list[QtWidgets] = []
-        self.setStyleSheet(QtGroupBoxStyle.Default)
 
-    def set_visible_immediate(self, visible):
-        self.__visible_immediate = visible
-        self.setVisible(visible)
+        if title:
+            self.setTitle(title)
 
-    def set_stylesheet_additional(self, style):
-        self.setStyleSheet(self.styleSheet() + "\n" + style)
-
-    def add_to(self, parent):
-        parent.addWidget(self)
-        return self
-
-    def remove_from(self, parent):
-        self.setParent(None)
-        parent.removeWidget(self)
+    def setTitle(self, *args, **kwargs):
+        super().setTitle(*args, **kwargs)
+        self.layout.setContentsMargins(0, 14, 0, 0)
 
 
 class QtGroupVBoxCSWidget(QtGroupBoxCSWidget):
     def __init__(self, title=None):
         super().__init__()
-        self.__visible_immediate = True
         self.__layout = QtWidgets.QVBoxLayout()
         self.__layout.setAlignment(QtCore.Qt.AlignTop)
         self.__layout.setContentsMargins(0, 0, 0, 0)
         self.__layout.setSpacing(0)
+
         self.setLayout(self.__layout)
         self.layout = self.__layout
-        self.setStyleSheet(QtGroupBoxStyle.Default)
-
-        self.is_resizing = False
-        self.mouse_press_pos = None
 
         if title:
             self.setTitle(title)
-
-    def mousePressEvent(self, event):
-        super().mousePressEvent(event)
-        if event.button() == QtCore.Qt.LeftButton:
-            edge_distance = 10  # 設定邊緣大小
-            mouse_x, mouse_y = event.pos().x(), event.pos().y()
-            self_width, self_height = self.width(), self.height()
-
-            if (
-                self_width - mouse_x <= edge_distance
-                or self_height - mouse_y <= edge_distance
-            ):
-                self.is_resizing = True
-                self.mouse_press_pos = event.pos()
-                self.setCursor(QtCore.Qt.SizeFDiagCursor)
-
-    def mouseMoveEvent(self, event):
-        super().mouseMoveEvent(event)
-        if self.is_resizing:
-            rel_move = event.pos() - self.mouse_press_pos
-            new_size = self.size() + rel_move
-            self.resize(new_size)
-            self.mouse_press_pos = event.pos()
-        else:
-            self.unsetCursor()
-
-    def mouseReleaseEvent(self, event):
-        super().mouseReleaseEvent(event)
-        if event.button() == QtCore.Qt.LeftButton:
-            self.is_resizing = False
-            self.mouse_press_pos = None
-            self.unsetCursor()
-
-    def set_visible_immediate(self, visible):
-        self.__visible_immediate = visible
-        self.setVisible(visible)
-
-    def set_stylesheet_additional(self, style):
-        self.setStyleSheet(self.styleSheet() + "\n" + style)
-
-    def add_to(self, parent):
-        parent.addWidget(self)
-        return self
-
-    def remove_from(self, parent):
-        self.setParent(None)
-        parent.removeWidget(self)
 
     def setTitle(self, *args, **kwargs):
         super().setTitle(*args, **kwargs)
@@ -539,66 +529,6 @@ class QtGroupVContainerCSWidget(QtGroupVBoxCSWidget):
                 widget.deleteLater()
             group_data["widget"].deleteLater()
         self.container.clear()
-
-
-class QtGroupboxManager:
-    def __init__(self):
-        self.__groupbox = QtGroupVBoxCSWidget()
-        self.__groupbox.layout.setContentsMargins(0, 0, 0, 0)
-        # self.__groupbox.setStyleSheet(QtGroupBoxStyle.Transparent)
-        self.__layout = self.__groupbox.layout
-        self.__context = {}
-
-    def get_groupbox(self):
-        return self.__groupbox
-
-    def add_group(self, widget_id, widget):
-        if widget_id in self.__context:
-            raise ValueError(f"Group ID {widget_id} already exists.")
-        self.__context[widget_id] = {"widget": widget, "children": {}}
-        self.__layout.addWidget(widget)
-
-    def remove_group(self, widget_id):
-        if widget_id not in self.__context:
-            raise ValueError(f"Group ID {widget_id} does not exist.")
-        widget = self.__context[widget_id]["widget"]
-        widget.deleteLater()
-        del self.__context[widget_id]
-
-    def add_widget(self, parent_id, widget_id, widget):
-        if parent_id not in self.__context:
-            raise ValueError(f"Parent group ID {parent_id} does not exist.")
-        if widget_id in self.__context[parent_id]["children"]:
-            raise ValueError(
-                f"Widget ID {widget_id} already exists in group {parent_id}."
-            )
-        self.__context[parent_id]["children"][widget_id] = widget
-        self.__context[parent_id]["widget"].layout.addWidget(widget)
-
-    def remove_widget(self, parent_id, widget_id):
-        if parent_id not in self.__context:
-            raise ValueError(f"Parent group ID {parent_id} does not exist.")
-        if widget_id not in self.__context[parent_id]["children"]:
-            raise ValueError(
-                f"Widget ID {widget_id} does not exist in group {parent_id}."
-            )
-        widget = self.__context[parent_id]["children"][widget_id]
-        widget.deleteLater()
-        del self.__context[parent_id]["children"][widget_id]
-
-    def clear_group(self, group_id):
-        if group_id not in self.__context:
-            raise ValueError(f"Group ID {group_id} does not exist.")
-        for widget_id, widget in self.__context[group_id]["children"].items():
-            widget.deleteLater()
-        self.__context[group_id]["children"].clear()
-
-    def clear_all(self):
-        for group_id, group_data in self.__context.items():
-            for widget_id, widget in group_data["children"].items():
-                widget.deleteLater()
-            group_data["widget"].deleteLater()
-        self.__context.clear()
 
 
 class QtButtonCSWidget(QtWidgets.QPushButton):
@@ -758,7 +688,7 @@ class QtStringPropertyCSWidget(QtDefaultCSWidget):
 
         self.lineedit = QtLineEditCSWidget()
         self.lineedit.setText(value)
-        self.lineedit.textChanged.connect(self.update_prop)
+        self.lineedit.textChanged.connect(self.emit_prop)
 
         font = QtGui.QFont(Fonts.MicrosoftJhengHei, 8, QtGui.QFont.Bold)
         font.setLetterSpacing(QtGui.QFont.PercentageSpacing, 100)
@@ -768,6 +698,6 @@ class QtStringPropertyCSWidget(QtDefaultCSWidget):
 
         self.setLayout(self.layout)
 
-    def update_prop(self, value):
+    def emit_prop(self, value):
         if self.long_name:
             self.propertySetter.emit(self.long_name, self.nice_name, value)

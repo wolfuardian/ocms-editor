@@ -1,6 +1,7 @@
 from ocmseditor.oe.utils.qt import (
     QtCore,
     QtWidgets,
+    QtResizeCSWidget,
     QtFloatCSWidget,
     QtScrollareaCSWidget,
     QtFramelessLayoutCSWidget,
@@ -8,7 +9,6 @@ from ocmseditor.oe.utils.qt import (
     QtGroupVContainerCSWidget,
     QtGroupHBoxCSWidget,
     QtGroupHBoxCSWidget,
-    QtGroupboxManager,
     QtHeadingLabelCSWidget,
     QtButtonCSWidget,
     QtStringPropertyCSWidget,
@@ -32,12 +32,19 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
         super().__init__()
         self.panel_status = AttributePanel.Expanded
 
+        self.__container_v_box = QtGroupVBoxCSWidget()
+        self.__container_v_box.layout.setContentsMargins(0, 0, 0, 0)
+        self.__container_v_box.layout.setSpacing(0)
+
         self.__container_h_box = QtGroupHBoxCSWidget()
         self.__container_h_box.layout.setContentsMargins(0, 0, 0, 0)
         self.__container_h_box.layout.setSpacing(0)
-        self.__container_h_box.setStyleSheet(QtGroupBoxStyle.Transparent)
         self.__container_h_box.setFixedWidth(300)
         self.__container_h_box.setFixedHeight(280)
+
+        self.__container_h_box.set_resizeable = True
+        self.__container_h_box.sizeSetter.connect(self.resize_widget)
+        self.__container_h_box.setStyleSheet(QtGroupBoxStyle.Transparent)
 
         self.__container_collapse_btn = QtButtonCSWidget()
         self.__container_collapse_btn.setSizePolicy(
@@ -48,6 +55,10 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
         self.__container_collapse_btn.setStyleSheet(QtButtonStyle.Dark)
 
         self.__scrollarea = QtScrollareaCSWidget()
+        self.__scrollarea.setSizePolicy(
+            QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding
+        )
+        self.__scrollarea.setAlignment(QtCore.Qt.AlignTop)
 
         self.__attributes_v_box = QtGroupVBoxCSWidget()
         self.__attributes_v_box.layout.setContentsMargins(0, 0, 0, 0)
@@ -80,73 +91,39 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
 
         self.__container_collapse_btn.clicked.connect(self.toggle_panel)
 
-        # self.edit_attribute.layout.setContentsMargins(0, 0, 0, 0)
-        # self.edit_attribute.layout.setSpacing(0)
-
-        #
-        # self.project_dir_box = QtGroupHBoxCSWidget()
-        # self.project_dir_box.set_text("專案路徑")
-        #
-        # self.fetch_btn = QtButtonCSWidget()
-        # self.fetch_btn.setFixedWidth(4)
-        # self.fetch_btn.setFixedHeight(16)
-        # self.fetch_btn.set_tooltip("Fetch")
-
-        # self.project_dir_txt = qt.QtTextLineCSWidget()
-        # self.project_dir_txt.set_text("")
-        # self.project_dir_txt.lineedit.setReadOnly(True)
-        #
-        # self.browse_btn = qt.QtButtonCSWidget()
-        # self.browse_btn.set_icon("open_folder.png")
-        # self.browse_btn.set_text("")
-        # self.browse_btn.setFixedHeight(32)
-        #
-        # self.fetch_btn.clicked.connect(lambda: operator.op_fetch_project_path(self))
-        # self.browse_btn.clicked.connect(lambda: operator.op_browser_project_path(self))
-        #
-        # self.project_dir_box.layout.addWidget(self.fetch_btn)
-        # self.project_dir_box.layout.addWidget(self.project_dir_txt)
-        # self.project_dir_box.layout.addWidget(self.browse_btn)
-        #
-        # self.scrollarea.layout.addWidget(self.project_dir_box)
-        #
-        # self.frame_layout.addWidget(self.scrollarea)
-        #
-        # self._validate()
-        # self.imports_btn_h_box.layout.addWidget(self.file_btn)
-        # self.imports_btn_h_box.layout.addWidget(self.scene_btn)
-        #
-
         self.__inspector_title_h_box.layout.addWidget(self.__inspector_title)
         self.__attributes_v_box.layout.addWidget(self.__inspector_title_h_box)
-        # self.__attributes_v_box.layout.addWidget(
-        #     self.__attr_prop_container.get_groupbox()
-        # )
         self.__attributes_v_box.layout.addWidget(self.__attributes_props_v_container)
 
         self.__scrollarea.layout.addWidget(self.__attributes_v_box)
-        # self.layout().addWidget(self.scrollarea)
 
-        self.__container_h_box.layout.addWidget(self.__scrollarea)
+        self.__container_v_box.layout.addWidget(self.__scrollarea)
+
+        self.__container_h_box.layout.addWidget(self.__container_v_box)
+        self.__container_h_box.layout.addWidget(self.__container_collapse_btn)
         self.__container_h_box.layout.addWidget(self.__container_collapse_btn)
 
         self.edit_attribute.layout.addWidget(self.__container_h_box)
 
+
+    def resize_widget(self, size):
+        self.__container_h_box.setFixedHeight(size.height())
+
     def toggle_panel(self):
         if self.panel_status == AttributePanel.Expanded:
             self.__container_collapse_btn.set_icon(":/nodeGrapherNext.png")
-            self.__scrollarea.setVisible(False)
+            self.__container_v_box.setVisible(False)
             self.panel_status = AttributePanel.Collapsed
         elif self.panel_status == AttributePanel.Collapsed:
             self.__container_collapse_btn.set_icon(":/nodeGrapherPrevious.png")
-            self.__scrollarea.setVisible(True)
+            self.__container_v_box.setVisible(True)
             self.panel_status = AttributePanel.Expanded
 
-    def redraw_edit_attributes(self, context):
-        self.destroy_edit_attributes(context)
-        self.construct_edit_attributes(context)
+    def redraw_edit_attributes(self, attrs):
+        self.destroy_edit_attributes()
+        self.construct_edit_attributes(attrs)
 
-    def destroy_edit_attributes(self, context):
+    def destroy_edit_attributes(self):
         self.__attributes_props_v_container.clear_all()
 
     def construct_edit_attributes(self, attrs: dict):
