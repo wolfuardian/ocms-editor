@@ -163,7 +163,7 @@ class UIMain(
         self.__tab.addTab(self.__tab_debug, "Debug")
 
         # 選取並更新場景狀態
-        Maya.select(Maya.get_selected())
+        Maya.select(Maya.get_selected_object())
 
 
     def tab_current_changed_event(self, index):

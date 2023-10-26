@@ -718,7 +718,7 @@ class QtStringPropertyCSWidget(QtDefaultCSWidget):
         self.__layout.setSpacing(0)
         self.__layout.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
 
-        self.editable_label = QtAttributeNameCSWidget()
+        self.editable_label = QtAttributeNameLineeditCSWidget()
         self.editable_label.setFixedWidth(80)
         self.editable_label.setText(attr)
         self.org_attr_text = self.editable_label.text()
@@ -745,6 +745,8 @@ class QtStringPropertyCSWidget(QtDefaultCSWidget):
         self.setLayout(self.__layout)
 
     def emit_set_attr_name(self, attr, new_attr):
+        print(f"emit_set_attr_name: {attr} -> {new_attr}")
+        compound, attr = attr.split("_")
         self.attrSetter.emit(attr, new_attr)
 
     def emit_set_attr_prop(self, attr_value):
@@ -765,50 +767,22 @@ class QtAttributeNameCSWidget(QtDefaultCSWidget):
         self.__layout.setContentsMargins(0, 0, 0, 0)
         self.__layout.setSpacing(0)
 
-        self.__label = QtAttributeNameLabelCSWidget()
-        self.__label.doubleClicked.connect(self.__display_edit)
-
         self.__lineedit = QtAttributeNameLineeditCSWidget()
-        self.__lineedit.editClose.connect(self.__display_label)
         self.__lineedit.editCompleted.connect(self.finishing_edit)
-        self.__lineedit.setVisible(False)
 
         self.__layout.addWidget(self.__lineedit)
         self.__layout.addWidget(self.__label)
 
         self.setLayout(self.__layout)
 
-    def __display_label(self):
-        self.__lineedit.setHidden(True)
-        self.__label.setHidden(False)
-
-    def __display_edit(self):
-        self.__lineedit.setHidden(False)
-        self.__label.setHidden(True)
-        self.__lineedit.openEdit()
-
     def finishing_edit(self, text, new_text):
-        self.__display_label()
         self.editCompleted.emit(text, new_text)
 
     def setText(self, text):
         self.__lineedit.setText(text)
-        self.__label.setText(text.split("_")[1].capitalize())
 
     def text(self):
         return self.__lineedit.text()
-
-
-class QtAttributeNameLabelCSWidget(QtWidgets.QLabel):
-    doubleClicked = QtCore.Signal()
-
-    def __init__(self):
-        super().__init__()
-
-        pass
-
-    def mouseDoubleClickEvent(self, event):
-        self.doubleClicked.emit()
 
 
 class QtAttributeNameLineeditCSWidget(QtWidgets.QLineEdit):

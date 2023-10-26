@@ -49,8 +49,8 @@ def subscribe_events():
 def fetch_active_object():
     maya = RepositoryFacade().maya
     maya.selected_object = None
-    if len(Maya.get_selected()) != 0:
-        maya.selected_object = Maya.get_selected()[0]
+    if len(Maya.get_selected_object()) != 0:
+        maya.selected_object = Maya.get_selected_object()[0]
 
 
 def fetch_active_viewport():

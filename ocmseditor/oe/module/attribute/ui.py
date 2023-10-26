@@ -119,6 +119,8 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
 
         self.edit_attribute.layout.addWidget(self.__container_h_box)
 
+        self.__add_ca_object_btn = None
+
     def toggle_panel(self):
         if self.panel_status == AttributePanel.Expanded:
             self.__container_collapse_btn.set_icon(":/nodeGrapherNext.png")
@@ -144,7 +146,7 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
     def construct_edit_attributes(self):
         maya = RepositoryFacade().maya
         # attrs = Maya.get_complex_attrs(maya.active_object)
-        attrs = Maya.get_compound_attrs(maya.selected_object)
+        attrs = Maya.get_attrs_hierarchy(maya.selected_object)
         # return
         for compound_attr, children_attrs in attrs.items():
             # print(f"compound_attr, children_attrs = {compound_attr}, {children_attrs}")
@@ -156,7 +158,7 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
             )
             for attr, attr_value in children_attrs.items():
                 __prop_lineedit = QtStringPropertyCSWidget(
-                    attr=compound_attr + "_" + attr,
+                    attr=attr,
                     value=attr_value,
                 )
                 __prop_lineedit.setStyleSheet(QtPropertyStyle.Minimal)
@@ -179,9 +181,6 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
                 widget=__add_attr_btn,
             )
 
-        # 對欄位操作的按鈕
-        self.__validate_attrs()
-
         __tool_gp = QtGroupHBoxCSWidget()
         __tool_gp.layout.setContentsMargins(0, 0, 0, 0)
         __tool_gp.layout.setSpacing(3)
@@ -195,17 +194,17 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
         self.__attributes_props_v_container.add_group(
             group_id="tool_gp", widget=__tool_gp
         )
-        __add_compound_attr_btn = QtButtonCSWidget()
-        __add_compound_attr_btn.setFixedHeight(32)
-        __add_compound_attr_btn.setFixedWidth(96)
-        __add_compound_attr_btn.set_icon("plus.png")
-        __add_compound_attr_btn.setText("新增 Object")
-        __add_compound_attr_btn.setStyleSheet(QtButtonStyle.Default_Roundness)
-        __add_compound_attr_btn.clicked.connect(self.add_compound_attr)
+        self.__add_ca_object_btn = QtButtonCSWidget()
+        self.__add_ca_object_btn.setFixedHeight(32)
+        self.__add_ca_object_btn.setFixedWidth(96)
+        self.__add_ca_object_btn.set_icon("plus.png")
+        self.__add_ca_object_btn.setText("新增 Object")
+        self.__add_ca_object_btn.setStyleSheet(QtButtonStyle.Default_Roundness)
+        self.__add_ca_object_btn.clicked.connect(self.add_object_compound)
         self.__attributes_props_v_container.add_widget(
             group_id="tool_gp",
             widget_id="add_compound_attr_btn",
-            widget=__add_compound_attr_btn,
+            widget=self.__add_ca_object_btn,
         )
         __add_compound_attr_btn2 = QtButtonCSWidget()
         __add_compound_attr_btn2.setFixedHeight(32)
@@ -220,32 +219,49 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
             widget=__add_compound_attr_btn2,
         )
 
+        # 對欄位操作的按鈕
+        self.__validate_attrs()
+
     def __validate_attrs(self):
         # Object_type
+        # Object_category
+        # Object_name
+        # Object_alias
+        # Object_remark
+        # Object_time
+        # Object_noted
+
         # Component_OCMS_Scene_FocusAt_pitch
         # Component_OCMS_Scene_FocusAt_yaw
         # Component_OCMS_Scene_FocusAt_zoom
         # Component_OCMS_Scene_FocusAt_offset
 
-        # Object_type
         # ComponentV2_NADILeanTouch_LeanCameraSettingValue_zoom
         # ComponentV2_NADILeanTouch_LeanCameraSettingValue_pitchWawSensitivity
         # ComponentV2_NADILeanTouch_LeanCameraSettingValue_pitchYaw
         # ComponentV2_NADILeanTouch_LeanCameraSettingValue_offset
 
-        print(f"Object: {self.__has_ca_object()}")
-        print(f"Components: {self.__has_ca_components()}")
+        maya = RepositoryFacade().maya
+        attrs = Maya.get_attrs(maya.selected_object)
+        for attr, attr_value in attrs.items():
+            print(f"attr, attr_value = {attr}, {attr_value}")
+
+        if self.__has_ca_object():
+            self.__add_ca_object_btn.setVisible(False)
+
+        if self.__has_ca_components():
+            pass
 
     @staticmethod
     def __has_ca_object():
         maya = RepositoryFacade().maya
-        compound_attrs = Maya.get_compound_attrs(maya.selected_object)
+        compound_attrs = Maya.get_attrs_hierarchy(maya.selected_object)
         return "object" in compound_attrs.keys()
 
     @staticmethod
     def __has_ca_components():
         maya = RepositoryFacade().maya
-        compound_attrs = Maya.get_compound_attrs(maya.selected_object)
+        compound_attrs = Maya.get_attrs_hierarchy(maya.selected_object)
         component_attrs = [
             c for c in compound_attrs.keys() if c.startswith("component")
         ]
@@ -271,16 +287,21 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
         maya = RepositoryFacade().maya
         user_input = Maya.user_input_dialog(message="請輸入屬性名稱:")
         if user_input:
-            attr = compound_attr + "_" + user_input
-            Maya.add_attr(maya.selected_object, attr)
+            Maya.add_attr(maya.selected_object, compound_attr, user_input)
             Maya.select(maya.selected_object)
+
+    @staticmethod
+    def add_object_compound():
+        maya = RepositoryFacade().maya
+        Maya.add_attr_compound(maya.selected_object, "Object")
+        Maya.select(maya.selected_object)
 
     @staticmethod
     def add_compound_attr():
         maya = RepositoryFacade().maya
         compound_attr = Maya.user_input_dialog(message="請輸入屬性組名稱:")
         if compound_attr:
-            Maya.add_compound_attr(maya.selected_object, compound_attr)
+            Maya.add_attr_compound(maya.selected_object, compound_attr)
             Maya.select(maya.selected_object)
 
     @staticmethod
@@ -290,7 +311,7 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
             title=maya.selected_object, message="新的 Component 命名為——"
         )
         if compound_attr:
-            Maya.add_compound_attr(maya.selected_object, compound_attr)
+            Maya.add_attr_compound(maya.selected_object, compound_attr)
             Maya.select(maya.selected_object)
 
     @staticmethod
