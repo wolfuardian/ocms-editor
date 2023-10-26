@@ -31,6 +31,8 @@ from ocmseditor.oe.handler import (
     del_maya_selection_changed_script_job,
     update_edit_attribute_delay,
 )
+from ocmseditor.tool.maya import Maya
+
 
 def version():
     with open(VERSION_PATH, "r") as f:
@@ -159,6 +161,10 @@ class UIMain(
         self.__tab.addTab(self.__tab_display, "Display")
         self.__tab.addTab(self.__tab_inspector, "Inspector")
         self.__tab.addTab(self.__tab_debug, "Debug")
+
+        # 選取並更新場景狀態
+        Maya.select(Maya.get_selected())
+
 
     def tab_current_changed_event(self, index):
         self.handle_selection_changed_script_job(self.mode)

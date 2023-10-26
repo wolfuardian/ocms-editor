@@ -1,7 +1,7 @@
+from functools import partial
 from ocmseditor.oe.utils.qt import (
     QtCore,
     QtWidgets,
-    QtResizeCSWidget,
     QtFloatCSWidget,
     QtScrollareaCSWidget,
     QtFramelessLayoutCSWidget,
@@ -22,7 +22,8 @@ from ocmseditor.oe.utils.qt_stylesheet import (
 )
 from ocmseditor.oe.constant import AttributePanel
 from ocmseditor.oe.repository import RepositoryFacade
-from .operator import op_set_attr
+from .operator import op_set_attr_name, op_set_attr_prop, op_del_attr
+from ocmseditor.tool.maya import Maya
 
 global instance_edit_attribute
 
@@ -40,11 +41,23 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
         self.__container_h_box.layout.setContentsMargins(0, 0, 0, 0)
         self.__container_h_box.layout.setSpacing(0)
         self.__container_h_box.setFixedWidth(300)
-        self.__container_h_box.setFixedHeight(280)
+        self.__container_h_box.setFixedHeight(600)
 
-        self.__container_h_box.set_resizeable = True
-        self.__container_h_box.sizeSetter.connect(self.resize_widget)
+        self.__container_h_box.set_resizeable(True)
+        self.__container_h_box.sizeSetter.connect(
+            lambda size: self.__container_h_box.setFixedSize(size)
+        )
+        self.__container_h_box.set_edge_distance(4)
         self.__container_h_box.setStyleSheet(QtGroupBoxStyle.Transparent)
+        self.__container_h_box_org_stylesheet = self.__container_h_box.styleSheet()
+        self.__container_h_box_new_stylesheet = """\nQGroupBox {
+                border-right: 4px solid #363636;
+                border-bottom: 4px solid #363636;
+            }"""
+        self.__container_h_box.setStyleSheet(
+            self.__container_h_box_org_stylesheet
+            + self.__container_h_box_new_stylesheet
+        )
 
         self.__container_collapse_btn = QtButtonCSWidget()
         self.__container_collapse_btn.setSizePolicy(
@@ -66,10 +79,11 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
         self.__attributes_v_box.setStyleSheet(QtGroupBoxStyle.Transparent)
 
         self.__attributes_props_v_container = QtGroupVContainerCSWidget()
+        self.__attributes_props_v_container.layout.setContentsMargins(3, 3, 3, 3)
+        self.__attributes_props_v_container.layout.setSpacing(12)
 
         self.__inspector_title_h_box = QtGroupHBoxCSWidget()
         self.__inspector_title_h_box.layout.setContentsMargins(0, 0, 0, 0)
-        self.__inspector_title_h_box.layout.setSpacing(0)
         self.__inspector_title_h_box.setStyleSheet(QtGroupBoxStyle.White)
 
         self.__inspector_title = QtHeadingLabelCSWidget()
@@ -105,52 +119,179 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
 
         self.edit_attribute.layout.addWidget(self.__container_h_box)
 
-
-    def resize_widget(self, size):
-        self.__container_h_box.setFixedHeight(size.height())
-
     def toggle_panel(self):
         if self.panel_status == AttributePanel.Expanded:
             self.__container_collapse_btn.set_icon(":/nodeGrapherNext.png")
             self.__container_v_box.setVisible(False)
             self.panel_status = AttributePanel.Collapsed
+            self.__container_h_box.setStyleSheet(self.__container_h_box_org_stylesheet)
         elif self.panel_status == AttributePanel.Collapsed:
             self.__container_collapse_btn.set_icon(":/nodeGrapherPrevious.png")
             self.__container_v_box.setVisible(True)
             self.panel_status = AttributePanel.Expanded
+            self.__container_h_box.setStyleSheet(
+                self.__container_h_box_org_stylesheet
+                + self.__container_h_box_new_stylesheet
+            )
 
-    def redraw_edit_attributes(self, attrs):
+    def redraw_edit_attributes(self):
         self.destroy_edit_attributes()
-        self.construct_edit_attributes(attrs)
+        self.construct_edit_attributes()
 
     def destroy_edit_attributes(self):
         self.__attributes_props_v_container.clear_all()
 
-    def construct_edit_attributes(self, attrs: dict):
+    def construct_edit_attributes(self):
+        maya = RepositoryFacade().maya
+        # attrs = Maya.get_complex_attrs(maya.active_object)
+        attrs = Maya.get_compound_attrs(maya.selected_object)
+        # return
         for compound_attr, children_attrs in attrs.items():
-            __group = QtGroupVBoxCSWidget(title=compound_attr)
+            # print(f"compound_attr, children_attrs = {compound_attr}, {children_attrs}")
+            __group = QtGroupVBoxCSWidget(title=compound_attr.capitalize())
             __group.setStyleSheet(QtGroupBoxStyle.Minimal)
 
             self.__attributes_props_v_container.add_group(
                 group_id=compound_attr, widget=__group
             )
             for attr, attr_value in children_attrs.items():
-                __prop = QtStringPropertyCSWidget(
-                    long_name=compound_attr + "." + attr,
-                    nice_name=attr.capitalize(),
+                __prop_lineedit = QtStringPropertyCSWidget(
+                    attr=compound_attr + "_" + attr,
                     value=attr_value,
                 )
-                __prop.setStyleSheet(QtPropertyStyle.Minimal)
+                __prop_lineedit.setStyleSheet(QtPropertyStyle.Minimal)
                 self.__attributes_props_v_container.add_widget(
-                    group_id=compound_attr, widget_id=attr, widget=__prop
+                    group_id=compound_attr, widget_id=attr, widget=__prop_lineedit
                 )
-                __prop.lineedit.setCursorPosition(0)
-                __prop.propertySetter.connect(self.prop_setter)
+                __prop_lineedit.lineedit.setCursorPosition(0)
+                __prop_lineedit.attrSetter.connect(self.set_attr_name)
+                __prop_lineedit.attrPropSetter.connect(self.set_attr_prop)
+                __prop_lineedit.attrDeleter.connect(self.del_attr)
+            __add_attr_btn = QtButtonCSWidget()
+            __add_attr_btn.setFixedHeight(10)
+            __add_attr_btn.set_icon("plus-8px.png")
+            __add_attr_btn.setStyleSheet(QtButtonStyle.Default_Roundness)
+            maya = RepositoryFacade().maya
+            __add_attr_btn.clicked.connect(partial(self.add_attr, compound_attr))
+            self.__attributes_props_v_container.add_widget(
+                group_id=compound_attr,
+                widget_id=compound_attr + "_" + "add_attr_btn",
+                widget=__add_attr_btn,
+            )
+
+        # 對欄位操作的按鈕
+        self.__validate_attrs()
+
+        __tool_gp = QtGroupHBoxCSWidget()
+        __tool_gp.layout.setContentsMargins(0, 0, 0, 0)
+        __tool_gp.layout.setSpacing(3)
+        __tool_gp.setStyleSheet(QtGroupBoxStyle.Transparent)
+        # __tool_gp.setFixedHeight(32)
+        # __tool_gp.setFixedWidth(96)
+        # __tool_gp.set_icon("plus.png")
+        # __tool_gp.setText("新增屬性集")
+        # __tool_gp.setStyleSheet(QtButtonStyle.Default_Roundness)
+        # __tool_gp.clicked.connect(self.add_compound_attr)
+        self.__attributes_props_v_container.add_group(
+            group_id="tool_gp", widget=__tool_gp
+        )
+        __add_compound_attr_btn = QtButtonCSWidget()
+        __add_compound_attr_btn.setFixedHeight(32)
+        __add_compound_attr_btn.setFixedWidth(96)
+        __add_compound_attr_btn.set_icon("plus.png")
+        __add_compound_attr_btn.setText("新增 Object")
+        __add_compound_attr_btn.setStyleSheet(QtButtonStyle.Default_Roundness)
+        __add_compound_attr_btn.clicked.connect(self.add_compound_attr)
+        self.__attributes_props_v_container.add_widget(
+            group_id="tool_gp",
+            widget_id="add_compound_attr_btn",
+            widget=__add_compound_attr_btn,
+        )
+        __add_compound_attr_btn2 = QtButtonCSWidget()
+        __add_compound_attr_btn2.setFixedHeight(32)
+        __add_compound_attr_btn2.setFixedWidth(128)
+        __add_compound_attr_btn2.set_icon("add_component.png")
+        __add_compound_attr_btn2.setText("新增 Component")
+        __add_compound_attr_btn2.setStyleSheet(QtButtonStyle.Default_Roundness)
+        __add_compound_attr_btn2.clicked.connect(self.add_component)
+        self.__attributes_props_v_container.add_widget(
+            group_id="tool_gp",
+            widget_id="add_compound_attr_btn2",
+            widget=__add_compound_attr_btn2,
+        )
+
+    def __validate_attrs(self):
+        # Object_type
+        # Component_OCMS_Scene_FocusAt_pitch
+        # Component_OCMS_Scene_FocusAt_yaw
+        # Component_OCMS_Scene_FocusAt_zoom
+        # Component_OCMS_Scene_FocusAt_offset
+
+        # Object_type
+        # ComponentV2_NADILeanTouch_LeanCameraSettingValue_zoom
+        # ComponentV2_NADILeanTouch_LeanCameraSettingValue_pitchWawSensitivity
+        # ComponentV2_NADILeanTouch_LeanCameraSettingValue_pitchYaw
+        # ComponentV2_NADILeanTouch_LeanCameraSettingValue_offset
+
+        print(f"Object: {self.__has_ca_object()}")
+        print(f"Components: {self.__has_ca_components()}")
 
     @staticmethod
-    def prop_setter(attr, nice_name, value):
+    def __has_ca_object():
         maya = RepositoryFacade().maya
-        op_set_attr(maya.active_object, attr, value)
+        compound_attrs = Maya.get_compound_attrs(maya.selected_object)
+        return "object" in compound_attrs.keys()
+
+    @staticmethod
+    def __has_ca_components():
+        maya = RepositoryFacade().maya
+        compound_attrs = Maya.get_compound_attrs(maya.selected_object)
+        component_attrs = [
+            c for c in compound_attrs.keys() if c.startswith("component")
+        ]
+        return len(component_attrs) > 0
+
+    @staticmethod
+    def set_attr_name(attr, new_attr):
+        maya = RepositoryFacade().maya
+        op_set_attr_name(maya.selected_object, attr, new_attr)
+
+    @staticmethod
+    def set_attr_prop(attr, value):
+        maya = RepositoryFacade().maya
+        op_set_attr_prop(maya.selected_object, attr, value)
+
+    @staticmethod
+    def del_attr(attr):
+        maya = RepositoryFacade().maya
+        op_del_attr(maya.selected_object, attr)
+
+    @staticmethod
+    def add_attr(compound_attr):
+        maya = RepositoryFacade().maya
+        user_input = Maya.user_input_dialog(message="請輸入屬性名稱:")
+        if user_input:
+            attr = compound_attr + "_" + user_input
+            Maya.add_attr(maya.selected_object, attr)
+            Maya.select(maya.selected_object)
+
+    @staticmethod
+    def add_compound_attr():
+        maya = RepositoryFacade().maya
+        compound_attr = Maya.user_input_dialog(message="請輸入屬性組名稱:")
+        if compound_attr:
+            Maya.add_compound_attr(maya.selected_object, compound_attr)
+            Maya.select(maya.selected_object)
+
+    @staticmethod
+    def add_component():
+        maya = RepositoryFacade().maya
+        compound_attr = Maya.user_input_dialog(
+            title=maya.selected_object, message="新的 Component 命名為——"
+        )
+        if compound_attr:
+            Maya.add_compound_attr(maya.selected_object, compound_attr)
+            Maya.select(maya.selected_object)
 
     @staticmethod
     def __create_edit_attribute():

@@ -393,9 +393,16 @@ class QtGroupBoxCSWidget(QtWidgets.QGroupBox):
         super().__init__()
         self.__is_resizeable = False
         self.__is_resizing = False
+        self.__resize_x = False
+        self.__resize_y = False
+        self.__width_min = 100
+        self.__width_max = 600
+        self.__height_min = 30
+        self.__height_max = 720
         self.__visible_immediate = True
         self.__font = QtGui.QFont(Fonts.MicrosoftJhengHei, 8, QtGui.QFont.Bold)
         self.__font.setLetterSpacing(QtGui.QFont.PercentageSpacing, 110)
+        self.__edge_distance = 4
         self.setFont(QtGui.QFont(self.__font))
         self.setStyleSheet(QtGroupBoxStyle.Default)
 
@@ -404,40 +411,70 @@ class QtGroupBoxCSWidget(QtWidgets.QGroupBox):
     def set_resizeable(self, condition):
         self.__is_resizeable = condition
 
+    def set_edge_distance(self, distance):
+        self.__edge_distance = distance
+
     def mousePressEvent(self, event):
         super().mousePressEvent(event)
+        if not self.__is_resizeable:
+            return
         if event.button() == QtCore.Qt.LeftButton:
-            edge_distance = 15
             mouse_x, mouse_y = event.pos().x(), event.pos().y()
-            self_width, self_height = self.width(), self.height()
+            width, height = self.width(), self.height()
+
+            if width - mouse_x <= self.__edge_distance:
+                self.__resize_x = True
+                self.setCursor(QtCore.Qt.SizeHorCursor)
+
+            if height - mouse_y <= self.__edge_distance:
+                self.__resize_y = True
+                self.setCursor(QtCore.Qt.SizeVerCursor)
 
             if (
-                self_width - mouse_x <= edge_distance
-                or self_height - mouse_y <= edge_distance
+                width - mouse_x <= self.__edge_distance
+                and height - mouse_y <= self.__edge_distance
             ):
+                self.setCursor(QtCore.Qt.SizeFDiagCursor)
+
+            if self.__resize_x or self.__resize_y:
                 self.__is_resizing = True
                 self.mouse_press_pos = event.pos()
-                self.setCursor(QtCore.Qt.SizeVerCursor)
 
     def mouseMoveEvent(self, event):
         super().mouseMoveEvent(event)
-        if self.__is_resizing:
-            rel_move = event.pos() - self.mouse_press_pos
-            new_size = self.size() + QtCore.QSize(rel_move.x(), rel_move.y())
-            new_size: QtCore.QSize
-            if new_size.height() <= 30:
-                new_size.setHeight(30)
-            elif new_size.height() > 600:
-                new_size.setHeight(600)
-            self.mouse_press_pos = event.pos()
-            self.sizeSetter.emit(new_size)
-        else:
+        if not self.__is_resizing:
             self.unsetCursor()
+            return
+
+        rel_move = event.pos() - self.mouse_press_pos
+        _new_size = self.size()
+        _tmp_size = self.size() + QtCore.QSize(rel_move.x(), rel_move.y())
+        _new_size: QtCore.QSize
+        _tmp_size: QtCore.QSize
+
+        if self.__resize_x:
+            _new_size.setWidth(_tmp_size.width())
+            if _new_size.width() <= self.__width_min:
+                _new_size.setWidth(self.__width_min)
+            elif _new_size.width() > self.__width_max:
+                _new_size.setWidth(self.__width_max)
+
+        if self.__resize_y:
+            _new_size.setHeight(_tmp_size.height())
+            if _new_size.height() <= self.__height_min:
+                _new_size.setHeight(self.__height_min)
+            elif _new_size.height() > self.__height_max:
+                _new_size.setHeight(self.__height_max)
+
+        self.mouse_press_pos = event.pos()
+        self.sizeSetter.emit(_new_size)
 
     def mouseReleaseEvent(self, event):
         super().mouseReleaseEvent(event)
         if event.button() == QtCore.Qt.LeftButton:
             self.__is_resizing = False
+            self.__resize_x = False
+            self.__resize_y = False
             self.mouse_press_pos = None
             self.unsetCursor()
 
@@ -524,7 +561,6 @@ class QtGroupVContainerCSWidget(QtGroupVBoxCSWidget):
 
     def clear_all(self):
         for group_id, group_data in self.container.items():
-            print(f"clearing group {group_id}, {group_data}")
             for widget_id, widget in group_data["children"].items():
                 widget.deleteLater()
             group_data["widget"].deleteLater()
@@ -544,7 +580,7 @@ class QtButtonCSWidget(QtWidgets.QPushButton):
         else:
             __icon = (ICON_DIR / icon).resolve().__str__()
             try:
-                self.setTabIcon(QtGui.QIcon(__icon))
+                self.setIcon(QtGui.QIcon(__icon))
             except Exception as e:
                 print(e)
 
@@ -669,35 +705,173 @@ class QtHeadingLabelCSWidget(QtWidgets.QLabel):
 
 
 class QtStringPropertyCSWidget(QtDefaultCSWidget):
-    propertySetter = QtCore.Signal(str, str, str)
+    attrSetter = QtCore.Signal(str, str)
+    attrPropSetter = QtCore.Signal(str, str)
+    attrDeleter = QtCore.Signal(str)
 
-    def __init__(self, parent=None, long_name=None, nice_name=None, value=""):
+    def __init__(self, parent=None, attr=None, value=""):
         super().__init__(parent)
-        self.long_name = long_name
-        self.nice_name = nice_name
+        self.attr = attr
 
-        self.layout = QtWidgets.QHBoxLayout()
-        self.layout.setContentsMargins(0, 0, 0, 0)
-        self.layout.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        self.__layout = QtWidgets.QHBoxLayout()
+        self.__layout.setContentsMargins(0, 0, 0, 0)
+        self.__layout.setSpacing(0)
+        self.__layout.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
 
-        self.label = QtLabelCSWidget()
-        self.label.setFixedWidth(80)
-        self.label.setText(self.long_name)
-        if self.nice_name:
-            self.label.setText(self.nice_name)
+        self.editable_label = QtAttributeNameCSWidget()
+        self.editable_label.setFixedWidth(80)
+        self.editable_label.setText(attr)
+        self.org_attr_text = self.editable_label.text()
+        self.editable_label.editCompleted.connect(self.emit_set_attr_name)
 
         self.lineedit = QtLineEditCSWidget()
         self.lineedit.setText(value)
-        self.lineedit.textChanged.connect(self.emit_prop)
+        self.lineedit.textChanged.connect(self.emit_set_attr_prop)
 
-        font = QtGui.QFont(Fonts.MicrosoftJhengHei, 8, QtGui.QFont.Bold)
-        font.setLetterSpacing(QtGui.QFont.PercentageSpacing, 100)
-        self.label.setFont(QtGui.QFont(font))
-        self.layout.addWidget(self.label)
-        self.layout.addWidget(self.lineedit)
+        self.delete_btn = QtButtonCSWidget()
+        self.delete_btn.set_icon(":/trash.png")
+        self.delete_btn.setFixedWidth(16)
+        self.delete_btn.setFixedHeight(16)
+        self.delete_btn.setStyleSheet(QtButtonStyle.Transparent)
+        self.delete_btn.clicked.connect(self.emit_del_attr)
 
-        self.setLayout(self.layout)
+        __font = QtGui.QFont(Fonts.MicrosoftJhengHei, 8, QtGui.QFont.Bold)
+        __font.setLetterSpacing(QtGui.QFont.PercentageSpacing, 100)
+        self.editable_label.setFont(QtGui.QFont(__font))
+        self.__layout.addWidget(self.editable_label)
+        self.__layout.addWidget(self.lineedit)
+        self.__layout.addWidget(self.delete_btn)
 
-    def emit_prop(self, value):
-        if self.long_name:
-            self.propertySetter.emit(self.long_name, self.nice_name, value)
+        self.setLayout(self.__layout)
+
+    def emit_set_attr_name(self, attr, new_attr):
+        self.attrSetter.emit(attr, new_attr)
+
+    def emit_set_attr_prop(self, attr_value):
+        if self.attr:
+            self.attrPropSetter.emit(self.attr, attr_value)
+
+    def emit_del_attr(self):
+        self.attrDeleter.emit(self.attr)
+
+
+class QtAttributeNameCSWidget(QtDefaultCSWidget):
+    editCompleted = QtCore.Signal(str, str)  # __text, __new_text
+
+    def __init__(self):
+        super().__init__()
+        self.__layout = QtWidgets.QVBoxLayout()
+        self.__layout.setAlignment(QtCore.Qt.AlignTop)
+        self.__layout.setContentsMargins(0, 0, 0, 0)
+        self.__layout.setSpacing(0)
+
+        self.__label = QtAttributeNameLabelCSWidget()
+        self.__label.doubleClicked.connect(self.__display_edit)
+
+        self.__lineedit = QtAttributeNameLineeditCSWidget()
+        self.__lineedit.editClose.connect(self.__display_label)
+        self.__lineedit.editCompleted.connect(self.finishing_edit)
+        self.__lineedit.setVisible(False)
+
+        self.__layout.addWidget(self.__lineedit)
+        self.__layout.addWidget(self.__label)
+
+        self.setLayout(self.__layout)
+
+    def __display_label(self):
+        self.__lineedit.setHidden(True)
+        self.__label.setHidden(False)
+
+    def __display_edit(self):
+        self.__lineedit.setHidden(False)
+        self.__label.setHidden(True)
+        self.__lineedit.openEdit()
+
+    def finishing_edit(self, text, new_text):
+        self.__display_label()
+        self.editCompleted.emit(text, new_text)
+
+    def setText(self, text):
+        self.__lineedit.setText(text)
+        self.__label.setText(text.split("_")[1].capitalize())
+
+    def text(self):
+        return self.__lineedit.text()
+
+
+class QtAttributeNameLabelCSWidget(QtWidgets.QLabel):
+    doubleClicked = QtCore.Signal()
+
+    def __init__(self):
+        super().__init__()
+
+        pass
+
+    def mouseDoubleClickEvent(self, event):
+        self.doubleClicked.emit()
+
+
+class QtAttributeNameLineeditCSWidget(QtWidgets.QLineEdit):
+    editClose = QtCore.Signal()
+    editCompleted = QtCore.Signal(str, str)  # __text, __new_text
+
+    def __init__(self, status=None):
+        super().__init__()
+        self.__text_org = self.text()
+        self.__close()
+
+    def __open(self):
+        self.setReadOnly(False)
+        self.setStyleSheet("background: white; border: 1px solid gray;")
+        self.setFocus()
+
+    def __close(self):
+        self.setReadOnly(True)
+        self.setStyleSheet("background: transparent; border: none;")
+        self.editClose.emit()
+
+    def __edited_error(self):
+        print("請輸入符合{compound}_{attr}之名稱，並包含只有英、數、底線等字元。")
+        self.setText(self.__text_org)
+
+    def __edited_pass(self):
+        self.__close()
+
+    def __edited_apply(self):
+        __text = self.__text_org
+        __new_text = self.text()
+        self.editCompleted.emit(__text, __new_text)
+
+    def __editing_finish(self):
+        if not self.__is_valid(self.text()):
+            self.__edited_error()
+        elif self.text() == self.__text_org:
+            self.__edited_pass()
+        else:
+            self.__edited_apply()
+        self.__close()
+
+    @staticmethod
+    def __is_valid(s):
+        import re
+
+        return bool(re.fullmatch(r"[a-zA-Z0-9]*_?[a-zA-Z0-9]*", s))
+
+    def openEdit(self):
+        self.__open()
+
+    def setText(self, *args, **kwargs):
+        super().setText(*args, **kwargs)
+        self.__text_org = self.text()
+
+    def mouseDoubleClickEvent(self, event):
+        self.__open()
+
+    def keyPressEvent(self, event):
+        if event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return):
+            self.clearFocus()
+        else:
+            super().keyPressEvent(event)
+
+    def focusOutEvent(self, event):
+        self.__editing_finish()

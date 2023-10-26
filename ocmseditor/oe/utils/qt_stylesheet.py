@@ -302,6 +302,26 @@ class QtButtonStyle:
             }}
             """
 
+    Dark_Roundness = f"""
+            QPushButton {{
+                color: {_hex("bdbdbd")};
+                background-color: {_hex("2b2b2b")};
+                border-radius: 4px;
+            }}
+
+            QPushButton:hover {{
+                background-color: {_hex("333333")};
+            }}
+            QPushButton:pressed {{
+                background-color: {_hex("707070")};
+            }}
+            QPushButton:disabled {{
+                color: {_hex("636363")};
+                border: 1px solid {_hex("3c3c3c")};
+                background-color: {_hex("2b2b2b")};
+            }}
+            """
+
     Default = f"""
             QPushButton {{
                 color: {_hex("bdbdbd")};
@@ -327,6 +347,28 @@ class QtButtonStyle:
                 background-color: {_hex("2b2b2b")};
             }}
         """
+
+    Default_Roundness = f"""
+            QPushButton {{
+                color: {_hex("bdbdbd")};
+                background-color: {_hex("525252")};
+                border-radius: 4px;
+                
+            }}
+            QPushButton:hover {{
+                border: 1px solid {_hex("B0B0B0")};
+            }}
+            QPushButton:pressed {{
+                background-color: {_hex("707070")};
+            }}
+            QPushButton:disabled {{
+                color: {_hex("636363")};
+                border: 1px solid {_hex("3c3c3c")};
+                background-color: {_hex("2b2b2b")};
+            }}
+        """
+
+
     Transparent = f"""
             QPushButton {{
                 color: {_hex("bdbdbd")};

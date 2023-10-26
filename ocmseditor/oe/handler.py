@@ -48,13 +48,18 @@ def subscribe_events():
 
 def fetch_active_object():
     maya = RepositoryFacade().maya
-    if len(Maya.get_active_object()) != 0:
-        maya.active_object = Maya.get_active_object()[0]
+    maya.selected_object = None
+    if len(Maya.get_selected()) != 0:
+        maya.selected_object = Maya.get_selected()[0]
 
 
 def fetch_active_viewport():
     maya = RepositoryFacade().maya
     maya.active_viewport = Maya.get_active_viewport()
+
+
+def update_edit_attribute_delay():
+    QtCore.QTimer.singleShot(10, update_edit_attribute)
 
 
 def update_edit_attribute():
@@ -68,14 +73,11 @@ def update_edit_attribute():
     edit_attribute = RepositoryFacade().ui.edit_attribute
     edit_attribute: EditAttributeWidget
     edit_attribute.edit_attribute.move(modified_point)
-    context = {}
     maya = RepositoryFacade().maya
-    attrs = Maya.get_attrs(maya.active_object)
-    edit_attribute.redraw_edit_attributes(attrs)
-
-
-def update_edit_attribute_delay():
-    QtCore.QTimer.singleShot(100, update_edit_attribute)
+    if maya.selected_object:
+        edit_attribute.redraw_edit_attributes()
+    else:
+        edit_attribute.destroy_edit_attributes()
 
 
 def add_maya_selection_changed_script_job():

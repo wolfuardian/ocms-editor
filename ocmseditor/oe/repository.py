@@ -25,7 +25,7 @@ class _UIWidgetDB:
 
 @dataclass
 class _MASceneDB:
-    active_object: str = field(default="")
+    selected_object: str = field(default="")
     active_viewport: QtWidgets.QWidget = field(default=None)
 
 
