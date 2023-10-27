@@ -158,6 +158,7 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
             )
             for attr, attr_value in children_attrs.items():
                 __prop_lineedit = QtStringPropertyCSWidget(
+                    compound=compound_attr,
                     attr=attr,
                     value=attr_value,
                 )
@@ -167,7 +168,7 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
                 )
                 __prop_lineedit.lineedit.setCursorPosition(0)
                 __prop_lineedit.attrSetter.connect(self.set_attr_name)
-                __prop_lineedit.attrPropSetter.connect(self.set_attr_prop)
+                __prop_lineedit.attrPropSetter.connect(self.set_attr_value)
                 __prop_lineedit.attrDeleter.connect(self.del_attr)
             __add_attr_btn = QtButtonCSWidget()
             __add_attr_btn.setFixedHeight(10)
@@ -256,7 +257,7 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
     def __has_ca_object():
         maya = RepositoryFacade().maya
         compound_attrs = Maya.get_attrs_hierarchy(maya.selected_object)
-        return "object" in compound_attrs.keys()
+        return "Object" in compound_attrs.keys()
 
     @staticmethod
     def __has_ca_components():
@@ -268,27 +269,36 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
         return len(component_attrs) > 0
 
     @staticmethod
-    def set_attr_name(attr, new_attr):
+    def set_attr_name(compound, old_attr, new_attr):
         maya = RepositoryFacade().maya
-        op_set_attr_name(maya.selected_object, attr, new_attr)
+        maya.selected_attribute = compound + "_" + old_attr
+        new_attr = compound + "_" + new_attr
+        op_set_attr_name(maya.selected_object, maya.selected_attribute, new_attr)
 
     @staticmethod
-    def set_attr_prop(attr, value):
+    def set_attr_value(compound, attr, value):
         maya = RepositoryFacade().maya
-        op_set_attr_prop(maya.selected_object, attr, value)
+        maya.selected_attribute = compound + "_" + attr
+        op_set_attr_prop(maya.selected_object, maya.selected_attribute, value)
 
     @staticmethod
-    def del_attr(attr):
+    def del_attr(compound, attr):
         maya = RepositoryFacade().maya
-        op_del_attr(maya.selected_object, attr)
+        maya.selected_attribute = compound + "_" + attr
+        op_del_attr(maya.selected_object, maya.selected_attribute)
 
     @staticmethod
-    def add_attr(compound_attr):
+    def add_attr(compound):
         maya = RepositoryFacade().maya
-        user_input = Maya.user_input_dialog(message="請輸入屬性名稱:")
-        if user_input:
-            Maya.add_attr(maya.selected_object, compound_attr, user_input)
+        input_attr = Maya.user_input_dialog(message="屬性名稱 attr 為:")
+        if input_attr:
+            Maya.add_attr(maya.selected_object, compound, input_attr)
             Maya.select(maya.selected_object)
+        input_value = Maya.user_input_dialog(message="屬性值 value 為:")
+        if input_value:
+            maya = RepositoryFacade().maya
+            maya.selected_attribute = compound + "_" + input_attr
+            op_set_attr_prop(maya.selected_object, maya.selected_attribute, input_value)
 
     @staticmethod
     def add_object_compound():

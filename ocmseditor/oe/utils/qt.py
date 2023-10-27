@@ -705,12 +705,13 @@ class QtHeadingLabelCSWidget(QtWidgets.QLabel):
 
 
 class QtStringPropertyCSWidget(QtDefaultCSWidget):
-    attrSetter = QtCore.Signal(str, str)
-    attrPropSetter = QtCore.Signal(str, str)
-    attrDeleter = QtCore.Signal(str)
+    attrSetter = QtCore.Signal(str, str, str)  # compound, old_attr, new_attr
+    attrPropSetter = QtCore.Signal(str, str, str)  # compound, attr, value
+    attrDeleter = QtCore.Signal(str, str)  # compound, attr
 
-    def __init__(self, parent=None, attr=None, value=""):
+    def __init__(self, parent=None, compound="", attr="", value=""):
         super().__init__(parent)
+        self.compound = compound
         self.attr = attr
 
         self.__layout = QtWidgets.QHBoxLayout()
@@ -744,17 +745,14 @@ class QtStringPropertyCSWidget(QtDefaultCSWidget):
 
         self.setLayout(self.__layout)
 
-    def emit_set_attr_name(self, attr, new_attr):
-        print(f"emit_set_attr_name: {attr} -> {new_attr}")
-        compound, attr = attr.split("_")
-        self.attrSetter.emit(attr, new_attr)
+    def emit_set_attr_name(self, old_attr, new_attr):
+        self.attrSetter.emit(self.compound, old_attr, new_attr)
 
     def emit_set_attr_prop(self, attr_value):
-        if self.attr:
-            self.attrPropSetter.emit(self.attr, attr_value)
+        self.attrPropSetter.emit(self.compound, self.attr, attr_value)
 
     def emit_del_attr(self):
-        self.attrDeleter.emit(self.attr)
+        self.attrDeleter.emit(self.compound, self.attr)
 
 
 class QtAttributeNameCSWidget(QtDefaultCSWidget):
@@ -787,7 +785,7 @@ class QtAttributeNameCSWidget(QtDefaultCSWidget):
 
 class QtAttributeNameLineeditCSWidget(QtWidgets.QLineEdit):
     editClose = QtCore.Signal()
-    editCompleted = QtCore.Signal(str, str)  # __text, __new_text
+    editCompleted = QtCore.Signal(str, str)  # __old, __new
 
     def __init__(self, status=None):
         super().__init__()

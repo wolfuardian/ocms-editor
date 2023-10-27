@@ -18,7 +18,6 @@ def op_set_attr_prop(node, attr, attr_value):
 
 
 def op_del_attr(node, attr):
-    maya = RepositoryFacade().maya
     Maya.del_attr(node, attr)
-    Maya.select(maya.selected_object)
+    Maya.select(node)
 
