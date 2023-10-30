@@ -94,9 +94,9 @@ class Maya(core.Maya):
         return attrs
 
     @classmethod
-    def get_attrs_hierarchy(cls, node_name):
+    def get_attrs_hierarchy(cls, node):
         collect_attrs = {}
-        for attr_long, attr_value in cls.get_attrs(node_name).items():
+        for attr_long, attr_value in cls.get_attrs(node).items():
             parts = attr_long.split("_")
             if len(parts) == 1:
                 # 沒有屬性組的時候
@@ -142,14 +142,13 @@ class Maya(core.Maya):
             cls.set_attr(node, long_name, default_value)
 
     @classmethod
-    def add_attr_compound(cls, node, attr_compound):
-        attr_compound = attr_compound + "_" + "default"
-        cmds.addAttr(
-            node,
-            longName=attr_compound,
-            niceName=attr_compound.capitalize().replace("_", " "),
-            dataType="string",
-        )
+    def add_ac_object(cls, node, attr_compound):
+        cls.add_attr(node, attr_compound, "default")
+
+    @classmethod
+    def add_ac_component(cls, node, attr_compound):
+
+        pass
 
     @classmethod
     def set_attr(cls, node, attr, attr_value):
