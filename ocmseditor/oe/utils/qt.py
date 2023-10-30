@@ -536,6 +536,9 @@ class QtGroupVContainerCSWidget(QtGroupVBoxCSWidget):
 
         self.container: dict[str, QtWidgets] = {}
 
+    def is_group_exist(self, group_id):
+        return group_id in self.container
+
     def add_group(self, group_id, widget):
         self.container[group_id] = {
             "widget": widget,
@@ -709,10 +712,11 @@ class QtStringPropertyCSWidget(QtDefaultCSWidget):
     attrPropSetter = QtCore.Signal(str, str, str)  # compound, attr, value
     attrDeleter = QtCore.Signal(str, str)  # compound, attr
 
-    def __init__(self, parent=None, compound="", attr="", value=""):
+    def __init__(self, parent=None, attr="", attr_str="", attr_value=""):
         super().__init__(parent)
-        self.compound = compound
         self.attr = attr
+        self.attr_str = attr_str
+        self.attr_value = attr_value
 
         self.__layout = QtWidgets.QHBoxLayout()
         self.__layout.setContentsMargins(0, 0, 0, 0)
@@ -722,11 +726,12 @@ class QtStringPropertyCSWidget(QtDefaultCSWidget):
         self.editable_label = QtAttributeNameLineeditCSWidget()
         self.editable_label.setFixedWidth(80)
         self.editable_label.setText(attr)
+        self.editable_label.setToolTip(self.attr)
         self.org_attr_text = self.editable_label.text()
         self.editable_label.editCompleted.connect(self.emit_set_attr_name)
 
         self.lineedit = QtLineEditCSWidget()
-        self.lineedit.setText(value)
+        self.lineedit.setText(self.attr_value)
         self.lineedit.textChanged.connect(self.emit_set_attr_prop)
 
         self.delete_btn = QtButtonCSWidget()

@@ -9,7 +9,7 @@ from shiboken2 import wrapInstance
 from collections import defaultdict
 
 from ocmseditor.oe.utils.logger import Logger
-from ocmseditor.oe.constant import INFO__BROWSER_CANCELED
+from ocmseditor.oe.constant import INFO__BROWSER_CANCELED, AttributeType
 
 from PySide2 import QtWidgets, QtCore, QtGui
 
@@ -94,9 +94,19 @@ class Maya(core.Maya):
         return attrs
 
     @classmethod
+    def get_attr_type(cls, attr):
+        parts = attr.split("_")
+        if len(parts) == 2:
+            return AttributeType.Simple
+        if len(parts) >= 3:
+            return AttributeType.Complex
+        return AttributeType.Undefined
+
+    @classmethod
     def get_attrs_hierarchy(cls, node):
         collect_attrs = {}
         for attr_long, attr_value in cls.get_attrs(node).items():
+            print(f"attr_long, attr_value: {attr_long}, {attr_value}")
             parts = attr_long.split("_")
             if len(parts) == 1:
                 # 沒有屬性組的時候

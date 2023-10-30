@@ -23,6 +23,12 @@ class AttributePanel:
     Collapsed = "Collapsed"
     Expanded = "Expanded"
 
+class AttributeType:
+    Simple = "Simple"
+    Complex = "Complex"
+    Undefined = "Undefined"
+    Invalid = "Invalid"
+
 
 class Fonts:
     Fixedsys = "Fixedsys"
