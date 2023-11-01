@@ -8,7 +8,6 @@ def op_set_attr_name(node, attr, new_attr):
     if not attr_value:
         attr_value = ""
     Maya.del_attr(node, attr)
-    Maya.add_attr_old(node, new_attr, default_value=attr_value)
     # Maya.add_attr(node, new_attr, default_value=attr_value)
     Maya.select(maya.selected_object)
 

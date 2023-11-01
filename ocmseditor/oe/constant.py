@@ -24,8 +24,9 @@ class AttributePanel:
     Expanded = "Expanded"
 
 class AttributeType:
-    Simple = "Simple"
-    Complex = "Complex"
+    Object = "Object"
+    ComponentV2 = "ComponentV2"
+    Component = "Component"
     Undefined = "Undefined"
     Invalid = "Invalid"
 
