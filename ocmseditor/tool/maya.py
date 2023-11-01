@@ -95,9 +95,10 @@ class Maya(core.Maya):
 
     @classmethod
     def nest_attrs(cls, result, head, body, tail, value):
-        if head not in result:
-            if head == AttributeType.ComponentV2 or head == AttributeType.Component:
-                result[head][body] = cls.new_component_data(head)
+        if head not in result and (
+            head == AttributeType.ComponentV2 or head == AttributeType.Component
+        ):
+            result[head][body] = cls.new_component_data(head)
         if body not in result[head]:
             result[head][body] = {}
         result[head][body][tail] = value

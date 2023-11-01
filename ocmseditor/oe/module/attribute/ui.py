@@ -149,12 +149,30 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
         maya = RepositoryFacade().maya
 
         attrs = Maya.get_attrs(maya.selected_object)
-        parsed_attrs = Maya.parse_attrs(attrs)
-        for attr_type, attr_data in parsed_attrs.items():
+        parsing_attrs = Maya.parse_attrs(attrs)
+        for attr_typ, attr_data in parsing_attrs.items():
             for compound, props in attr_data.items():
                 for prop, value in props.items():
-                    print(f"attr_type, compound, prop, value = {attr_type}, {compound}, {prop}, {value}")
+                    print(f"attr_typ, compound, prop, value = {attr_typ}, {compound}, {prop}, {value}")
         return
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         for attr, attr_value in Maya.get_attrs(maya.selected_object).items():
             attr_type = Maya.parse_attribute_type(attr)
