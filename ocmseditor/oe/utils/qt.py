@@ -514,6 +514,8 @@ class QtGroupHBoxCSWidget(QtGroupBoxCSWidget):
 class QtGroupVBoxCSWidget(QtGroupBoxCSWidget):
     def __init__(self, title=None):
         super().__init__()
+        self.__error = False
+
         self.__layout = QtWidgets.QVBoxLayout()
         self.__layout.setAlignment(QtCore.Qt.AlignTop)
         self.__layout.setContentsMargins(0, 0, 0, 0)
@@ -528,6 +530,12 @@ class QtGroupVBoxCSWidget(QtGroupBoxCSWidget):
     def setTitle(self, *args, **kwargs):
         super().setTitle(*args, **kwargs)
         self.layout.setContentsMargins(0, 14, 0, 0)
+
+    def has_error(self):
+        return self.__error
+
+    def set_error(self, error):
+        self.__error = error
 
 
 class QtGroupVContainerCSWidget(QtGroupVBoxCSWidget):
@@ -708,15 +716,18 @@ class QtHeadingLabelCSWidget(QtWidgets.QLabel):
 
 
 class QtStringPropertyCSWidget(QtDefaultCSWidget):
-    attrSetter = QtCore.Signal(str, str, str)  # compound, old_attr, new_attr
-    attrPropSetter = QtCore.Signal(str, str, str)  # compound, attr, value
-    attrDeleter = QtCore.Signal(str, str)  # compound, attr
+    attributeRenamer = QtCore.Signal(str, str, str, str)  # ln, nn, osn, nsn
+    attributeSetter = QtCore.Signal(str, str)  # ln, str_prop
+    attributeDeleter = QtCore.Signal(str)  # ln
 
-    def __init__(self, parent=None, attr="", attr_str="", attr_value=""):
+    def __init__(
+        self, parent=None, long_name="", short_name="", nice_name="", string_property=""
+    ):
         super().__init__(parent)
-        self.attr = attr
-        self.attr_str = attr_str
-        self.attr_value = attr_value
+        self.long_name = long_name
+        self.short_name = short_name
+        self.nice_name = nice_name
+        self.string_property = string_property
 
         self.__layout = QtWidgets.QHBoxLayout()
         self.__layout.setContentsMargins(0, 0, 0, 0)
@@ -725,21 +736,21 @@ class QtStringPropertyCSWidget(QtDefaultCSWidget):
 
         self.editable_label = QtAttributeNameLineeditCSWidget()
         self.editable_label.setFixedWidth(80)
-        self.editable_label.setText(attr)
-        self.editable_label.setToolTip(self.attr)
+        self.editable_label.setText(self.short_name)
+        self.editable_label.setToolTip(self.long_name)
         self.org_attr_text = self.editable_label.text()
-        self.editable_label.editCompleted.connect(self.emit_set_attr_name)
+        self.editable_label.editCompleted.connect(self.emit_set_short_name)
 
         self.lineedit = QtLineEditCSWidget()
-        self.lineedit.setText(self.attr_value)
-        self.lineedit.textChanged.connect(self.emit_set_attr_prop)
+        self.lineedit.setText(self.string_property)
+        self.lineedit.textChanged.connect(self.emit_set_string_property)
 
         self.delete_btn = QtButtonCSWidget()
         self.delete_btn.set_icon(":/trash.png")
         self.delete_btn.setFixedWidth(16)
         self.delete_btn.setFixedHeight(16)
         self.delete_btn.setStyleSheet(QtButtonStyle.Transparent)
-        self.delete_btn.clicked.connect(self.emit_del_attr)
+        self.delete_btn.clicked.connect(self.emit_del_attribute)
 
         __font = QtGui.QFont(Fonts.MicrosoftJhengHei, 8, QtGui.QFont.Bold)
         __font.setLetterSpacing(QtGui.QFont.PercentageSpacing, 100)
@@ -750,14 +761,16 @@ class QtStringPropertyCSWidget(QtDefaultCSWidget):
 
         self.setLayout(self.__layout)
 
-    def emit_set_attr_name(self, old_attr, new_attr):
-        self.attrSetter.emit(self.compound, old_attr, new_attr)
+    def emit_set_short_name(self, old_short_name, new_short_name):
+        self.attributeRenamer.emit(
+            self.long_name, self.nice_name, old_short_name, new_short_name
+        )
 
-    def emit_set_attr_prop(self, attr_value):
-        self.attrPropSetter.emit(self.compound, self.attr, attr_value)
+    def emit_set_string_property(self, value):
+        self.attributeSetter.emit(self.long_name, value)
 
-    def emit_del_attr(self):
-        self.attrDeleter.emit(self.compound, self.attr)
+    def emit_del_attribute(self):
+        self.attributeDeleter.emit(self.long_name)
 
 
 class QtAttributeNameCSWidget(QtDefaultCSWidget):

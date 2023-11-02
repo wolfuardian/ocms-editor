@@ -19,9 +19,20 @@ class Mode:
     FileMode = "File Mode"
     SceneMode = "Scene Mode"
 
+
 class AttributePanel:
     Collapsed = "Collapsed"
     Expanded = "Expanded"
+
+
+class Attribute:
+    LongName = "long_Name"
+    ShortName = "short_Name"
+    NiceName = "nice_Name"
+    Type = "type"
+    Compound = "compound"
+    StringProperty = "string_property"
+
 
 class AttributeType:
     Object = "Object"

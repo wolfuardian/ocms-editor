@@ -20,9 +20,9 @@ from ocmseditor.oe.utils.qt_stylesheet import (
     QtTitleLabelStyle,
     QtPropertyStyle,
 )
-from ocmseditor.oe.constant import AttributePanel, AttributeType
+from ocmseditor.oe.constant import AttributePanel, Attribute, AttributeType
 from ocmseditor.oe.repository import RepositoryFacade
-from .operator import op_set_attr_name, op_set_attr_prop, op_del_attr
+from .operator import op_add_attr, op_del_attr, op_set_attr_prop, op_rename_attr
 from ocmseditor.tool.maya import Maya
 from ocmseditor.tool.debug import Debug
 
@@ -151,40 +151,71 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
         print(
             "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
         )
-        attrs = Maya.get_attrs(maya.selected_object)
-        # for attr, attr_value in attrs.items():
-        #     print(f"attr, attr_value = {attr}")
+        attrs = Maya.get_attributes(maya.selected_object)
         Debug.print_beautiful_dictionary(attrs, 0, "    ")
-        nest_attrs = Maya.split_attrs(attrs)
         print("\n")
-        for attr_typ, attr_data in nest_attrs.items():
+        parsed_attributes = Maya.parse_attributes(attrs)
+
+        Debug.print_beautiful_dictionary(parsed_attributes, 0, "    ")
+        print("\n")
+
+        sorted_parsed_attributes = Maya.sort_parsed_attributes(parsed_attributes)
+        Debug.print_beautiful_dictionary(sorted_parsed_attributes, 0, "    ")
+        print("\n")
+
+        for attr_typ, attr_data in sorted_parsed_attributes.items():
             for compound, props in attr_data.items():
-                # __compound_v_box = QtGroupVBoxCSWidget(title=compound)
-                # __compound_v_box.setStyleSheet(QtGroupBoxStyle.Minimal)
-                # self.__attributes_v_container.add_group(
-                #     group_id=compound, widget=__compound_v_box
-                # )
-                for prop, value in props.items():
-                    pass
-                    # attribute = Maya.
-                    #
-                    # __prop_lineedit = QtStringPropertyCSWidget(
-                    #     attr=prop,
-                    #     attr_str=prop,
-                    #     attr_value=value,
-                    # )
-                    # __prop_lineedit.setStyleSheet(QtPropertyStyle.Minimal)
-                    # self.__attributes_v_container.add_widget(
-                    #     group_id=compound, widget_id=prop, widget=__prop_lineedit
-                    # )
-                    # print(f"long_name = {compound}_{prop}")
-                    # print(f"{attr_typ}, {compound}, {prop}, {value}")
-        Debug.print_beautiful_dictionary(nest_attrs, 0, "    ")
-        # print(f"nest_attrs = {nest_attrs}")
+                __compound_v_box = QtGroupVBoxCSWidget(title=compound)
+                if attr_typ == AttributeType.Undefined:
+                    __compound_v_box.set_error(True)
+                    __compound_v_box.setStyleSheet(QtGroupBoxStyle.Minimal_Error)
+                else:
+                    __compound_v_box.set_error(False)
+                    __compound_v_box.setStyleSheet(QtGroupBoxStyle.Minimal)
+                self.__attributes_v_container.add_group(
+                    group_id=compound, widget=__compound_v_box
+                )
+                for prop, pdata in props.items():
+                    pdata: dict
+                    long_name = pdata.get(Attribute.LongName)
+                    short_name = pdata.get(Attribute.ShortName)
+                    nice_name = pdata.get(Attribute.NiceName)
+                    string_property = pdata.get(Attribute.StringProperty)
+                    __prop_lineedit = QtStringPropertyCSWidget(
+                        long_name=long_name,
+                        short_name=short_name,
+                        nice_name=nice_name,
+                        string_property=string_property,
+                    )
+                    __prop_lineedit.setStyleSheet(QtPropertyStyle.Minimal)
+                    self.__attributes_v_container.add_widget(
+                        group_id=compound,
+                        widget_id=long_name,
+                        widget=__prop_lineedit,
+                    )
+                    __prop_lineedit.attributeRenamer.connect(self.rename_attr)
+                    __prop_lineedit.attributeSetter.connect(self.set_attr)
+                    __prop_lineedit.attributeDeleter.connect(self.del_attr)
+
+                if __compound_v_box.has_error():
+                    continue
+                __add_attr_btn = QtButtonCSWidget()
+                __add_attr_btn.setFixedHeight(10)
+                __add_attr_btn.set_icon("plus-8px.png")
+                __add_attr_btn.setStyleSheet(QtButtonStyle.Default_Roundness)
+                maya = RepositoryFacade().maya
+                __add_attr_btn.clicked.connect(
+                    partial(self.add_attr, attr_typ, compound)
+                )
+                self.__attributes_v_container.add_widget(
+                    group_id=compound,
+                    widget_id=compound + "_" + "add_attr_btn",
+                    widget=__add_attr_btn,
+                )
 
         return
-        for attr, attr_value in Maya.get_attrs(maya.selected_object).items():
-            attr_type = Maya.parse_attribute_type(attr)
+        for attr, attr_value in Maya.get_attributes(maya.selected_object).items():
+            attr_type = Maya.attribute_type(attr)
 
             print(f"compound_attrs = {compound}")
             if not self.__attributes_v_container.is_group_exist(compound):
@@ -192,9 +223,9 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
                     group_id=compound, widget=__compound_v_box
                 )
             __prop_lineedit = QtStringPropertyCSWidget(
-                attr=attr,
-                attr_str=attr_str,
-                attr_value=attr_value,
+                long_name=attr,
+                short_name=attr_str,
+                string_property=attr_value,
             )
             __prop_lineedit.setStyleSheet(QtPropertyStyle.Minimal)
             self.__attributes_v_container.add_widget(
@@ -312,7 +343,7 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
         # len >= 3
 
         maya = RepositoryFacade().maya
-        attrs = Maya.get_attrs(maya.selected_object)
+        attrs = Maya.get_attributes(maya.selected_object)
         for attr, attr_value in attrs.items():
             print(f"attr, attr_value = {attr}, {attr_value}")
 
@@ -348,36 +379,69 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
         return len(component_attrs) > 0
 
     @staticmethod
-    def set_attr_name(compound, old_attr, new_attr):
+    def rename_attr(long_name, nice_name, old_short_name, new_short_name):
         maya = RepositoryFacade().maya
-        maya.selected_attribute = compound + "_" + old_attr
-        new_attr = compound + "_" + new_attr
-        op_set_attr_name(maya.selected_object, maya.selected_attribute, new_attr)
+        maya.selected_attribute = long_name
+        new_long_name = long_name.replace(old_short_name, new_short_name)
+        new_nice_name = nice_name.replace(old_short_name, new_short_name)
+        op_rename_attr(
+            node=maya.selected_object,
+            long_name=maya.selected_attribute,
+            new_long_name=new_long_name,
+            new_nice_name=new_nice_name,
+        )
+        Maya.select(maya.selected_object)
 
     @staticmethod
-    def set_attr_value(compound, attr, value):
+    def set_attr(long_name, value):
         maya = RepositoryFacade().maya
-        maya.selected_attribute = compound + "_" + attr
+        maya.selected_attribute = long_name
         op_set_attr_prop(maya.selected_object, maya.selected_attribute, value)
 
     @staticmethod
-    def del_attr(compound, attr):
+    def del_attr(long_name):
         maya = RepositoryFacade().maya
-        maya.selected_attribute = compound + "_" + attr
+        maya.selected_attribute = long_name
         op_del_attr(maya.selected_object, maya.selected_attribute)
 
     @staticmethod
-    def add_attr(compound):
+    def add_attr(attr_typ, compound):
         maya = RepositoryFacade().maya
-        input_attr = Maya.user_input_dialog(message="屬性名稱 attr 為:")
-        if input_attr:
-            Maya.add_attr(maya.selected_object, compound, input_attr)
-            Maya.select(maya.selected_object)
+        print(f"attr_typ, compound = {attr_typ}, {compound}")
+        input_name = Maya.user_input_dialog(message="屬性名稱 attr 為:")
+        if not input_name:
+            input_name = "default"
+        if attr_typ == AttributeType.Object:
+            long_name = AttributeType.Object + "_" + input_name
+        elif attr_typ == AttributeType.ComponentV2:
+            long_name = (
+                AttributeType.ComponentV2
+                + "_"
+                + compound.replace(".", "_")
+                + "_"
+                + input_name
+            )
+        elif attr_typ == AttributeType.Component:
+            long_name = (
+                AttributeType.Component
+                + "_"
+                + compound.replace(".", "_")
+                + "_"
+                + input_name
+            )
+        else:
+            raise Exception("Undefined Attribute Type")
+
         input_value = Maya.user_input_dialog(message="屬性值 value 為:")
-        if input_value:
-            maya = RepositoryFacade().maya
-            maya.selected_attribute = compound + "_" + input_attr
-            op_set_attr_prop(maya.selected_object, maya.selected_attribute, input_value)
+        if not input_value:
+            input_value = ""
+        op_add_attr(
+            node=maya.selected_object,
+            long_name=long_name,
+            nice_name=Maya.attribute_nice_name(long_name),
+            default_value=input_value,
+        )
+        Maya.select(maya.selected_object)
 
     @staticmethod
     def add_ac_object():

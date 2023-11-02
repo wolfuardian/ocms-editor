@@ -368,7 +368,6 @@ class QtButtonStyle:
             }}
         """
 
-
     Transparent = f"""
             QPushButton {{
                 color: {_hex("bdbdbd")};
@@ -581,6 +580,20 @@ class QtGroupBoxStyle:
     
         QGroupBox::title {{
             font-size: 10px;
+            background-color: {_hex("2b2b2b")};
+            color: None;
+        }}
+    """
+    Minimal_Error = f"""
+        QGroupBox {{
+            font-size: 10px;
+            background-color: None;
+            border: 0px;
+        }}
+
+        QGroupBox::title {{
+            font-size: 10px;
+            background-color: {_hex("5d3535")};
             color: None;
         }}
     """

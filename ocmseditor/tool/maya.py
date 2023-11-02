@@ -9,7 +9,7 @@ from shiboken2 import wrapInstance
 from collections import defaultdict
 
 from ocmseditor.oe.utils.logger import Logger
-from ocmseditor.oe.constant import INFO__BROWSER_CANCELED, AttributeType
+from ocmseditor.oe.constant import INFO__BROWSER_CANCELED, Attribute, AttributeType
 
 from PySide2 import QtWidgets, QtCore, QtGui
 
@@ -86,12 +86,109 @@ class Maya(core.Maya):
             return None
 
     @classmethod
-    def get_attrs(cls, node):
+    def get_attributes(cls, node):
         result = defaultdict(dict)
         for attr in cmds.listAttr(node, userDefined=True, write=True) or []:
             if not cmds.attributeQuery(attr, node=node, numberOfChildren=True):
                 result[attr] = cmds.getAttr(f"{node}.{attr}")
+        return dict(result)
+
+    @classmethod
+    def parse_attributes(cls, attributes):
+        result = defaultdict(dict)
+        for attribute, value in attributes.items():
+            parsed_attribute = cls.parse_attribute(attribute, value)
+            result.update(parsed_attribute)
+        return dict(result)
+
+    @classmethod
+    def parse_attribute(cls, attribute, value):
+        attr_data = {
+            Attribute.LongName: attribute,
+            Attribute.ShortName: cls.attribute_short_name(attribute),
+            Attribute.NiceName: cls.attribute_nice_name(attribute),
+            Attribute.Type: cls.attribute_type(attribute),
+            Attribute.Compound: cls.attribute_compound(attribute),
+            Attribute.StringProperty: value,
+        }
+        result = {attribute: attr_data}
         return result
+
+    @classmethod
+    def attribute_type(cls, attribute):
+        parts = attribute.split("_")
+        first_part = parts[0]
+        if len(parts) == 2 and first_part == AttributeType.Object:
+            return AttributeType.Object
+        if len(parts) >= 3 and first_part == AttributeType.ComponentV2:
+            return AttributeType.ComponentV2
+        if len(parts) >= 3 and first_part == AttributeType.Component:
+            return AttributeType.Component
+        return AttributeType.Undefined
+
+    @classmethod
+    def attribute_compound(cls, attribute):
+        head, body, tail = cls.split_attribute(attribute)
+        return body
+
+    @classmethod
+    def attribute_short_name(cls, attribute):
+        head, body, tail = cls.split_attribute(attribute)
+        return tail
+
+    @classmethod
+    def attribute_nice_name(cls, attribute):
+        head, body, tail = cls.split_attribute(attribute)
+        typ = cls.attribute_type(attribute)
+        if not body:
+            body = head
+        head = typ
+        body = body.replace("_", ".")
+        if typ == AttributeType.ComponentV2 or typ == AttributeType.Component:
+            nice_name = " | ".join([head, body, tail])
+        else:
+            nice_name = " | ".join([head, tail])
+        return nice_name
+
+    @classmethod
+    def sort_parsed_attributes(cls, parsed_attributes):
+        result = defaultdict(dict)
+        for attribute, attr_data in parsed_attributes.items():
+            typ, cp, ln = (
+                attr_data.get(Attribute.Type),
+                attr_data.get(Attribute.Compound),
+                attr_data.get(Attribute.LongName),
+            )
+            if cp not in result[typ]:
+                result[typ][cp] = defaultdict(dict)
+            result[typ][cp][ln] = attr_data
+        return dict(result)
+
+    @classmethod
+    def new_component_data(cls, compound_type):
+        if compound_type == AttributeType.Component:
+            return {"assembly": "Nadi.OCMS"}
+        if compound_type == AttributeType.ComponentV2:
+            return {}
+
+    @classmethod
+    def split_attribute(cls, attribute):
+        parts = attribute.split("_")
+        has_body = len(parts) >= 3
+        parts_head = parts[0]
+        if has_body:
+            parts_body = parts[1:-1]
+        else:
+            parts_body = []
+        parts_tail = parts[-1]
+        head, body, tail = parts_head, ".".join(parts_body), parts_tail
+
+        typ = cls.attribute_type(attribute)
+        if not body:
+            body = head
+        head = typ
+
+        return head, body, tail
 
     @classmethod
     def nest_attrs(cls, result, head, body, tail, value):
@@ -108,72 +205,14 @@ class Maya(core.Maya):
     def split_attrs(cls, attrs):
         result = defaultdict(dict)
         for attribute, value in attrs.items():
-            typ = cls.parse_attribute_type(attribute)
-            head, body, tail = cls.split_attr(attribute)
-            if not body:
-                body = head
-            head = typ
+            head, body, tail = cls.split_attribute(attribute)
             result = cls.nest_attrs(result, head, body, tail, value)
         return dict(result)
 
     @classmethod
-    def parse_attribute(cls, attribute):
-        result = {attribute: defaultdict(dict)}
-        data = {
-
-        }
-
-
-
-    @classmethod
-    def split_attr(cls, attr_long):
-        parts = attr_long.split("_")
-        has_body = len(parts) >= 3
-        parts_head = parts[0]
-        if has_body:
-            parts_body = parts[1:-1]
-        else:
-            parts_body = []
-        parts_tail = parts[-1]
-        head, body, tail = parts_head, ".".join(parts_body), parts_tail
-        return head, body, tail
-
-    @classmethod
-    def new_component_data(cls, compound_type):
-        if compound_type == AttributeType.Component:
-            return {"assembly": "Nadi.OCMS"}
-        if compound_type == AttributeType.ComponentV2:
-            return {}
-
-    @classmethod
-    def split_attr(cls, attr_long):
-        parts = attr_long.split("_")
-        has_body = len(parts) >= 3
-        parts_head = parts[0]
-        if has_body:
-            parts_body = parts[1:-1]
-        else:
-            parts_body = []
-        parts_tail = parts[-1]
-        head, body, tail = parts_head, ".".join(parts_body), parts_tail
-        return head, body, tail
-
-    @classmethod
-    def parse_attribute_type(cls, attr_long):
-        parts = attr_long.split("_")
-        first = parts[0]
-        if len(parts) == 2 and first == AttributeType.Object:
-            return AttributeType.Object
-        if len(parts) >= 3 and first == AttributeType.ComponentV2:
-            return AttributeType.ComponentV2
-        if len(parts) >= 3 and first == AttributeType.Component:
-            return AttributeType.Component
-        return AttributeType.Undefined
-
-    @classmethod
     def get_attrs_hierarchy(cls, node):
         collect_attrs = {}
-        for attr_long, attr_value in cls.get_attrs(node).items():
+        for attr_long, attr_value in cls.get_attributes(node).items():
             print(f"attr_long, attr_value: {attr_long}, {attr_value}")
             parts = attr_long.split("_")
             if len(parts) == 1:
@@ -197,12 +236,13 @@ class Maya(core.Maya):
         return cmds.deleteAttr(f"{node}.{attr}")
 
     @classmethod
-    def add_attr(cls, node, compound, attr, default_value=""):
-        long_name = compound + "_" + attr
+    def add_attr(cls, node, long_name, nice_name="", default_value=""):
+        if nice_name == "":
+            nice_name = long_name.replace("_", " | ")
         cmds.addAttr(
             node,
             longName=long_name,
-            niceName=long_name.replace("_", " | "),
+            niceName=nice_name,
             dataType="string",
         )
         if default_value != "":
