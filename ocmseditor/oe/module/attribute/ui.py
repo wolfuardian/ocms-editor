@@ -24,6 +24,7 @@ from ocmseditor.oe.constant import AttributePanel, AttributeType
 from ocmseditor.oe.repository import RepositoryFacade
 from .operator import op_set_attr_name, op_set_attr_prop, op_del_attr
 from ocmseditor.tool.maya import Maya
+from ocmseditor.tool.debug import Debug
 
 global instance_edit_attribute
 
@@ -78,9 +79,9 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
         self.__attributes_v_box.layout.setSpacing(0)
         self.__attributes_v_box.setStyleSheet(QtGroupBoxStyle.Transparent)
 
-        self.__attributes_props_v_container = QtGroupVContainerCSWidget()
-        self.__attributes_props_v_container.layout.setContentsMargins(3, 3, 3, 3)
-        self.__attributes_props_v_container.layout.setSpacing(12)
+        self.__attributes_v_container = QtGroupVContainerCSWidget()
+        self.__attributes_v_container.layout.setContentsMargins(3, 3, 3, 3)
+        self.__attributes_v_container.layout.setSpacing(12)
 
         self.__inspector_title_h_box = QtGroupHBoxCSWidget()
         self.__inspector_title_h_box.layout.setContentsMargins(0, 0, 0, 0)
@@ -107,7 +108,7 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
 
         self.__inspector_title_h_box.layout.addWidget(self.__inspector_title)
         self.__attributes_v_box.layout.addWidget(self.__inspector_title_h_box)
-        self.__attributes_v_box.layout.addWidget(self.__attributes_props_v_container)
+        self.__attributes_v_box.layout.addWidget(self.__attributes_v_container)
 
         self.__scrollarea.layout.addWidget(self.__attributes_v_box)
 
@@ -143,56 +144,52 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
         self.construct_edit_attributes()
 
     def destroy_edit_attributes(self):
-        self.__attributes_props_v_container.clear_all()
+        self.__attributes_v_container.clear_all()
 
     def construct_edit_attributes(self):
         maya = RepositoryFacade().maya
-
+        print(
+            "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+        )
         attrs = Maya.get_attrs(maya.selected_object)
-        parsing_attrs = Maya.parse_attrs(attrs)
-        for attr_typ, attr_data in parsing_attrs.items():
+        # for attr, attr_value in attrs.items():
+        #     print(f"attr, attr_value = {attr}")
+        Debug.print_beautiful_dictionary(attrs, 0, "    ")
+        nest_attrs = Maya.split_attrs(attrs)
+        print("\n")
+        for attr_typ, attr_data in nest_attrs.items():
             for compound, props in attr_data.items():
+                # __compound_v_box = QtGroupVBoxCSWidget(title=compound)
+                # __compound_v_box.setStyleSheet(QtGroupBoxStyle.Minimal)
+                # self.__attributes_v_container.add_group(
+                #     group_id=compound, widget=__compound_v_box
+                # )
                 for prop, value in props.items():
-                    print(f"attr_typ, compound, prop, value = {attr_typ}, {compound}, {prop}, {value}")
+                    pass
+                    # attribute = Maya.
+                    #
+                    # __prop_lineedit = QtStringPropertyCSWidget(
+                    #     attr=prop,
+                    #     attr_str=prop,
+                    #     attr_value=value,
+                    # )
+                    # __prop_lineedit.setStyleSheet(QtPropertyStyle.Minimal)
+                    # self.__attributes_v_container.add_widget(
+                    #     group_id=compound, widget_id=prop, widget=__prop_lineedit
+                    # )
+                    # print(f"long_name = {compound}_{prop}")
+                    # print(f"{attr_typ}, {compound}, {prop}, {value}")
+        Debug.print_beautiful_dictionary(nest_attrs, 0, "    ")
+        # print(f"nest_attrs = {nest_attrs}")
+
         return
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         for attr, attr_value in Maya.get_attrs(maya.selected_object).items():
             attr_type = Maya.parse_attribute_type(attr)
-            compound = ""
-            attr_str = ""
-            if attr_type == AttributeType.Object:
-                compound = attr.split("_")[0]
-            elif attr_type == AttributeType.ComponentV2:
-                compound = ".".join(attr.split("_")[1:-1])
-            elif attr_type == AttributeType.Component:
-                compound = ".".join(attr.split("_")[1:-1])
-            else:
-                compound = "Undefined"
-                print(f"Something wrong with attr: {attr}")
-            __group = QtGroupVBoxCSWidget(title=compound)
-            __group.setStyleSheet(QtGroupBoxStyle.Minimal)
+
             print(f"compound_attrs = {compound}")
-            if not self.__attributes_props_v_container.is_group_exist(compound):
-                self.__attributes_props_v_container.add_group(
-                    group_id=compound, widget=__group
+            if not self.__attributes_v_container.is_group_exist(compound):
+                self.__attributes_v_container.add_group(
+                    group_id=compound, widget=__compound_v_box
                 )
             __prop_lineedit = QtStringPropertyCSWidget(
                 attr=attr,
@@ -200,17 +197,17 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
                 attr_value=attr_value,
             )
             __prop_lineedit.setStyleSheet(QtPropertyStyle.Minimal)
-            self.__attributes_props_v_container.add_widget(
+            self.__attributes_v_container.add_widget(
                 group_id=compound, widget_id=attr, widget=__prop_lineedit
             )
-            if not self.__attributes_props_v_container.is_group_exist(compound):
+            if not self.__attributes_v_container.is_group_exist(compound):
                 __add_attr_btn = QtButtonCSWidget()
                 __add_attr_btn.setFixedHeight(10)
                 __add_attr_btn.set_icon("plus-8px.png")
                 __add_attr_btn.setStyleSheet(QtButtonStyle.Default_Roundness)
                 maya = RepositoryFacade().maya
                 __add_attr_btn.clicked.connect(partial(self.add_attr, compound))
-                self.__attributes_props_v_container.add_widget(
+                self.__attributes_v_container.add_widget(
                     group_id=compound,
                     widget_id=compound + "_" + "add_attr_btn",
                     widget=__add_attr_btn,
@@ -218,11 +215,11 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
         # return
         # for compound_attr, attrs in attrs.items():
         #     print(f"compound_attr, attrs = {compound_attr}, {attrs}")
-        #     __group = QtGroupVBoxCSWidget(title=compound_attr.capitalize())
-        #     __group.setStyleSheet(QtGroupBoxStyle.Minimal)
+        #     __compound_v_box = QtGroupVBoxCSWidget(title=compound_attr.capitalize())
+        #     __compound_v_box.setStyleSheet(QtGroupBoxStyle.Minimal)
         #
         #     self.__attributes_props_v_container.add_group(
-        #         group_id=compound_attr, widget=__group
+        #         group_id=compound_attr, widget=__compound_v_box
         #     )
         #     for attr, attr_value in attrs.items():
         #         __prop_lineedit = QtStringPropertyCSWidget(
@@ -240,7 +237,6 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
         #         __prop_lineedit.attrPropSetter.connect(self.set_attr_value)
         #         __prop_lineedit.attrDeleter.connect(self.del_attr)
 
-
         __tool_gp = QtGroupHBoxCSWidget()
         __tool_gp.layout.setContentsMargins(0, 0, 0, 0)
         __tool_gp.layout.setSpacing(3)
@@ -251,9 +247,7 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
         # __tool_gp.setText("新增屬性集")
         # __tool_gp.setStyleSheet(QtButtonStyle.Default_Roundness)
         # __tool_gp.clicked.connect(self.add_compound_attr)
-        self.__attributes_props_v_container.add_group(
-            group_id="tool_gp", widget=__tool_gp
-        )
+        self.__attributes_v_container.add_group(group_id="tool_gp", widget=__tool_gp)
         self.__add_ac_object_btn = QtButtonCSWidget()
         self.__add_ac_object_btn.setFixedHeight(32)
         self.__add_ac_object_btn.setFixedWidth(96)
@@ -261,7 +255,7 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
         self.__add_ac_object_btn.setText("  新增 Object")
         self.__add_ac_object_btn.setStyleSheet(QtButtonStyle.Default_Roundness)
         self.__add_ac_object_btn.clicked.connect(self.add_ac_object)
-        self.__attributes_props_v_container.add_widget(
+        self.__attributes_v_container.add_widget(
             group_id="tool_gp",
             widget_id="add_compound_attr_btn",
             widget=self.__add_ac_object_btn,
@@ -275,7 +269,7 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
             QtButtonStyle.Default_Roundness
         )
         self.__add_ac_component_legacy_btn.clicked.connect(self.add_ac_component_legacy)
-        self.__attributes_props_v_container.add_widget(
+        self.__attributes_v_container.add_widget(
             group_id="tool_gp",
             widget_id="add_ac_component_legacy_btn",
             widget=self.__add_ac_component_legacy_btn,
@@ -287,7 +281,7 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
         self.__add_ac_component_btn.setText("  新增 Component")
         self.__add_ac_component_btn.setStyleSheet(QtButtonStyle.Default_Roundness)
         self.__add_ac_component_btn.clicked.connect(self.add_ac_component)
-        self.__attributes_props_v_container.add_widget(
+        self.__attributes_v_container.add_widget(
             group_id="tool_gp",
             widget_id="add_ac_component_btn",
             widget=self.__add_ac_component_btn,

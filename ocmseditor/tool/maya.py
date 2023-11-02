@@ -105,7 +105,7 @@ class Maya(core.Maya):
         return result
 
     @classmethod
-    def parse_attrs(cls, attrs):
+    def split_attrs(cls, attrs):
         result = defaultdict(dict)
         for attribute, value in attrs.items():
             typ = cls.parse_attribute_type(attribute)
@@ -115,6 +115,28 @@ class Maya(core.Maya):
             head = typ
             result = cls.nest_attrs(result, head, body, tail, value)
         return dict(result)
+
+    @classmethod
+    def parse_attribute(cls, attribute):
+        result = {attribute: defaultdict(dict)}
+        data = {
+
+        }
+
+
+
+    @classmethod
+    def split_attr(cls, attr_long):
+        parts = attr_long.split("_")
+        has_body = len(parts) >= 3
+        parts_head = parts[0]
+        if has_body:
+            parts_body = parts[1:-1]
+        else:
+            parts_body = []
+        parts_tail = parts[-1]
+        head, body, tail = parts_head, ".".join(parts_body), parts_tail
+        return head, body, tail
 
     @classmethod
     def new_component_data(cls, compound_type):

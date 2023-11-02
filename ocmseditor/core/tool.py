@@ -15,6 +15,10 @@ def interface(cls):
     return type(cls.__name__, (Interface, cls), attrs)
 
 @interface
+class Debug:
+    pass
+
+@interface
 class Maya:
     pass
 
