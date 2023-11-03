@@ -49,9 +49,9 @@ class UIMainDecorator(UIMain):
     def toggle_panel():
         from ocmseditor.oe.module.attribute.ui import EditAttributeWidget
 
-        edit_attribute = RepositoryFacade().ui.edit_attribute
-        edit_attribute: EditAttributeWidget
-        edit_attribute.toggle_panel()
+        attribute_panel = RepositoryFacade().ui.attribute_panel
+        attribute_panel: EditAttributeWidget
+        attribute_panel.toggle_panel()
 
     def toggle_resize_win(self):
         self._update_window_size_factor()

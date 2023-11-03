@@ -42,7 +42,7 @@ class SelectionChangedEvent:
 def subscribe_events():
     EventHandler.subscribe("on_selection_changed", lambda: fetch_active_object())
     EventHandler.subscribe(
-        "on_selection_changed", lambda: update_edit_attribute_delay()
+        "on_selection_changed", lambda: update_attribute_panel_delay()
     )
 
 
@@ -58,11 +58,11 @@ def fetch_active_viewport():
     maya.active_viewport = Maya.get_active_viewport()
 
 
-def update_edit_attribute_delay():
-    QtCore.QTimer.singleShot(10, update_edit_attribute)
+def update_attribute_panel_delay():
+    QtCore.QTimer.singleShot(10, update_attribute_panel)
 
 
-def update_edit_attribute():
+def update_attribute_panel():
     from ocmseditor.oe.module.attribute.ui import EditAttributeWidget
 
     fetch_active_viewport()
@@ -70,14 +70,14 @@ def update_edit_attribute():
     geom = maya.active_viewport.geometry()
     global_point = maya.active_viewport.mapToGlobal(geom.topLeft())
     modified_point = QtCore.QPoint(global_point.x() + 2, global_point.y() + 40)
-    edit_attribute = RepositoryFacade().ui.edit_attribute
-    edit_attribute: EditAttributeWidget
-    edit_attribute.edit_attribute.move(modified_point)
+    attribute_panel = RepositoryFacade().ui.attribute_panel
+    attribute_panel: EditAttributeWidget
+    attribute_panel.attribute_panel.move(modified_point)
     maya = RepositoryFacade().maya
     if maya.selected_object:
-        edit_attribute.redraw_edit_attributes()
+        attribute_panel.redraw_attribute_slots()
     else:
-        edit_attribute.destroy_edit_attributes()
+        attribute_panel.destroy_attribute_slots()
 
 
 def add_maya_selection_changed_script_job():
