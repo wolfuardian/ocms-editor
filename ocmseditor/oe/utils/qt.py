@@ -790,16 +790,6 @@ class QtAttributeNameLineeditCSWidget(QtWidgets.QLineEdit):
         self.setStyleSheet("background: transparent; border: none;")
         self.editClose.emit()
 
-    def __edited_error(self):
-        print("請輸入符合{compound}_{attr}之名稱，並包含只有英、數、底線等字元。")
-        self.setText(self.__text_org)
-
-    def __edited_pass(self):
-        self.__close()
-
-    def __edited_apply(self):
-        self.editApply.emit(self.__text_org, self.text())
-
     def __edit_completed(self):
         self.editComplete.emit(self.__text_org, self.text())
         self.__close()
