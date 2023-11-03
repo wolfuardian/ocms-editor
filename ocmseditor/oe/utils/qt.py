@@ -514,8 +514,6 @@ class QtGroupHBoxCSWidget(QtGroupBoxCSWidget):
 class QtGroupVBoxCSWidget(QtGroupBoxCSWidget):
     def __init__(self, title=None):
         super().__init__()
-        self.__error = False
-
         self.__layout = QtWidgets.QVBoxLayout()
         self.__layout.setAlignment(QtCore.Qt.AlignTop)
         self.__layout.setContentsMargins(0, 0, 0, 0)
@@ -530,12 +528,6 @@ class QtGroupVBoxCSWidget(QtGroupBoxCSWidget):
     def setTitle(self, *args, **kwargs):
         super().setTitle(*args, **kwargs)
         self.layout.setContentsMargins(0, 14, 0, 0)
-
-    def has_error(self):
-        return self.__error
-
-    def set_error(self, error):
-        self.__error = error
 
 
 class QtGroupVContainerCSWidget(QtGroupVBoxCSWidget):
@@ -716,6 +708,7 @@ class QtHeadingLabelCSWidget(QtWidgets.QLabel):
 
 
 class QtStringPropertyCSWidget(QtDefaultCSWidget):
+    attributeValidator = QtCore.Signal(str, str)  # org, cur
     attributeRenamer = QtCore.Signal(str, str, str, str)  # ln, nn, osn, nsn
     attributeSetter = QtCore.Signal(str, str)  # ln, str_prop
     attributeDeleter = QtCore.Signal(str)  # ln
@@ -739,7 +732,8 @@ class QtStringPropertyCSWidget(QtDefaultCSWidget):
         self.editable_label.setText(self.short_name)
         self.editable_label.setToolTip(self.long_name)
         self.org_attr_text = self.editable_label.text()
-        self.editable_label.editCompleted.connect(self.emit_set_short_name)
+        self.editable_label.editComplete.connect(self.emit_validate_attribute)
+        self.editable_label.editApply.connect(self.emit_rename_attribute)
 
         self.lineedit = QtLineEditCSWidget()
         self.lineedit.setText(self.string_property)
@@ -761,7 +755,10 @@ class QtStringPropertyCSWidget(QtDefaultCSWidget):
 
         self.setLayout(self.__layout)
 
-    def emit_set_short_name(self, old_short_name, new_short_name):
+    def emit_validate_attribute(self, origin, current):
+        self.attributeValidator.emit(origin, current)
+
+    def emit_rename_attribute(self, old_short_name, new_short_name):
         self.attributeRenamer.emit(
             self.long_name, self.nice_name, old_short_name, new_short_name
         )
@@ -773,37 +770,10 @@ class QtStringPropertyCSWidget(QtDefaultCSWidget):
         self.attributeDeleter.emit(self.long_name)
 
 
-class QtAttributeNameCSWidget(QtDefaultCSWidget):
-    editCompleted = QtCore.Signal(str, str)  # __text, __new_text
-
-    def __init__(self):
-        super().__init__()
-        self.__layout = QtWidgets.QVBoxLayout()
-        self.__layout.setAlignment(QtCore.Qt.AlignTop)
-        self.__layout.setContentsMargins(0, 0, 0, 0)
-        self.__layout.setSpacing(0)
-
-        self.__lineedit = QtAttributeNameLineeditCSWidget()
-        self.__lineedit.editCompleted.connect(self.finishing_edit)
-
-        self.__layout.addWidget(self.__lineedit)
-        self.__layout.addWidget(self.__label)
-
-        self.setLayout(self.__layout)
-
-    def finishing_edit(self, text, new_text):
-        self.editCompleted.emit(text, new_text)
-
-    def setText(self, text):
-        self.__lineedit.setText(text)
-
-    def text(self):
-        return self.__lineedit.text()
-
-
 class QtAttributeNameLineeditCSWidget(QtWidgets.QLineEdit):
     editClose = QtCore.Signal()
-    editCompleted = QtCore.Signal(str, str)  # __old, __new
+    editComplete = QtCore.Signal(str, str)  # origin, current
+    editApply = QtCore.Signal(str, str)  # current, new
 
     def __init__(self, status=None):
         super().__init__()
@@ -828,27 +798,11 @@ class QtAttributeNameLineeditCSWidget(QtWidgets.QLineEdit):
         self.__close()
 
     def __edited_apply(self):
-        __text = self.__text_org
-        __new_text = self.text()
-        self.editCompleted.emit(__text, __new_text)
+        self.editApply.emit(self.__text_org, self.text())
 
-    def __editing_finish(self):
-        if not self.__is_valid(self.text()):
-            self.__edited_error()
-        elif self.text() == self.__text_org:
-            self.__edited_pass()
-        else:
-            self.__edited_apply()
+    def __edit_completed(self):
+        self.editComplete.emit(self.__text_org, self.text())
         self.__close()
-
-    @staticmethod
-    def __is_valid(s):
-        import re
-
-        return bool(re.fullmatch(r"[a-zA-Z0-9]*_?[a-zA-Z0-9]*", s))
-
-    def openEdit(self):
-        self.__open()
 
     def setText(self, *args, **kwargs):
         super().setText(*args, **kwargs)
@@ -864,4 +818,4 @@ class QtAttributeNameLineeditCSWidget(QtWidgets.QLineEdit):
             super().keyPressEvent(event)
 
     def focusOutEvent(self, event):
-        self.__editing_finish()
+        self.__edit_completed()

@@ -21,6 +21,9 @@ class RepositoryFacade:
 class _UIWidgetDB:
     main: QtWidgets.QWidget = field(default=None)
     edit_attribute: QtWidgets.QWidget = field(default=None)
+    attributes: dict = field(default=None)
+    attributes_data: dict = field(default=None)
+    redirected_attributes_data: dict = field(default=None)
 
 
 @dataclass

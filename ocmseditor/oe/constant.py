@@ -36,7 +36,6 @@ class Attribute:
 
 class AttributeType:
     Object = "Object"
-    ComponentV2 = "ComponentV2"
     Component = "Component"
     Undefined = "Undefined"
     Invalid = "Invalid"
