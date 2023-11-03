@@ -22,7 +22,12 @@ from ocmseditor.oe.utils.qt_stylesheet import (
 )
 from ocmseditor.oe.constant import AttributePanel, Attribute, AttributeType
 from ocmseditor.oe.repository import RepositoryFacade
-from .operator import op_add_attr, op_del_attr, op_set_attr_prop, op_rename_attr
+from .operator import (
+    op_add_attribute,
+    op_del_attribute,
+    op_set_attribute,
+    op_rename_attribute,
+)
 from ocmseditor.tool.maya import Maya
 from ocmseditor.tool.debug import Debug
 
@@ -198,11 +203,11 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
                         widget=__string_property,
                     )
                     __string_property.attributeValidator.connect(
-                        partial(self.validate_attr, __string_property)
+                        partial(self.validate_attribute, __string_property)
                     )
-                    __string_property.attributeRenamer.connect(self.rename_attr)
-                    __string_property.attributeSetter.connect(self.set_attr)
-                    __string_property.attributeDeleter.connect(self.del_attr)
+                    __string_property.attributeRenamer.connect(self.rename_attribute)
+                    __string_property.attributeSetter.connect(self.set_attribute)
+                    __string_property.attributeDeleter.connect(self.del_attribute)
 
                 if __is_compound_error:
                     continue
@@ -266,39 +271,39 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
         return AttributeType.Object in ui.redirected_attributes_data.keys()
 
     @staticmethod
-    def validate_attr(this_widget, original_name, current_name):
+    def validate_attribute(this_widget, original_name, current_name):
         def __is_valid(s):
             import re
 
             return bool(re.fullmatch(r"[a-zA-Z0-9]*_?[a-zA-Z0-9]*", s))
 
-        def __edit_invalid():
+        def __invalid_edit():
             print("錯誤: 輸入字符中有英、數、底線以外的字元。")
             return original_name
 
-        def __edit_pass():
+        def __pass_edit():
             return "pass"
 
-        def __edit_valid():
+        def __valid_edit():
             return current_name
 
         if not __is_valid(current_name):
-            __attr = __edit_invalid()
+            __attr = __invalid_edit()
             this_widget.editable_label.setText(__attr)
         elif current_name == original_name:
-            __attr = __edit_pass()
+            __attr = __pass_edit()
             pass
         else:
-            __attr = __edit_valid()
+            __attr = __valid_edit()
             this_widget.editable_label.editApply.emit(original_name, current_name)
 
     @staticmethod
-    def rename_attr(long_name, nice_name, old_short_name, new_short_name):
+    def rename_attribute(long_name, nice_name, old_short_name, new_short_name):
         maya = RepositoryFacade().maya
         maya.selected_attribute = long_name
         new_long_name = long_name.replace(old_short_name, new_short_name)
         new_nice_name = nice_name.replace(old_short_name, new_short_name)
-        op_rename_attr(
+        op_rename_attribute(
             node=maya.selected_object,
             long_name=maya.selected_attribute,
             new_long_name=new_long_name,
@@ -307,32 +312,32 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
         Maya.select(maya.selected_object)
 
     @staticmethod
-    def set_attr(long_name, value):
+    def set_attribute(long_name, value):
         maya = RepositoryFacade().maya
         maya.selected_attribute = long_name
-        op_set_attr_prop(maya.selected_object, maya.selected_attribute, value)
+        op_set_attribute(maya.selected_object, maya.selected_attribute, value)
 
     @staticmethod
-    def del_attr(long_name):
+    def del_attribute(long_name):
         maya = RepositoryFacade().maya
         maya.selected_attribute = long_name
-        op_del_attr(maya.selected_object, maya.selected_attribute)
+        op_del_attribute(maya.selected_object, maya.selected_attribute)
 
     @staticmethod
     def add_attribute_to_exist_compound(attr_typ, compound):
         maya = RepositoryFacade().maya
-        input_name = Maya.user_input_dialog(message="屬性名稱 attr 為:")
-        if not input_name:
-            input_name = "default"
+        _input = Maya.input_dialog(message="屬性名稱 attr 為:")
+        if not _input:
+            _input = "default"
         if attr_typ == AttributeType.Object:
-            long_name = AttributeType.Object + "_" + input_name
+            long_name = AttributeType.Object + "_" + _input
         elif attr_typ == AttributeType.Component:
             long_name = (
                 AttributeType.Component
                 + "_"
                 + compound.replace(".", "_")
                 + "_"
-                + input_name
+                + _input
             )
         else:
             raise Exception("Undefined Attribute Type")
@@ -340,15 +345,15 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
             print("錯誤: 該屬性已經存在。")
             return
 
-        input_value = Maya.user_input_dialog(message="屬性值 value 為:")
-        if not input_value:
-            input_value = ""
+        _input = Maya.input_dialog(message="屬性值 value 為:")
+        if not _input:
+            _input = ""
 
-        op_add_attr(
+        op_add_attribute(
             node=maya.selected_object,
             long_name=long_name,
             nice_name=Maya.attribute_nice_name(long_name),
-            default_value=input_value,
+            default_value=_input,
         )
         Maya.select(maya.selected_object)
 
@@ -359,7 +364,7 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
         if Maya.has_attribute(maya.selected_object, long_name):
             print("錯誤: 該屬性已經存在。")
             return
-        op_add_attr(
+        op_add_attribute(
             node=maya.selected_object,
             long_name=long_name,
             nice_name=Maya.attribute_nice_name(long_name),
@@ -370,22 +375,18 @@ class EditAttributeWidget(QtFramelessLayoutCSWidget):
     @staticmethod
     def add_ac_component():
         maya = RepositoryFacade().maya
-        input_compound = Maya.user_input_dialog(message="組件名稱 Component 為:")
-        if not isinstance(input_compound, str):
+        _input = Maya.input_dialog(message="組件名稱 Component 為:")
+        if not isinstance(_input, str):
             return
-        if not input_compound:
-            input_compound = "OCMS.Default"
+        if not _input:
+            _input = "OCMS.Default"
         long_name = (
-            AttributeType.Component
-            + "_"
-            + input_compound.replace(".", "_")
-            + "_"
-            + "default"
+            AttributeType.Component + "_" + _input.replace(".", "_") + "_" + "default"
         )
         if Maya.has_attribute(maya.selected_object, long_name):
             print("錯誤: 該屬性已經存在。")
             return
-        op_add_attr(
+        op_add_attribute(
             node=maya.selected_object,
             long_name=long_name,
             nice_name=Maya.attribute_nice_name(long_name),

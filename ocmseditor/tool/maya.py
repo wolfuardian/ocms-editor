@@ -186,15 +186,15 @@ class Maya(core.Maya):
         return head, body, tail
 
     @classmethod
-    def get_attr(cls, node, attr):
+    def get_attribute(cls, node, attr):
         return cmds.getAttr(f"{node}.{attr}")
 
     @classmethod
-    def del_attr(cls, node, attr):
+    def del_attribute(cls, node, attr):
         return cmds.deleteAttr(f"{node}.{attr}")
 
     @classmethod
-    def add_attr(cls, node, long_name, nice_name="", default_value=""):
+    def add_attribute(cls, node, long_name, nice_name="", default_value=""):
         if nice_name == "":
             nice_name = long_name.replace("_", " | ")
         cmds.addAttr(
@@ -204,14 +204,14 @@ class Maya(core.Maya):
             dataType="string",
         )
         if default_value != "":
-            cls.set_attr(node, long_name, default_value)
+            cls.set_attribute(node, long_name, default_value)
 
     @classmethod
-    def set_attr(cls, node, attr, attr_value):
+    def set_attribute(cls, node, attr, attr_value):
         cmds.setAttr(f"{node}.{attr}", attr_value, type="string")
 
     @classmethod
-    def user_input_dialog(cls, title="輸入框", message="請輸入:"):
+    def input_dialog(cls, title="輸入框", message="請輸入:"):
         result = cmds.promptDialog(
             title=title,
             message=message,
