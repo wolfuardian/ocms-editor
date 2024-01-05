@@ -1,21 +1,15 @@
-from ocmseditor.oe.constant import ICON_DIR
+import ocmseditor.tool as tool
+from ocmseditor.oe.constant import INFO__BROWSER_CANCELED
+from ocmseditor.oe.repository import RepositoryFacade
 from ocmseditor.oe.utils.qt import (
-    QtGui,
     QtScrollareaCSWidget,
     QtFramelessLayoutCSWidget,
     QtGroupVBoxCSWidget,
     QtGroupHBoxCSWidget,
     QtHeadingLabelCSWidget,
-    QtButtonCSWidget,
     QtBigButtonCSWidget,
-    QtDefaultCSWidget,
 )
 from ocmseditor.oe.utils.qt_stylesheet import QtGroupBoxStyle, QtButtonStyle
-from ocmseditor.oe.constant import INFO__BROWSER_CANCELED
-
-from ocmseditor.oe.repository import RepositoryFacade
-
-import ocmseditor.tool as tool
 
 
 class ImportsWidget(QtFramelessLayoutCSWidget):
