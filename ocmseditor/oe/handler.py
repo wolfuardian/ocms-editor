@@ -5,6 +5,7 @@ from ocmseditor.tool.registry import Registry
 from ocmseditor.oe.constant import REG_MAYA_JOB_IDS
 from ocmseditor.oe.utils.qt import QtCore, QtGui
 from ocmseditor.oe.repository import RepositoryFacade
+from ocmseditor.oe.module.scene.controller import SceneController
 
 
 class EventHandler:
@@ -44,6 +45,12 @@ def subscribe_events():
     EventHandler.subscribe(
         "on_selection_changed", lambda: update_attribute_panel_delay()
     )
+
+
+def on_selection_changed():
+    SceneController.update_selection()
+    # fetch_active_object()
+    # update_attribute_panel_delay()
 
 
 def fetch_active_object():
